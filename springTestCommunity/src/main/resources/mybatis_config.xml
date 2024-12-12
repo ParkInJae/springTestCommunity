@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0/EN" 
+				"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- vo 별칭 지정 -->
+	<typeAliases>
+		<!-- 별칭 지정시 반드시 클래스부터 선언 후 별칭 지정! -->
+		<typeAlias type="com.springCommunity.vo.UserInfoVO" alias="userInfoVO"/>
+		<typeAlias type="com.springCommunity.vo.ChatVO" alias="chatVO"/>
+		<typeAlias type="com.springCommunity.vo.ChatMessageVO" alias="chatMessageVO"/>
+		<typeAlias type="com.springCommunity.vo.SearchVO" alias="searchVO"/>
+		<typeAlias type="com.springCommunity.vo.MypageVO" alias="mypageVO"/>
+	</typeAliases>
+</configuration>

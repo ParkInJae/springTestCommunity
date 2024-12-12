@@ -1,0 +1,93 @@
+@charset "UTF-8";
+body{
+			width: 80%;
+			margin-left: 10%;
+			margin-right: 10%;
+		}
+#header{
+      height: 60px;
+			margin: 0%;
+			position: relative;
+      display: flex;
+      width: 100%;
+    }
+#logo_img{
+      width: 120px;
+      height: 60px;
+      margin:0px auto;
+    }
+#login_info{
+      width: 200px;
+			display: inline;
+			position: absolute;
+			left: 80%;
+			top: 5%;
+    }
+#header2{
+			width : 100%;
+			position: relative;
+      display: flex;
+			height: 40%;
+			margin-top: 1%;
+			margin-bottom: 1%;
+		}
+#bar{
+			margin:0px;
+      display: flex;
+      width: 100%;
+			padding-left: 1%;
+		}
+#working_info_bar{
+      border: 1px solid black;
+			width: 300px;
+    	height: 170px;
+    	display: flex;
+    	flex-direction: column;
+    	flex-wrap: nowrap;
+    }
+#working_info{
+			list-style-type: none;
+			
+		}
+#alarm{
+			width : 50px;
+      height: 50px;
+      border: 1px solid black;
+			border-radius: 50%;
+			position: absolute;
+			top: 5%;
+			left: 13%;
+		}
+#alarm_icon{
+			width : 50px;
+      height: 50px;
+      border: 1px none none;
+		}
+#menu_bar{
+			margin:0px;
+      padding-top: 1.5%;
+      display: flex;
+      width: 100%;
+      list-style: none;
+      justify-content: space-evenly;
+		}
+#menu{
+			width : 120px;
+      height: 120px;
+      border: 1px solid rgb(78, 76, 76);
+			border-radius: 50%;
+		}
+#menu_icon{
+			width : 100px;
+      height: 100px;
+			padding-left: 8%;
+			padding-top: 7%;
+      border: 1px none none;
+		}
+#member{
+			padding-right: 1%;
+		}
+#member_img{
+			width : 120px;
+			height: 150px;
+		}
