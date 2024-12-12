@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springCommunity.mapper.chatMapper">
+	<!-- 채팅방 갯수 -->
+	<select id="selectTotal" parameterType="searchVO" resultType="int">
+		SELECT count(*) as total FROM CHAT c
+		JOIN CHAT_USERS cu ON c.CHAT_NO = cu.CHAT_NO
+		WHERE cu.USER_ID = #{user_id}
+			 AND CHAT_STATE='1'
+		 	 AND (CHAT_NAME LIKE concat('%', #{search_value}, '%') OR #{search_value} = '') 
+	</select>
+	
+	<!-- 채팅목록 -->
+	<select id="selectAll" parameterType="searchVO" resultType="chatVO">
+		SELECT c.CHAT_NO, c.CHAT_NAME 
+		FROM CHAT c
+		JOIN CHAT_USERS cu ON c.CHAT_NO = cu.CHAT_NO
+		WHERE cu.USER_ID = #{user_id}
+			 AND CHAT_STATE='1'
+		 	 AND (CHAT_NAME LIKE concat('%', #{search_value}, '%') OR #{search_value} = '')
+	</select>
+	
+	<!-- 채팅초대 유저 검색 -->
+	<select id="searchUsers" parameterType="searchVO" resultType="userInfoVO">
+		SELECT USER_NAME, USER_ID, DEPARTMENT_NAME, JOB_POSITION_NAME
+	    FROM USER u
+	    INNER JOIN DEPARTMENT d ON u.DEPARTMENT_ID = d.DEPARTMENT_ID
+	    INNER JOIN JOB_POSITION j ON u.JOB_POSITION_ID = j.JOB_POSITION_ID
+	    WHERE (
+		    	u.USER_NAME LIKE CONCAT('%', #{search_value}, '%')
+		       OR d.DEPARTMENT_NAME LIKE CONCAT('%', #{search_value}, '%')
+		       OR j.JOB_POSITION_NAME LIKE CONCAT('%', #{search_value}, '%')
+		      )
+	       AND USER_ID != #{user_id}
+	</select>
+	
+	<!-- 채팅방 생성 -->
+	<insert id="insertRoom" parameterType="chatVO">
+		INSERT INTO CHAT (CHAT_NAME, CHAT_GROUP, USER_ID)
+        VALUES (#{chat_name}, #{chat_group}, #{user_id})
+        <selectKey order="AFTER" resultType="int" keyProperty="chat_no">
+			select LAST_INSERT_ID() as CHAT_NO
+		</selectKey>
+	</insert>
+	
+	<!-- 생성된 채팅방의 유저들 CHAT_USER 테이블에 추가 -->
+	<insert id="insertRoomAfterUser" parameterType="chatVO">
+		INSERT INTO CHAT_USERS (CHAT_NO, USER_ID)
+        VALUES (#{chat_no}, #{user_id})
+	</insert>
+</mapper>
