@@ -5,10 +5,10 @@
 	<!-- vo 별칭 지정 -->
 	<typeAliases>
 		<!-- 별칭 지정시 반드시 클래스부터 선언 후 별칭 지정! -->
-		<typeAlias type="com.springCommunity.vo.UserInfoVO" alias="userInfoVO"/>
-		<typeAlias type="com.springCommunity.vo.ChatVO" alias="chatVO"/>
-		<typeAlias type="com.springCommunity.vo.ChatMessageVO" alias="chatMessageVO"/>
-		<typeAlias type="com.springCommunity.vo.SearchVO" alias="searchVO"/>
-		<typeAlias type="com.springCommunity.vo.MypageVO" alias="mypageVO"/>
+		<typeAlias type="com.springTestCommunity.vo.UserInfoVO" alias="userInfoVO"/>
+		<typeAlias type="com.springTestCommunity.vo.ChatVO" alias="chatVO"/>
+		<typeAlias type="com.springTestCommunity.vo.ChatMessageVO" alias="chatMessageVO"/>
+		<typeAlias type="com.springTestCommunity.vo.SearchVO" alias="searchVO"/>
+		<typeAlias type="com.springTestCommunity.vo.MypageVO" alias="mypageVO"/>
 	</typeAliases>
 </configuration>
