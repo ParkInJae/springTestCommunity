@@ -15,6 +15,7 @@ public interface DailyWorkTimeService {
 	 */
 	
 	
-		public boolean checkIn(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude);}
+		public boolean checkIn(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude);
+}
 
 	
