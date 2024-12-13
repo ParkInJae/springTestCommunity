@@ -4,7 +4,39 @@
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <%@ include file="./include/header.jsp" %>
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/home.css" />
-	<br>
+
+	<button onclick="checkIn()">출근 </button>
+	<button onclick="checkOut()">퇴근</button>
+	<script>
+		function checkIn(){
+			if ("geolocation" in navigator) {
+				  /* 위치정보 사용 가능 */
+				  const latitude = position.coords.latitude; 		// 위도 
+				  const longitude = position.coords.longitude;  	// 경도 
+				  $.ajax({
+		                url: "/user/checkIn.do",
+		                method: "POST",
+		                contentType: "application/json",
+		                data: JSON.stringify({
+		                    latitude: latitude,
+		                    longitude: longitude,
+		                    user_id: user_id
+		                }),
+	                success: function(data) {
+	                    alert('출근 완료');
+	                },
+	                error: function(xhr, status, error) {
+	                    alert('출근 실패: ' + error);
+	                }
+	              });
+				} else {
+				  /* 위치정보 사용 불가능 */
+				  alert("위치정보를 사용할 수 없습니다.")
+				}
+		}
+	</script>
+
+	<hr>
 	<sec:authorize access="isAuthenticated()">
 		<div style="font-size:18px; text-decoration: none; color:black; font-weight: bold;">
 			<br>

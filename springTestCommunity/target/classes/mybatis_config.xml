@@ -10,5 +10,6 @@
 		<typeAlias type="com.springCommunity.vo.ChatMessageVO" alias="chatMessageVO"/>
 		<typeAlias type="com.springCommunity.vo.SearchVO" alias="searchVO"/>
 		<typeAlias type="com.springCommunity.vo.MypageVO" alias="mypageVO"/>
+		<typeAlias type="com.springCommunity.vo.DailyWorkTimeVO" alias="dailyWorkTimeVO"/>
 	</typeAliases>
 </configuration>
