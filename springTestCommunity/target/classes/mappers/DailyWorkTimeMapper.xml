@@ -7,6 +7,8 @@
 	insert into DAILY_WORK_TIME(USER_ID, CHECK_IN_TIME)
 	values(#{user_id}, now())
 </insert>
+
+
 <update id="checkOut" parameterType="dailyworkTimeVO">
 update DAILY_WORK_TIME set CHECK_OUT_TIME = now()
 where WORK_TIME_NO = #(work_time_no) and USER_ID = #(user_id)
