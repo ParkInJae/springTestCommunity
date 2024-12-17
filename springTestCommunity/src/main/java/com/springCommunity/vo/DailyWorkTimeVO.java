@@ -14,9 +14,6 @@ public class DailyWorkTimeVO {
 	
 	// 기본 생성자 
 	public DailyWorkTimeVO() {}
-	
-	
-	
 
 	public String getWork_time_no() 							{return work_time_no;}
 	public String getUser_id() 									{return user_id;}
@@ -26,10 +23,7 @@ public class DailyWorkTimeVO {
 	public String getUpdated_at() 								{return updated_at;}
 	public String getLatitude() 								{return latitude;}
 	public String getLongitude() 								{return longitude;}
-
-
-
-
+	
 	public void setWork_time_no(String work_time_no) 			{this.work_time_no = work_time_no;	 	  }	
 	public void setUser_id(String user_id) 						{this.user_id = user_id;			  	  }
 	public void setCheck_in_time(String check_in_time) 			{this.check_in_time = check_in_time;  	  }
