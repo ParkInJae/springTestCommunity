@@ -185,9 +185,11 @@ public class CharController {
     	System.out.println("loadMessage 실행1");
     	List<ChatMessageVO> list = chatService.loadMessage(chat_no);
     	System.out.println("loadMessage 실행2");
+    	/*
     	for(ChatMessageVO vo : list) {
     		System.out.println("loadChat : " + vo.getChat_message_content());
     	}
+    	 */
     	return list;
     }
 }

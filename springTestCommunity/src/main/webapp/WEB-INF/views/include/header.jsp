@@ -53,16 +53,16 @@ window.onload = function(){
 	    $(this).css("display","none");
 	});
 	
-	/* 클릭할때 chat_no를 받아와서 배열에 담고, 해당 채팅창을 닫으면 배열에서 삭제. 매초마다 메시지내용 다시 불러오기 */
-	setInterval(() => {
+	/* 클릭할때 chat_no를 받아와서 배열에 담고, 해당 채팅창을 닫으면 배열에서 삭제. 매초마다 메시지내용 다시 불러오기 
+	/* setInterval(() => {
 	    openChats.forEach((chat_no) => {
 	        loadMessage(chat_no);
 	    });
-	}, 1000);
+	}, 1000); 
 	 
 	
 	/* 채팅방목록 매초마다 불러오기. 마지막 채팅내용과 채팅시간에 필요 */
-	setInterval(function(){
+	<%-- setInterval(function(){
 		$.ajax({
 	        url: "<%= request.getContextPath() %>/chat/chat.do",
 	        type: "GET",
@@ -91,8 +91,8 @@ window.onload = function(){
 	        }
 	    });
 	},1000);
+ --%>
 }
-
 
 $(document).on('keyup', '#user_search', function() {
 	let search_value = $(this).val();

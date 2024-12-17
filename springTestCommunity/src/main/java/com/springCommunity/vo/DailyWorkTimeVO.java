@@ -7,8 +7,8 @@ public class DailyWorkTimeVO {
 	public String check_out_time;
 	public String created_at;
 	public String updated_at;
-	public double latitude;
-	public double longitude;
+	public String latitude;
+	public String longitude;
 	
 	
 	
@@ -39,11 +39,11 @@ public class DailyWorkTimeVO {
 	public String getUpdated_at() {
 		return updated_at;
 	}
-	public double getLatitude() {
+	public String getLatitude() {
 		return latitude;
 	}
 
-	public double getLongitude() {
+	public String getLongitude() {
 		return longitude;
 	}
 	
@@ -66,11 +66,11 @@ public class DailyWorkTimeVO {
 	public void setUpdated_at(String updated_at) {
 		this.updated_at = updated_at;
 	}
-	public void setLatitude(double latitude) {
+	public void setLatitude(String latitude) {
 		this.latitude = latitude;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(String longitude) {
 		this.longitude = longitude;
 	}
 	

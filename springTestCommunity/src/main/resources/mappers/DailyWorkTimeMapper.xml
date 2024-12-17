@@ -2,8 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.springCommunity.mapper.DailyWorkTimeMapper">
+
 <insert id="checkIn" parameterType="dailyWorkTimeVO" >
 	insert into DAILY_WORK_TIME(USER_ID, CHECK_IN_TIME)
-	values(#{user_id}, #{check_in_time})
+	values(#{user_id}, now())
 </insert>
+<update id="checkOut" parameterType="dailyworkTimeVO">
+update DAILY_WORK_TIME set CHECK_OUT_TIME = now()
+where WORK_TIME_NO = #(work_time_no) and USER_ID = #(user_id)
+</update>
+
+
 </mapper>
