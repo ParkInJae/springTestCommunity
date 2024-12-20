@@ -26,10 +26,10 @@ function checkIn() {
                     }),
                     success: function (data) {
                     	console.log(data);
-                        alert('출근 완료: ');
+                        alert('출근 완료!');
                     },
                     error: function (xhr, status, error) {
-                        alert('출근 실패: ' + xhr.responseText);
+                        alert('출근 실패! 이미 존재하는 출근 기록입니다.');
                        console.log(xhr.responseText);
                     }
                 });
@@ -65,10 +65,10 @@ function checkOut() {
                         user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
                     }),
                     success: function (data) {
-                        alert('퇴근 완료: ');
+                        alert('퇴근 완료! ');
                     },
                     error: function (xhr, status, error) {
-                        alert('퇴근 실패: ' + xhr.responseText);
+                        alert('퇴근 처리가 되지 않았습니다.');
                        console.log(xhr.responseText);
                     }
                 });
