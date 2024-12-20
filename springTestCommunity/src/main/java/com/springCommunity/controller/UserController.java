@@ -35,6 +35,10 @@ public class UserController {
 		
 		int result = sqlSession.insert("com.springCommunity.mapper.userMapper.insert", userInfoVO);
 		
+		// select절 이용해서 workTime의 값을 가져오고 , 
+		// 가져온 workTime을 통해서 근무 시간, 날짜,연장 근무 시간, 특별 근무 시간을 계산해야함
+		// 계산한 값을 데이터에 담아서 , 같이 메인으로 넘어가야함 
+		
 		if(result > 0) {
 			System.out.println("회원가입성공");
 		}else {

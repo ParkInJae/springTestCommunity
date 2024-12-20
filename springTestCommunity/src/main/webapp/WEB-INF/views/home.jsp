@@ -7,7 +7,6 @@
 
 	<button onclick="checkIn()">출근 </button>
 	<button onclick="checkOut()">퇴근</button>
-
 <script>
 function checkIn() {
     if ("geolocation" in navigator) {
@@ -26,7 +25,8 @@ function checkIn() {
                         user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
                     }),
                     success: function (data) {
-                        alert('출근 완료: ' + data);
+                    	console.log(data);
+                        alert('출근 완료: ');
                     },
                     error: function (xhr, status, error) {
                         alert('출근 실패: ' + xhr.responseText);
@@ -47,10 +47,53 @@ function checkIn() {
         alert("브라우저가 위치 서비스를 지원하지 않습니다.");
     }
 }
+// 퇴근 함수 
+function checkOut() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+
+                // AJAX 요청
+                $.ajax({
+                    url: "user/checkOut.do",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        latitude: latitude,         // 위도
+                        longitude: longitude,       // 경도
+                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
+                    }),
+                    success: function (data) {
+                        alert('퇴근 완료: ');
+                    },
+                    error: function (xhr, status, error) {
+                        alert('퇴근 실패: ' + xhr.responseText);
+                       console.log(xhr.responseText);
+                    }
+                });
+            },
+            (error) => {
+                alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
+            },
+            {
+                enableHighAccuracy: true, // 정확도 우선 모드
+                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
+                maximumAge: 0             // 항상 최신 위치 정보 수집
+            }
+        );
+    } else {
+        alert("브라우저가 위치 서비스를 지원하지 않습니다.");
+    }
+}
+
+
+
 </script>
 
 	<hr>
 	<sec:authorize access="isAuthenticated()">
+		<div>${serverTime}</div>
 		<div style="font-size:18px; text-decoration: none; color:black; font-weight: bold;">
 			<br>
 			<table class="mainTable">

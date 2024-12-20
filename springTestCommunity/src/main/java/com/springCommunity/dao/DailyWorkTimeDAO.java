@@ -10,12 +10,20 @@ import com.springCommunity.vo.DailyWorkTimeVO;
 public class DailyWorkTimeDAO {
 	
 	@Autowired
-	SqlSession sqlsession;
+	SqlSession sqlSession;
 	public final String namespace = "com.springCommunity.mapper.DailyWorkTimeMapper.";
 
 	public int checkIn(DailyWorkTimeVO dailyWorkTimeVO ) {
 		
-		return sqlsession.insert(namespace + "checkIn" ,dailyWorkTimeVO);
+		return sqlSession.insert(namespace + "CheckIn" ,dailyWorkTimeVO);
 	}
+	public int checkOut(DailyWorkTimeVO dailyWorkTimeVO ) {
+		return sqlSession.update(namespace+ "checkOut",dailyWorkTimeVO); 
+	}
+	
+	public void getWorkTime(String userId) {
+		
+	}
+	
 	
 }

@@ -19,7 +19,7 @@ public class MyDepartment {
 	@Autowired
 	SqlSession sqlSession;
 
-	@RequestMapping(value="/user/myDepartment.do")
+	@RequestMapping(value="user/myDepartment.do")
 	public String list(Model model, UserInfoVO userinfo,Authentication authentication){
 		// 스프링 시큐리티를 이용해 권한을 체크 
 		String auth = authentication.getAuthorities().toString();
@@ -41,18 +41,10 @@ public class MyDepartment {
 			  // 관리자 유저에게 보여줄 정보를  모델에 저장 
 			  // 관리자 유저용 뷰 페이지 연결 System.out.println("관리자입니다"); 
 			   return "department/myDepartmentAdmin"; 
-			   }
-		 */else {
+			   } */
+		else {
 			return "home"; // 접근 권한이 없음 -> 
-		}
-
-		
-		
-		
-		
-
-
-
+		 	}
     	}
 	
 }

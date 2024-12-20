@@ -29,10 +29,33 @@ public class WorkTimeController {
             boolean isWithinRange = dailyWorkTimeService.checkIn(dailyWorkTimeVO,latitude, longitude);
 
             if (isWithinRange) {
-                return ResponseEntity.ok("출근 성공 .");
+                return ResponseEntity.ok("출근 성공.");
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("회사에서 멀리 있음.");
             }
         
     }
+    
+	// ResponseEntity<String>과 그에 해당 하는 메소드 및 출퇴근 로직 ReadMe에 작성 
+	  @RequestMapping(value="user/checkOut.do", method = RequestMethod.POST) public
+	  ResponseEntity<String> checkOut(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
+		  // VO에서 위도와 경도 가져오기 
+		  String latitude = dailyWorkTimeVO.getLatitude();
+		  String longitude = dailyWorkTimeVO.getLongitude();
+		  
+		  boolean isWithinRange = dailyWorkTimeService.checkOut(dailyWorkTimeVO,latitude, longitude);
+		  if(isWithinRange) {
+			  return ResponseEntity.ok("수고하셨습니다. 퇴근하세요");
+		  }else {
+			  return ResponseEntity.status(HttpStatus.FORBIDDEN).body("시스템 오류로 퇴근 처리가 되지 않습니다.");
+		  }
+	  }
+	     
+    
+    
+    
 }
+
+
+
+
