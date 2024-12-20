@@ -39,7 +39,7 @@ public class HomeController {
 			
 			// sessiuon을 통해서 mapper에서 시간계산 후 값을 가져옴 
 			logger.info("vo : {}", vo.getUser_id());
-			dailyWorkTimeService
+			/* dailyWorkTimeService  아카이브에 보관된 내용 참고 */
 			
 		}
 		

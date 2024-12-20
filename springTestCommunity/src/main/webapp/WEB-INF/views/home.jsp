@@ -24,13 +24,17 @@ function checkIn() {
                         longitude: longitude,       // 경도
                         user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
                     }),
-                    success: function (data) {
-                    	console.log(data);
-                        alert('출근 완료!');
+                    success: function (response) {
+                        if (response === 'success') {
+                            console.log(response); // response를 출력해야 함
+                            alert('출근 완료!');
+                        } else {
+                            alert('출근 실패!');  // 실패 시 구체적인 메시지를 제공
+                        }
                     },
                     error: function (xhr, status, error) {
-                        alert('출근 실패! 이미 존재하는 출근 기록입니다.');
-                       console.log(xhr.responseText);
+                        alert('이미 출근 하셨습니다.');
+                        console.log(xhr.responseText);
                     }
                 });
             },
@@ -64,12 +68,17 @@ function checkOut() {
                         longitude: longitude,       // 경도
                         user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
                     }),
-                    success: function (data) {
-                        alert('퇴근 완료! ');
+                    success: function (response) {
+                        if (response === 'success') {
+                            console.log(response); // response를 출력해야 함
+                            alert('퇴근 완료!');
+                        } else {
+                            alert('퇴근 실패!');  // 실패 시 구체적인 메시지를 제공
+                        }
                     },
                     error: function (xhr, status, error) {
-                        alert('퇴근 처리가 되지 않았습니다.');
-                       console.log(xhr.responseText);
+                        alert('이미 퇴근 버튼을 눌렀습니다.');
+                        console.log(xhr.responseText);
                     }
                 });
             },
@@ -86,9 +95,6 @@ function checkOut() {
         alert("브라우저가 위치 서비스를 지원하지 않습니다.");
     }
 }
-
-
-
 </script>
 
 	<hr>

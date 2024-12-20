@@ -19,6 +19,13 @@ public class WorkTimeController {
     @Autowired
     DailyWorkTimeService dailyWorkTimeService;
 
+    /* ajax 반환할 때 , @Reponsebody 사용하는 이유 */
+    // controller은 가공된 데이터를 문자열의 형태로 view에게 전송을 함 (뷰로 랜더링을 함 ) 
+    // 그러나 ajax를 사용하여 통신하는 경우 JavaScript에서 사용할 수 있도록 HTTP 응답 본문에 데이터를 반환함 
+    // 이때 반환하는 타입은 문자열인데 , @Reponsebody를 사용하지 않는다면 , 뷰로 랜더링을 할 수 있기 때문에 , @Reponsebody를 사용해서 
+    // 뷰로 랜더링을 하는것을 막고 HTTP 응답 본문에 데이터를 반환한다. 
+    
+    // ajax를 사용하여 문자열로 보낼 때 , @Reponsebody를 사용하는데 , 만약 ResponseEntity를 사용한다면 ,해당 메소드 위에@Reponsebody를 선언하지 않아도 된다.   
     @RequestMapping(value = "user/checkIn.do", method = RequestMethod.POST)
     public ResponseEntity<String> checkIn(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
     	 // VO에서 위도와 경도 가져오기
@@ -30,9 +37,9 @@ public class WorkTimeController {
             boolean isWithinRange = dailyWorkTimeService.checkIn(dailyWorkTimeVO,latitude, longitude);
 
             if (isWithinRange) {
-                return ResponseEntity.ok("출근 성공.");
+                return ResponseEntity.ok("success");
             } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("회사에서 멀리 있음.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("fail");
             }
         
     }
@@ -52,9 +59,9 @@ public class WorkTimeController {
 		  // @s
 		  boolean isWithinRange = dailyWorkTimeService.checkOut(dailyWorkTimeVO,latitude, longitude);
 		  if(isWithinRange) {
-			  return ResponseEntity.ok("수고하셨습니다. 퇴근하세요");
+			  return ResponseEntity.ok("success");
 		  }else {
-			  return ResponseEntity.status(HttpStatus.FORBIDDEN).body("시스템 오류로 퇴근 처리가 되지 않습니다.");
+			  return ResponseEntity.status(HttpStatus.FORBIDDEN).body("fail");
 		  }
 	  }
 	     
