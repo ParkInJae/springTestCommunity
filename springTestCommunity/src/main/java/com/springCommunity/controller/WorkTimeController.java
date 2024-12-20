@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,12 +38,18 @@ public class WorkTimeController {
     }
     
 	// ResponseEntity<String>과 그에 해당 하는 메소드 및 출퇴근 로직 ReadMe에 작성 
-	  @RequestMapping(value="user/checkOut.do", method = RequestMethod.POST) public
-	  ResponseEntity<String> checkOut(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
+    // ajax에서 보내는 내부 데이터는 vo의 setter를 통해서 자동으로 값이 셋팅 되기 때문에, dailyWorkTimeVO만 매개변수로 받아도 된다.
+    /*  @RequestBody를 사용하면, AJAX에서 보낸 JSON 데이터가 VO 객체로 자동 매핑됩니다.
+    	매핑 과정에서 JSON의 키 이름이 VO의 필드 이름과 동일하다면, Spring이 VO의 setter 메서드를 사용해 데이터를 채웁니다.
+    */
+    @PostMapping
+	  @RequestMapping(value="user/checkOut.do", method = RequestMethod.POST)
+    public ResponseEntity<String> checkOut(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
 		  // VO에서 위도와 경도 가져오기 
 		  String latitude = dailyWorkTimeVO.getLatitude();
 		  String longitude = dailyWorkTimeVO.getLongitude();
 		  
+		  // @s
 		  boolean isWithinRange = dailyWorkTimeService.checkOut(dailyWorkTimeVO,latitude, longitude);
 		  if(isWithinRange) {
 			  return ResponseEntity.ok("수고하셨습니다. 퇴근하세요");

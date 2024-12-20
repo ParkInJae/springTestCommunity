@@ -24,19 +24,23 @@ import com.springCommunity.vo.UserVO;
 public class HomeController {
 	
 	@Autowired
-	private DailyWorkTimeService service;
+	private DailyWorkTimeService dailyWorkTimeService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
 	/**
 	 * Simply selects the home view to render by returning its name.
+	 @AuthenticationPrincipa 사용하면 vo 의 정보를 가져올  수 있음 
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(Locale locale, Model model, @AuthenticationPrincipal UserVO vo) {
 		
 		if(vo != null) {
+			
 			// sessiuon을 통해서 mapper에서 시간계산 후 값을 가져옴 
 			logger.info("vo : {}", vo.getUser_id());
+			dailyWorkTimeService
+			
 		}
 		
 		logger.info("Welcome home! The client locale is {}.", locale);
