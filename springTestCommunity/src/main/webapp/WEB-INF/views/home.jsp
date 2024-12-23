@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ include file="./include/header.jsp" %>
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/home.css" />
 
@@ -96,7 +97,6 @@ function checkOut() {
     }
 }
 </script>
-
 	<hr>
 	<sec:authorize access="isAuthenticated()">
 		<div>${serverTime}</div>
@@ -140,76 +140,38 @@ function checkOut() {
 		    <!-- 주간 테이블 (연장 근무 시간을 포함한 총 근무 시간을 작성 ) -->
 				<hr>
 				<table class="workTable" border=1>
-				<thead>
-					<tr>
-		                <th>일자(요일) </th>
-		                <th>근무 시간 </th>
-		                <th>연장 근무 시간 </th>
-		                <th>특별 근무 시간 </th>
-		                <th>특별 근무 시간 </th>
-		                <th>총 근무 시간 </th>
-				</thead>
-				<tbody>
-				 	<tr>
-		                <th>2024.12.09</th>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		            </tr>
-		            <tr>
-		                <td>2024.12.10</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		            </tr>
-		            <tr>
-		            	<td>2024.12.11</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		            </tr>
-		            <tr>
-		                <td>2024.12.12</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		            </tr>
-		            <tr>
-		                <td>2024.12.13</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		            </tr>
-		            <tr>
-		                <td>2024.12.14</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		            </tr>
-		            <tr>
-		                <td>2024.12.15</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		                <td>8</td>
-		            </tr>
-				</tbody>
+					<thead>
+						<tr>
+			                <th>일자(요일) </th>
+			                <th>근무 시간 </th>
+			                <th>연장 근무 시간 </th>
+			                <th>특별 근무 시간 </th>
+			                <th>총 근무 시간 </th>
+					</thead>
+					<tbody>
+					<c:forEach var="entry" items="${dailyWorkHours}">
+						<!-- 실수로 표현이 됨  -->
+						<%-- <c:set var="hours" value="${entry.value/ 60}"/>  --%> 				  
+					    <%-- <c:set var="minutes" value="${entry.value % 60}" /> --%>
+					    <%-- <c:set var="roundedHours" value="${hours - (hours % 1)}" /> --%>
+					    <!-- 정수로 표현 가능함   -->
+					    
+					    <fmt:formatNumber value="${entry.value/ 60}" type="number" var="hours" /> 
+					    <fmt:formatNumber value="${entry.value % 60}" type="number" var="minutes" />
+					    <fmt:formatNumber value="${hours - (hours % 1)}" type="number" var="roundedHours" />
+					 	<tr>
+					 	<!-- key > 날짜, value > 근무 시간  -->
+			                <td>${entry.key}</td>
+			                <td>
+							    ${roundedHours}시간${minutes}분
+							</td>
+			                <td>0</td>
+			                <td>0</td>
+			                <td>${entry.value}</td>
+			            </tr>
+					</c:forEach>
+					</tbody>
 		  	  </table>
-		  	  
-		  	  
 		</div>
 	</sec:authorize>
 </body>

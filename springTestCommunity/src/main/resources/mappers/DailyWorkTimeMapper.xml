@@ -21,6 +21,13 @@ WHERE USER_ID = #{user_id} AND DATE(CHECK_IN_TIME) = CURDATE()
     where DATE_FORMAT(WORK_DATE, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')
     and USER_ID = #{user_id}
  </update>
+ 
+<!-- 유저 아이디가 매개변수로 들어오고, 반환은   dailyWorkTimeVO로 설정 함 -->
+<select id="selectList" parameterType="String" resultType="dailyWorkTimeVO">
+SELECT * 
+FROM DAILY_WORK_TIME
+WHERE USER_ID = #{user_id}
+</select>
 
 
 </mapper>

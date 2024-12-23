@@ -1,6 +1,10 @@
 package com.springCommunity.service;
 
+import java.util.List;
+import java.util.Map;
+
 import com.springCommunity.vo.DailyWorkTimeVO;
+import com.springCommunity.vo.UserVO;
 
 public interface DailyWorkTimeService {
 	/*
@@ -19,7 +23,11 @@ public interface DailyWorkTimeService {
 		
 		public boolean checkOut(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude);
 		
-		public void getWorkTime(String userId);
+		public List<DailyWorkTimeVO> selectList (String user_id);
+		
+		
+		public Map<String, Object> calculateWorkTime(String user_id); 
+		
 }
 
 	
