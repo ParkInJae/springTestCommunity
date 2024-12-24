@@ -25,9 +25,7 @@ public interface DailyWorkTimeService {
 		
 		public List<DailyWorkTimeVO> selectList (String user_id);
 		
-		
-		public Map<String, Object> calculateWorkTime(String user_id); 
-		
+		public Map<String, Object> calculateWorkTime(String user_id);
 }
 
 	

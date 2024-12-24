@@ -1,15 +1,20 @@
 package com.springCommunity.service;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,109 +113,139 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 
 		return dailyWorkTimeDAO.selectList(user_id);
 	}
-/*	
-	// 앞서 가져온 전체 출퇴근 시간을  이용해서
-	// 일별 근무 시간, 주간 근무 시간을 계산함 
-
-	1. 해당 유저의 전체 출퇴근 시간을 가져옴 
-	2. 일간 근무 시간 계산
-	3. 주간 근무 시간 계산 (월요일 기준으로 ) 
-*/
-/*
-	 readMe 정리해야할 부분 
-	 하루 근무 시간 & 주간 시간 계산 및  
-	 	// Long::sum은 long 타입의 값을 더하는 함수, 즉 두 개의 Long 값을 합산하는 역활을 하며, Map의 merge메서드에서 사용
-    	//함수형 인터페이스 >> 
-  	 	//Bifunction >> 두개의 입력을 받아 하나의 결과를 반환하는 함수형 인터페이스 
-    	//Long::sum >> Bifunction을 간결하게 표현
-    	>> localDateTime 과 localTime의 차이는 ???>  
-     	정리 
- */
+	// 공휴일 가져오는 메소드 
 	
-/*
-    월요일부터 금요일까지의 날짜 데이터를 가져오는 메소드가 필요하고 
-     그 내용을 이용해서 ,코드를 수정해야함
-     주간 근무 시간 계산시 > merge를 사용함  
-	merge할 때 주의점, 키의 이름이 동일하면 이번 주 근무 기록과 다음 주 근무 기록이 합산될 수 있음(유의) 
-*/
-/* 기존 코드에서 수정해야하는 내용 
-	현재 calculateWorkTime 메소드 내부의 weekKey 키 이름이  너무 어려움 
-	또한 weekKey를 조회하면 키 이름이 예를들어 2024.12.23~2024.12.29 이런 형식으로 이루어져 있는데, 
-	1. 날짜를 정수형 배열에 담고 , sort를 이용해서 오름차순으로 정렬 
-	2. 오름차순으로 정렬한 배열에서 반복문 돌려서 , i가 x일 때, Stirng weekKey = "a 주차 키 " 이런식으로 if -else 사용 또는 subString 사용해서 생성 
- */
 	
 	@Override
 	public Map<String, Object> calculateWorkTime(String user_id) {
-	
 		//1. 해당 유저의 전체 출퇴근 시간을 가져옴
 		List<DailyWorkTimeVO> list =dailyWorkTimeDAO.selectList(user_id);
 		
+		for(DailyWorkTimeVO item : list) {
+			System.out.println("--------------------");
+			System.out.println(item.toString());
+		}
+		
 		// 근무 시간 변수 선언 
-		Map<String, Long> dailyWorkHours = new HashMap <>(); 		// 일간 근무 시간
-		Map<String, Long> weeklyWorkHours = new HashMap <>();		// 주간 근무 시간
+		Map<String, Long> dailyRegularWorkHours = new HashMap <>(); 	// 일간 정규 근무 시간
+		Map<String, Long> weeklyRegularWorkHours = new HashMap <>();	// 주간 정규 근무 시간
 		
-		// 기존 코드에 추가된 내용 (x주차별 키 생성 관련 변수 )
-		// DateTimeFormatter 클래스는 날짜와 시간을 원하는 형식으로 출력 및 해석하는데 사용
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		
-		//
-		List<LocalDate> sortDatesList = new ArrayList<>();
-		
-		// 일간 근무 시간 계산 및 날짜 수집 
-		// LocalDateTime > 날짜와 시간을 함께 표현한다.
-		// 해당 회원의 출퇴근 기록이 담긴 리스트에서 , 반복문을 돌려 출근 시간을 가져온 후 날짜와 시간꺄지 포맷, 포맷된 데이터를 toLocalDate()메소드 이용해서 변환 후 , LocalDate타입의 리스트에 삽입한다. 
-		list.forEach(workTime -> {
-			// DB를 조회하고 list에 담겨진 출근 시간의 기록을 dateStr에 담는다.  
-            String dateStr = workTime.getCheck_in_time(); 						 // ex: "2024-12-17 20:30:06"
-            //담겨진 dateStr을  dateTime이라는 변수에 시간만 담는다. 
-            // LocalDateTime >>날짜와 시간 정보를 모두 포함
-            LocalDateTime  dateTime = LocalDateTime .parse(dateStr, formatter);  //  ex: "2024-12-17 20:30:06"
-            // LocalDate >>날짜 정보를 포함
-            LocalDate localDate = dateTime.toLocalDate();
-            //리스트에 날짜를 넣음 
-            sortDatesList.add(localDate);
-            
-            // 하루 근무 시간 계산
-            // dailyHours >> 하루 근무 시간의 값 
-            //calculateDailyHours >> 하루 근무 시간 메소드 : 해당하는 일자의 시간을 계산하고 분으로 표현한다. 
-            long dailyHours = calculateDailyHours(workTime.getCheck_in_time(), workTime.getCheck_out_time()); 
+		Map<String, Long> dailyExtendWorkHours = new HashMap <>();		// 일간 연장 근무 시간
+		Map<String, Long> weeklyExtendHours = new HashMap <>();   		// 주간 연장 근무 시간
 
-            /*
-             forEach가 만족할 때까지 , 
-             	위에서 선언한 일간 근무시간 맵에 문자열로 변환한 localDate를 키로 , 계산한 dailyHours값(분)을 맵에 담는다. 
-             */
-            // 맵에 키와 값을 넣음
-            // 키는 해당 날짜를 문자열로 변환한 것 , 값은 해당 날짜의 근무시간을 분으로 표시한 값 
-            dailyWorkHours.put(localDate.toString(), dailyHours);
-		});    
+		Map<String, Long> dailySpecialWorkHours = new HashMap <>();		// 일간 특별 근무 시간
+		Map<String, Long> WeeklySpecialWorkHours = new HashMap <>();	// 주간 특별 근무 시간
 		
+		
+		 // 공휴일 리스트 (예시로 2025년 공휴일을 추가)
+	    Set<LocalDate> holidays = new HashSet<>(Arrays.asList(
+	        LocalDate.of(2025, 1, 1),  // 새해
+	        LocalDate.of(2025, 3, 1),  // 삼일절
+	        LocalDate.of(2025, 5, 5),  // 어린이날
+	        LocalDate.of(2025, 6, 6),  // 현충일
+	        LocalDate.of(2025, 8, 15), // 광복절
+	        LocalDate.of(2025, 10, 3), // 개천절
+	        LocalDate.of(2025, 10, 9), // 한글날
+	        LocalDate.of(2025, 12, 25) // 크리스마스
+	    ));
+		
+		
+		// 기존 코드에 추가된 내용 ( n주차별 키 생성 관련 변수 )
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");		// DateTimeFormatter 클래스는 날짜와 시간을 원하는 형식으로 출력 및 해석하는데 사용
+		List<LocalDate> sortDatesList = new ArrayList<>();//년 월 일 을 담는 리스트 선언
+		
+		// 각 근무 시간 처리 
+		list.forEach(workTime -> {
+            String checkInStr  = workTime.getCheck_in_time(); 	// 출근 시간 ex: "2024-12-17 20:30:06"
+            String checkOutStr = workTime.getCheck_out_time();	// 퇴근 시간 
+            if (checkInStr == null || checkOutStr == null) {
+                System.out.println("출근 또는 퇴근 시간이 null입니다.");
+                return; // null 데이터는 건너뜀
+                }
             
-            // 날짜 정렬
-			//LocalDate(일과 날짜 )
-			sortDatesList.sort(Comparator.naturalOrder());
+            LocalDateTime  CheckIn = LocalDateTime .parse(checkInStr, formatter);  		//  LocalDateTime >>날짜와 시간 정보를 모두 포함  ex: "2024-12-17 20:30:06"
+            LocalDateTime  checkOut  = LocalDateTime .parse(checkOutStr, formatter);  	//  LocalDateTime >>날짜와 시간 정보를 모두 포함  ex: "2024-12-17 20:30:06"
+            LocalDate localDate = CheckIn.toLocalDate(); 						 		// LocalDate >>날짜 정보를 포함
+            sortDatesList.add(localDate);	            						 		//리스트에 날짜를 넣음
             
-            // 주차별 키 생성 및 근무 시간 합산 
-			sortDatesList.forEach(date -> {
-				// 국제 표준 규격 사용 
-                int weekOfYear = date.get(WeekFields.ISO.weekOfYear());
-                String weekKey = date.getYear() + "년 " + weekOfYear + "주차";
-                
-                //	
-                long dailyHours = dailyWorkHours.getOrDefault(date.toString(), 0L);
-                //merge >> String key, Long value, BiFunction
-                weeklyWorkHours.merge(weekKey, dailyHours, Long::sum);
-            });
- 
-            // 결과 반환 
-			Map<String, Object> result = new HashMap<>();
-	        result.put("dailyWorkHours", dailyWorkHours);
-	        result.put("weeklyWorkHours", weeklyWorkHours);
-	        return result;
+            // 기준 시간 18:00:00 설정
+            LocalDateTime cutoffTime = LocalDateTime.of(localDate, LocalTime.parse("18:00:00"));
+            
+            // 18:00 이전과 이후 근무 시간 계산
+            long dailyMinutes = calculateDailyHours(checkInStr, checkOutStr);
+            if (checkOut.isBefore(cutoffTime)) {
+                // 18:00 이전 퇴근
+                dailyRegularWorkHours.put(localDate.toString(), dailyMinutes);  // 일간 정규 근무 시간에 (키, 값) 대입
+            } else {
+                // 18:00 이후 퇴근 (연장 근무)
+                long extendedMinutes = Duration.between(cutoffTime, checkOut).toMinutes();  // 초과 시간 계산
+                dailyExtendWorkHours.put(localDate.toString(), extendedMinutes); // 일간 연장 근무 시간에 (키, 값) 대입
+            }
+
+            // 일요일 또는 공휴일에 근무하면 특근 처리
+            if (localDate.getDayOfWeek() == DayOfWeek.SUNDAY || holidays.contains(localDate)) {
+                dailySpecialWorkHours.put(localDate.toString(), dailyMinutes); // 일간 특별 근무 시간에 (키, 값) 대입
+            }
+        });
+		
+		System.out.println("sortDatesList 원소 개수 : " + sortDatesList.size());
+        // 날짜 정렬
+		sortDatesList.sort(Comparator.naturalOrder());
+		
+		sortDatesList.forEach(item -> {
+			System.out.println(item);
+		});
+        // 주차별 키 생성 및 근무 시간 합산 
+		sortDatesList.forEach(date -> {
+			// 주차별 키 생성 
+            int weekOfYear = date.get(WeekFields.ISO.weekOfYear());
+            String weekKey = date.getYear() + "년 " + weekOfYear + "주차";
+            System.out.println("weekKey : "+weekKey);
+            //merge >> String key, Long value, BiFunction
+            
+            /*
+             	원리 >
+             	1) forEach를 활용하면서 반복   
+             	2) 주차별 키를 생성 
+             	3) 해당 주차에 대한 일간 (정규 근무 , 연장 근무, 특별 근무) 시간을 가져온 뒤 , 결과를 합산하여 주간 (정규 근무, 연장 근무, 특별 근무 ) 시간을 가져옴 
+             	4) 해당하는 정보를 result키에 담고 return으로 반환 
+             */
+            
+            // 일간 근무 시간 가져오기 	
+            long dailyHours = dailyRegularWorkHours.getOrDefault(date.toString(), 0L);
+            // 주간 근무 시간 가져오기 
+            weeklyRegularWorkHours.merge(weekKey, dailyHours, Long::sum);             
+            
+            // 일간 연장 근무 시간 가져오기 
+            long dailyExtendHours = dailyExtendWorkHours.getOrDefault(date.toString(), 0L);
+            // 주간 연장 근무 시간 가져오기
+            // weeklyExtendHours.merge(weekKey, dailyExtendHours, Long::sum); >>  각 주차별로 연장 근무 시간을 누적하여 합산하는 역할
+            // weeklyExtendHours는 누적된 주간 연장 근무 시간을 의미
+            weeklyExtendHours.merge(weekKey, dailyExtendHours, Long::sum);
+            
+            
+            // 일간 특별별 근무 시간 가져오기 
+            long dailySpecialHours= dailySpecialWorkHours.getOrDefault(date.toString(), 0L);
+            
+            //	주간 특별 근무 시간 가져오기                 
+            WeeklySpecialWorkHours.merge(weekKey, dailySpecialHours, Long::sum);
+        });
+        // 결과 반환 
+		Map<String, Object> result = new HashMap<>();
+		
+        result.put("dailyRegularWorkHours", dailyRegularWorkHours);								// 일간 근무 시간
+        result.put("weeklyRegularWorkHours", weeklyRegularWorkHours);							// 주간 근무 시간
+        
+        result.put("dailyExtendWorkHours", dailyExtendWorkHours);					    		// 일간 연장 근무 시간
+        result.put("weeklyExtendHours", weeklyExtendHours);										// 주간 연장 근무 시간
+        
+        result.put("dailySpecialWorkHours", dailySpecialWorkHours);								// 일간 특별 근무 시간
+        result.put("WeeklySpecialWorkHours", WeeklySpecialWorkHours);							// 주간 특별 근무 시간
+        
+        return result;
 	}
-	
-	
-    // 유틸 메서드: 하루 근무시간 계산
+
+	// 유틸 메서드: 하루 근무시간 계산
     private long calculateDailyHours(String checkInTime, String checkOutTime) {
     	// 만약 출근 or 퇴근 시간 둘 중 하나라도 null이면 시간 계산을 할 수 없음 
     	if (checkInTime == null || checkOutTime == null ) {
@@ -223,12 +258,15 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
         LocalDateTime  end = LocalDateTime .parse(checkOutTime, formatter);
         
         return Duration.between(start, end).toMinutes(); // 시간 단위로 반환 >> 버림처리 
+ 
         // 따라서 시간 ,분을 이용해서 반환하게끔 설정
         // 초 단위로는 버림 
-        //시간과 , 분은 버리지 않고 가져오게끔 설정 
+        //시간과 , 분은 버리지 않고 가져오게끔 설정
     }
-	
-	
-	
-	
+
+
+
+
+
+
 }

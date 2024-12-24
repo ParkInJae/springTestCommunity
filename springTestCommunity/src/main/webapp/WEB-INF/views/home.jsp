@@ -149,7 +149,7 @@ function checkOut() {
 			                <th>총 근무 시간 </th>
 					</thead>
 					<tbody>
-					<c:forEach var="entry" items="${dailyWorkHours}">
+					<c:forEach var="entry" items="${weeklyRegularWorkHours}">
 						<!-- 실수로 표현이 됨  -->
 						<%-- <c:set var="hours" value="${entry.value/ 60}"/>  --%> 				  
 					    <%-- <c:set var="minutes" value="${entry.value % 60}" /> --%>

@@ -36,14 +36,6 @@ public class HomeController {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(Locale locale, Model model,@AuthenticationPrincipal UserVO vo ) {
-		
-		/*
-		 해당 유저의 정보가 null이 아닌경우 ,해당 유저의 근무시간을 리스트로 가져와서 model에 담고 보내줘야한다. 
-		 1. 매개변수를 userVO를 넣느다. 
-		 2. 쿼리 실행 후 받아오는 타입을 근무시간VO를 받는다?
-		 
-		 */
-
 		// 만약 로그인 한 사용자가 존재한다면, 
 		if(vo != null) {
 			// session을 통해서 mapper에서 시간계산 후 값을 가져옴 
@@ -54,23 +46,19 @@ public class HomeController {
 	        
 	         // 비즈니스 로직을 구현하는 service로 의존성 주입 
 			 Map<String, Object> WorkTimeData = dailyWorkTimeService.calculateWorkTime(vo.getUser_id());
-			 // service의 리턴값을 받아서 모델에 데이터 추가
-			 logger.info("dailyWorkHours : {}", WorkTimeData.get("dailyWorkHours"));
-			 logger.info("dailyWorkHours : {}", WorkTimeData.get("weeklyWorkHours"));
+// 디버깅
+			 logger.info("dailyRegularWorkHours : {}", WorkTimeData.get("dailyRegularWorkHours"));
+			 logger.info("weeklyRegularWorkHours : {}", WorkTimeData.get("weeklyRegularWorkHours"));
 			 
-			 model.addAttribute("dailyWorkHours",WorkTimeData.get("dailyWorkHours")) ;  // 일별 데이터 
-			 model.addAttribute("weeklyWorkHours",WorkTimeData.get("weeklyWorkHours")) ;// 주간 데이터  
+			 
+			 // service의 리턴값을 받아서 모델에 데이터 추가
+			 model.addAttribute("dailyRegularWorkHours",WorkTimeData.get("dailyRegularWorkHours"));  	// 일간 정규 근무 시간
+			 model.addAttribute("weeklyRegularWorkHours",WorkTimeData.get("weeklyRegularWorkHours"));	// 주간 정규 근무 시간
+			 model.addAttribute("dailyExtendWorkHours",WorkTimeData.get("dailyExtendWorkHours")); 		// 일간 연장 근무 시간 
+			 model.addAttribute("weeklyExtendHours",WorkTimeData.get("weeklyExtendHours"));				// 주간 연장 근무 시간
+			 model.addAttribute("dailySpecialWorkHours",WorkTimeData.get("dailySpecialWorkHours"));  	// 일간 특별 근무 시간 
+			 model.addAttribute("WeeklySpecialWorkHours",WorkTimeData.get("WeeklySpecialWorkHours"));	// 주간 특별 근무 시간  
 		}		
-		
-		logger.info("Welcome home! The client locale is {}.", locale);
-		
-		Date date = new Date();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-		
-		String formattedDate = dateFormat.format(date);
-		
-		model.addAttribute("serverTime", formattedDate );
-		
 		return "home";
 	}
 	

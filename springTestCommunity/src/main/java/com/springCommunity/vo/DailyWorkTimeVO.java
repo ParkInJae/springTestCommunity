@@ -36,6 +36,13 @@ public class DailyWorkTimeVO {
 	public void setLatitude(String latitude) 					{this.latitude = latitude;			  	  }
 	public void setLongitude(String longitude) 					{this.longitude = longitude;	 	 	  }
 
+	@Override
+	public String toString() {
+		return "DailyWorkTimeVO [work_time_no=" + work_time_no + ", user_id=" + user_id + ", check_in_time="
+				+ check_in_time + ", check_out_time=" + check_out_time + ", created_at=" + created_at + ", updated_at="
+				+ updated_at + ", latitude=" + latitude + ", longitude=" + longitude + "]";
+	}
+
 	
 	
 	
