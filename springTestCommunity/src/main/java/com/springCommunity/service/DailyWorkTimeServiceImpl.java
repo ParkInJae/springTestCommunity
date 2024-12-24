@@ -167,7 +167,7 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
             LocalDateTime  checkOut  = LocalDateTime .parse(checkOutStr, formatter);  	//  LocalDateTime >>날짜와 시간 정보를 모두 포함  ex: "2024-12-17 20:30:06"
             LocalDate localDate = CheckIn.toLocalDate(); 						 		// LocalDate >>날짜 정보를 포함
             sortDatesList.add(localDate);	            						 		//리스트에 날짜를 넣음
-            
+
             // 기준 시간 18:00:00 설정
             LocalDateTime cutoffTime = LocalDateTime.of(localDate, LocalTime.parse("18:00:00"));
             
