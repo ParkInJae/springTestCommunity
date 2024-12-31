@@ -23,10 +23,14 @@ WHERE USER_ID = #{user_id} AND DATE(CHECK_IN_TIME) = CURDATE()
  </update>
  
 <!-- 유저 아이디가 매개변수로 들어오고, 반환은   dailyWorkTimeVO로 설정 함 -->
-<select id="selectList" parameterType="String" resultType="dailyWorkTimeVO">
+<select id="selectList" parameterType="dailyWorkTimeVO" resultType="dailyWorkTimeVO">
 SELECT * 
 FROM DAILY_WORK_TIME
-WHERE USER_ID = #{user_id}
+WHERE USER_ID = #{user_id} and date_format(NOW(),'%Y-%m-%d')
+    BETWEEN
+        (SELECT ADDDATE(CURDATE(), - WEEKDAY(CURDATE()) + 0 ))
+    AND
+        (SELECT ADDDATE(CURDATE(), - WEEKDAY(CURDATE()) + 6 ));
 </select>
 
 

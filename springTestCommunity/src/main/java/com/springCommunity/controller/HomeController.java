@@ -47,17 +47,14 @@ public class HomeController {
 	         // 비즈니스 로직을 구현하는 service로 의존성 주입 
 			 Map<String, Object> WorkTimeData = dailyWorkTimeService.calculateWorkTime(vo.getUser_id());
 // 디버깅
-			 logger.info("dailyRegularWorkHours : {}", WorkTimeData.get("dailyRegularWorkHours"));
-			 logger.info("weeklyRegularWorkHours : {}", WorkTimeData.get("weeklyRegularWorkHours"));
+			 logger.info("dailyWorkHours : {}", WorkTimeData.get("dailyWorkHours"));
+			 logger.info("weeklyWorkHours : {}", WorkTimeData.get("weeklyWorkHours"));
 			 
 			 
 			 // service의 리턴값을 받아서 모델에 데이터 추가
-			 model.addAttribute("dailyRegularWorkHours",WorkTimeData.get("dailyRegularWorkHours"));  	// 일간 정규 근무 시간
-			 model.addAttribute("weeklyRegularWorkHours",WorkTimeData.get("weeklyRegularWorkHours"));	// 주간 정규 근무 시간
-			 model.addAttribute("dailyExtendWorkHours",WorkTimeData.get("dailyExtendWorkHours")); 		// 일간 연장 근무 시간 
-			 model.addAttribute("weeklyExtendHours",WorkTimeData.get("weeklyExtendHours"));				// 주간 연장 근무 시간
-			 model.addAttribute("dailySpecialWorkHours",WorkTimeData.get("dailySpecialWorkHours"));  	// 일간 특별 근무 시간 
-			 model.addAttribute("WeeklySpecialWorkHours",WorkTimeData.get("WeeklySpecialWorkHours"));	// 주간 특별 근무 시간  
+			 model.addAttribute("dailyWorkHours",WorkTimeData.get("dailyWorkHours"));  	// 일간 정규 근무 시간
+			 model.addAttribute("weeklyWorkHours",WorkTimeData.get("weeklyWorkHours"));	// 주간 정규 근무 시간
+		
 		}		
 		return "home";
 	}

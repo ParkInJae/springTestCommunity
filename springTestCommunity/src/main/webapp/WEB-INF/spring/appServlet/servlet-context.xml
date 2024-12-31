@@ -26,9 +26,6 @@
 	</beans:bean>
 	
 	<context:component-scan base-package="com.springCommunity.controller" />
-	
-	
-	<context:component-scan base-package="com.springCommunity.controller" />
 	<context:component-scan base-package="com.springCommunity.service" />
 	<context:component-scan base-package="com.springCommunity.dao" />
 	<context:component-scan base-package="com.springCommunity.filter" />
