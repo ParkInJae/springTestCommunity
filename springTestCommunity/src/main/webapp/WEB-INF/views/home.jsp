@@ -5,112 +5,10 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ include file="./include/header.jsp" %>
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/home.css" />
-
-	<button onclick="checkIn()">출근 </button>
-	<button onclick="checkOut()">퇴근</button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script>
-function checkIn() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-
-                // AJAX 요청
-                $.ajax({
-                    url: "user/checkIn.do",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        latitude: latitude,         // 위도
-                        longitude: longitude,       // 경도
-                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
-                    }),
-                    success: function (response) {
-                        if (response === 'success') {
-                            console.log(response); // response를 출력해야 함
-                            alert('출근 완료!');
-                        } else {
-                            alert('출근 실패!');  // 실패 시 구체적인 메시지를 제공
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        alert('이미 출근 하셨습니다.');
-                        console.log(xhr.responseText);
-                    }
-                });
-            },
-            (error) => {
-                alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
-            },
-            {
-                enableHighAccuracy: true, // 정확도 우선 모드
-                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
-                maximumAge: 0             // 항상 최신 위치 정보 수집
-            }
-        );
-    } else {
-        alert("브라우저가 위치 서비스를 지원하지 않습니다.");
-    }
-}
-// 퇴근 함수 
-function checkOut() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-
-                // AJAX 요청
-                $.ajax({
-                    url: "user/checkOut.do",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        latitude: latitude,         // 위도
-                        longitude: longitude,       // 경도
-                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
-                    }),
-                    success: function (response) {
-                        if (response === 'success') {
-                            console.log(response); // response를 출력해야 함
-                            alert('퇴근 완료!');
-                        } else {
-                            alert('퇴근 실패!');  // 실패 시 구체적인 메시지를 제공
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        alert('이미 퇴근 버튼을 눌렀습니다.');
-                        console.log(xhr.responseText);
-                    }
-                });
-            },
-            (error) => {
-                alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
-            },
-            {
-                enableHighAccuracy: true, // 정확도 우선 모드
-                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
-                maximumAge: 0             // 항상 최신 위치 정보 수집
-            }
-        );
-    } else {
-        alert("브라우저가 위치 서비스를 지원하지 않습니다.");
-    }
-}
-</script>
 	<hr>
 	<sec:authorize access="isAuthenticated()">
 		<div style="font-size:18px; text-decoration: none; color:black; font-weight: bold;">
-			<br>
-			<table class="mainTable">
-		        <tr>
-		            <th class="existValue"><a href="user/companyCommunity.do"></a>공지사항</th>
-		            <th>|</th>
-		            <th class="existValue"><a href="user/companyCommunity.do">사내 커뮤니티</a></th>
-		            <th>|</th>
-		            <th class="existValue"><a href="user/myDepartment.do">나의 부서 업무 상황</a></th>
-		        </tr>
-		    </table>
 			<!-- 근무시간 나타내기  -->
 			 <div class="summaryContainer">
 			    <div>근무 관련 요약 </div>
@@ -144,7 +42,7 @@ function checkOut() {
 					    <fmt:formatNumber value="${entry.value/ 60}" type="number" var="hours" /> 
 					    <fmt:formatNumber value="${entry.value % 60}" type="number" var="minutes" />
 					    <fmt:formatNumber value="${hours - (hours % 1)}" type="number" var="roundedHours" />
-					 	<tr>
+					 	<tr>  
 					 	<!-- key > 날짜, value > 근무 시간  -->
 			                <td>${entry.key}</td>
 			                <td>${roundedHours}시간${minutes}분</td>

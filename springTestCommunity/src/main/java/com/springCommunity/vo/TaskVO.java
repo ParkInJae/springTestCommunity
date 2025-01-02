@@ -11,7 +11,7 @@ public class TaskVO {
 	private String schedule_no;
 	
 	
-	
+	  
 	public String getTask_name() {return task_name;}
 	public int getTask_no() {return task_no;}
 	public String getTask_start_date() {return task_start_date;}

@@ -28,7 +28,7 @@ public class MyDepartmentServiceImpl implements MyDepartmentService{
 		return myDepartmentDAO.selectSchedulesByDepartment(departmentId);
 		
 	}
-
+ 
 	
 	
 	@Override

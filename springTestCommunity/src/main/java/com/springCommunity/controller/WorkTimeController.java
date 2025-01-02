@@ -19,7 +19,7 @@ public class WorkTimeController {
     @Autowired
     DailyWorkTimeService dailyWorkTimeService;
 
-    /* ajax 반환할 때 , @Reponsebody 사용하는 이유 */
+    /* ajax 반환할 때 , @Reponsebody 사용하는 이유 */  
     // controller은 가공된 데이터를 문자열의 형태로 view에게 전송을 함 (뷰로 랜더링을 함 ) 
     // 그러나 ajax를 사용하여 통신하는 경우 JavaScript에서 사용할 수 있도록 HTTP 응답 본문에 데이터를 반환함 
     // 이때 반환하는 타입은 문자열인데 , @Reponsebody를 사용하지 않는다면 , 뷰로 랜더링을 할 수 있기 때문에 , @Reponsebody를 사용해서 

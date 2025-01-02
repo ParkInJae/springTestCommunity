@@ -9,7 +9,6 @@
 <link href="<%= request.getContextPath()%>/resources/css/header.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/chat.css" />
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/login.css" />
-<link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/board.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="<%= request.getContextPath() %>/resources/js/jquery-3.7.1.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"><!-- jQuery UI CSS -->
@@ -40,6 +39,15 @@ window.onload = function(){
 		}
 	});
 	
+	$(document).ready(function () {
+        const loginError = '<%= session.getAttribute("loginError") %>';
+        if(loginError !== 'null') {
+            $('#loginModal').fadeIn(); // 모달 표시
+            $('#loginError').text(loginError).show(); // 에러 메시지 표시
+        }
+        <% session.removeAttribute("loginError"); %> <!-- 에러 메시지 제거 -->
+    });
+	
 	/* 채팅방 검색창 글지우는 버튼 */
 	$(document).on('keyup', '#search_input', function() {
 		if($(this).val().length > 0){
@@ -53,45 +61,226 @@ window.onload = function(){
 	    $(this).css("display","none");
 	});
 	
-	/* 클릭할때 chat_no를 받아와서 배열에 담고, 해당 채팅창을 닫으면 배열에서 삭제. 매초마다 메시지내용 다시 불러오기 
-	/* setInterval(() => {
+	/* 클릭할때 chat_no를 받아와서 배열에 담고, 해당 채팅창을 닫으면 배열에서 삭제. 매초마다 메시지내용 다시 불러오기 */
+	setInterval(() => {
 	    openChats.forEach((chat_no) => {
 	        loadMessage(chat_no);
 	    });
-	}, 1000); 
+	}, 1000);
 	 
 	
 	/* 채팅방목록 매초마다 불러오기. 마지막 채팅내용과 채팅시간에 필요 */
-	<%-- setInterval(function(){
-		$.ajax({
-	        url: "<%= request.getContextPath() %>/chat/chat.do",
-	        type: "GET",
-	        success: function(data) {
-	        	let html = ``;
-	        	for(item of data.list){
-					html += `
-					<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_name}');">
-						<div class="chat_item">
-							<div class="message_wrapper">
-				          	  <div class="chat_name">\${item.chat_name}</div>`;
-		            if(item.unread_count > 0) {
-		           		html += `<div class="unread_count">\${item.unread_count}</div>`;
-		            }else{
-		            	html += `<div></div>`;
-		            }
-	            	html += `</div>
-		          			<div class="last_message_wrapper">
-				                <div class="last_message">\${item.chat_message_content || ""}</div>
-				                <div class="last_message_time">\${item.chat_message_time || ""}</div>
-				            </div>
-				        </div>
-					</li>`;
-				}
+	startChatInterval();
+	
+	setInterval(function(){
+		unreadMessageCounts();
+	},5000);
+}
+
+let chatInterval;
+
+function startChatInterval() {
+    chatInterval = setInterval(function(){
+        $.ajax({
+            url: "<%= request.getContextPath() %>/chat/chat.do",
+            type: "GET",
+            success: function(data) {
+            	let html = ``;
+            	if(data.message) {
+                    // 리스트가 비어있으면 메시지를 출력
+                    html += `<li><div class="no-result">\${data.message}</div></li>`;
+                }else {
+		        	for(item of data.list){
+						html += `
+						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');">
+							<div class="chat_item">
+								<div class="message_wrapper">
+					           	 <div class="chat_name">
+						           	<!-- 상단 고정 아이콘 -->
+		                            <i class="\${item.chat_users_top === 1 ? 'fas fa-solid fa-thumbtack' : 'fas fa-regular fa-thumbtack'}" 
+		                               onclick="updateChatTop(event, \${item.chat_no});" 
+		                               style="margin-right: 8px; cursor: pointer; color: \${item.chat_users_top === 1 ? '#ff6347' : '#ccc'};">
+		                            </i>
+						           	\${item.chat_users_name}`;
+			           	if(item.user_count > 2) {   	
+		           		html += `   <span class="user_count">\${item.user_count}</span>`;
+			           	}
+			           	html += `</div>`;
+			            if(item.unread_count > 0) {
+			            	let unreadText = item.unread_count;
+
+			                if (item.unread_count > 99) {
+			                    unreadText = '99+';
+			                }
+			                else if (item.unread_count > 9) {
+			                    unreadText = '9+';
+			                }
+
+			                html += `<div class="unread_count">\${unreadText}</div>`;
+			            }else{
+			            	html += `<div></div>`;
+			            }
+			            html += `</div>
+			            		<div class="last_message_wrapper">
+					                <div class="last_message">\${item.chat_message_content || ""}</div>
+					                <div class="last_message_time">\${item.chat_message_time || ""}</div>
+					            </div>
+					        </div>
+						</li>`;
+					}
+                }
 	            $("#chatRoomList").html(html);
-	        }
-	    });
-	},1000);
- --%>
+            }
+        });
+    }, 1000);
+}
+
+function stopChatInterval() {
+    clearInterval(chatInterval);
+}
+
+function startChatSearchInterval(searchValue) {
+    chatInterval = setInterval(function(){
+        $.ajax({
+            url: "<%= request.getContextPath() %>/chat/chat.do",
+            type: "GET",
+            data: { search_value: searchValue },
+            success: function(data) {
+            	let html = ``;
+            	if(data.message) {
+                    // 리스트가 비어있으면 메시지를 출력
+                    html += `<li><div class="no-result">\${data.message}</div></li>`;
+                }else {
+		        	for(item of data.list){
+						html += `
+						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');">
+							<div class="chat_item">
+								<div class="message_wrapper">
+					           	 <div class="chat_name">
+						           	<!-- 상단 고정 아이콘 -->
+		                            <i class="\${item.chat_users_top === 1 ? 'fas fa-solid fa-thumbtack' : 'fas fa-regular fa-thumbtack'}" 
+		                               onclick="updateChatTop(event, \${item.chat_no});" 
+		                               style="margin-right: 8px; cursor: pointer; color: \${item.chat_users_top === 1 ? '#ff6347' : '#ccc'};">
+		                            </i>
+						           	\${item.chat_users_name}`;
+			           	if(item.user_count > 2) {   	
+		           		html += `   <span class="user_count">\${item.user_count}</span>`;
+			           	}
+			           	html += `</div>`;
+			            if(item.unread_count > 0) {
+			            	let unreadText = item.unread_count;
+
+			                if (item.unread_count > 99) {
+			                    unreadText = '99+';
+			                }
+			                else if (item.unread_count > 9) {
+			                    unreadText = '9+';
+			                }
+
+			                html += `<div class="unread_count">\${unreadText}</div>`;
+			            }else{
+			            	html += `<div></div>`;
+			            }
+			            html += `</div>
+			            		<div class="last_message_wrapper">
+					                <div class="last_message">\${item.chat_message_content || ""}</div>
+					                <div class="last_message_time">\${item.chat_message_time || ""}</div>
+					            </div>
+					        </div>
+						</li>`;
+					}
+                }
+	            $("#chatRoomList").html(html);
+            }
+        });
+    }, 1000);
+}
+
+function chatSearch() {
+    const searchValue = $("#search_input").val();
+    
+    stopChatInterval();
+    
+    $.ajax({
+        url: "<%= request.getContextPath() %>/chat/chat.do",
+        type: "GET",
+        data: { search_value: searchValue },
+        success: function(data) {
+            let html = '';
+            if(data.message) {
+                // 리스트가 비어있으면 메시지를 출력
+                html += `<li><div class="no-result">\${data.message}</div></li>`;
+            }else {
+	            for(item of data.list) {
+	                html += `
+	                    <li onclick="chatRoomView(\${item.chat_no}, '\${item.chat_users_name}');">
+	                        <div class="chat_item">
+	                            <div class="message_wrapper">
+	                                <div class="chat_name">
+		                                <!-- 상단 고정 아이콘 -->
+		                                <i class="\${item.chat_users_top === 1 ? 'fas fa-solid fa-thumbtack' : 'fas fa-regular fa-thumbtack'}" 
+		                                   onclick="updateChatTop(event, \${item.chat_no});" 
+		                                   style="margin-right: 8px; cursor: pointer; color: \${item.chat_users_top === 1 ? '#ff6347' : '#ccc'};">
+		                                </i>
+	                                    \${item.chat_users_name}`;
+	                if (item.user_count > 2) {
+	                    html += `       <span class="user_count">\${item.user_count}</span>`;
+	                }
+	                html += `</div>`;
+	                if(item.unread_count > 0) {
+	                	let unreadText = item.unread_count;
+
+		                if(item.unread_count > 99) {
+		                    unreadText = '99+';
+		                }
+		                else if(item.unread_count > 9) {
+		                    unreadText = '9+';
+		                }
+
+		                html += `<div id="unread_count_\${item.chat_no}" class="unread_count">\${unreadText}</div>`;
+	                }else {
+	                    html += `<div id="unread_count_\${item.chat_no}"></div>`;
+	                }
+	                html += `</div>
+	                            <div class="last_message_wrapper">
+	                                <div class="last_message">\${item.chat_message_content || ""}</div>
+	                                <div class="last_message_time">\${item.chat_message_time || ""}</div>
+	                            </div>
+	                        </div>
+	                    </li>`;
+	            }
+            }
+            $("#chatRoomList").html(html); // 검색 결과를 업데이트
+            startChatSearchInterval(searchValue);
+        },
+        error: function(err) {
+            console.error("검색 중 오류 발생:", err);
+        }
+    });
+}
+
+//상단 고정 상태 변경 함수
+function updateChatTop(event, chat_no) {
+    event.stopPropagation(); // 부모 클릭 이벤트 방지
+    $.ajax({
+        url: `<%= request.getContextPath() %>/chat/updateChatTop.do`,
+        type: "POST",
+        data: { chat_no: chat_no, user_id: user_id },
+        success: function(result) {
+            if(result === "Success") {
+                // DOM에서 아이콘 상태 업데이트
+                const icon = event.target;
+                const isPinned = icon.classList.contains("fa-solid");
+                icon.className = isPinned ? "fas fa-regular fa-thumbtack" : "fas fa-solid fa-thumbtack";
+                icon.style.color = isPinned ? "#ccc" : "#ff6347";
+            }else {
+                alert("상단 고정 상태 변경에 실패했습니다.");
+            }
+        },
+        error: function() {
+            alert("오류가 발생했습니다. 다시 시도해주세요.");
+        }
+    });
 }
 
 $(document).on('keyup', '#user_search', function() {
@@ -134,48 +323,69 @@ function chatModal(){
         url: "<%= request.getContextPath() %>/chat/chat.do",
         type: "GET",
         success: function(data) {
-        	let html = `
-       		<div class="modalHeader">
+        	let html = 
+       		`<div class="modalHeader">
 		        <h2>채팅</h2>
 		        <button class="closeBtn" onclick="closeModal()">X</button>
 		    </div>
     		<div id="chatContainer">
     			<div id="chatContainerHeader">
 	                <button id="createChatButton">채팅방생성</button>
-		            <form action="<%= request.getContextPath() %>/chat/chat.do" method="get" name="searchFn">
-	                    <div id="search_container" style="display: flex; margin-top: 1.5%; 
-								 align-items: center; border: 1px solid #ccc;
-								 background-color: white; border-radius: 25px; width:98%; height: 30px;">
-	      	   				  <i class="fas fa-magnifying-glass search-icon" style="margin-left:10px;"></i>
-		                      <input type="text" name="search_value" id="search_input" placeholder="채팅방검색"
-		                      style="border:none; width:85%; height:auto; margin-left:5px;">
-		                      <i class="fas fa-times" id="clearBtn"></i>
-	                    </div>
-		            </form>
+                    <div id="search_container" style="display: flex; margin-top: 1.5%; 
+							 align-items: center; border: 1px solid #ccc;
+							 background-color: white; border-radius: 25px; width:98%; height: 30px;">
+      	   				  <i class="fas fa-magnifying-glass search-icon" style="margin-left:10px;"></i>
+	                      <input type="text" name="search_value" id="search_input" placeholder="채팅방검색"
+	                      onkeydown="if(event.key === 'Enter') chatSearch();"
+	                      style="border:none; width:85%; height:auto; margin-left:5px;">
+	                      <i class="fas fa-times" id="clearBtn"></i>
+                    </div>
 	            </div>
 	            <div id="chatSidebar">
 	                <ul id="chatRoomList">`;
-	                
-        	for(item of data.list){
-				html += `
-						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_name}');">
-							<div class="chat_item">
-								<div class="message_wrapper">
-						            <div class="chat_name">\${item.chat_name}</div>`;
-	            if(item.unread_count > 0) {
-	           		html += `			<div class="unread_count">\${item.unread_count || ""}</div>`;
-	            }else{
-	            	html += `			<div>\${item.unread_count || ""}</div>`;
-	            }
-         		html += `	        </div>
-					            <div class="last_message_wrapper">
-					                <div class="last_message">\${item.chat_message_content || ""}</div>
-					                <div class="last_message_time">\${item.chat_message_time || ""}</div>
-					            </div>
-					        </div>
-						</li>`;
-			}
-        	
+            if(data.message) {
+               // 리스트가 비어있으면 메시지를 출력
+               html += `<li><div class="no-result">\${data.message}</div></li>`;
+            }else {
+	        	for(item of data.list){
+					html += 
+							`<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');">
+								<div class="chat_item">
+									<div class="message_wrapper">
+							            <div class="chat_name">
+								            <!-- 상단 고정 아이콘 -->
+		                                    <i class="\${item.chat_users_top === 1 ? 'fas fa-solid fa-thumbtack' : 'fas fa-regular fa-thumbtack'}" 
+		                                       onclick="updateChatTop(event, \${item.chat_no});" 
+		                                       style="margin-right: 8px; cursor: pointer; color: \${item.chat_users_top === 1 ? '#ff6347' : '#ccc'};">
+		                                    </i>
+							            	\${item.chat_users_name}`;
+		           	if(item.user_count > 2) {   	
+	           			html +=            `<span class="user_count">\${item.user_count}</span>`;
+		           	}
+	          		html +=            `</div>`;
+		            if(item.unread_count > 0) {
+		            	let unreadText = item.unread_count;
+
+		                if (item.unread_count > 99) {
+		                    unreadText = '99+';
+		                }
+		                else if (item.unread_count > 9) {
+		                    unreadText = '9+';
+		                }
+
+		                html += `    	<div id="unread_count_\${item.chat_no}" class="unread_count">\${unreadText}</div>`;
+		            }else{
+		            	html += `    	<div id="unread_count_\${item.chat_no}"></div>`;
+		            }
+	         		html += 	    `</div>
+						            <div class="last_message_wrapper">
+						                <div class="last_message">\${item.chat_message_content || ""}</div>
+						                <div class="last_message_time">\${item.chat_message_time || ""}</div>
+						            </div>
+						        </div>
+							</li>`;
+				}
+            }
         	html += `</ul>
 	            </div>
         	</div>
@@ -216,15 +426,15 @@ $(document).on("click", "#completeChatButton", function () {
     });
 
     if(selectedUsers.length > 0) {
-        const chat_name = chatNames.join(', ');
-        console.log('생성된 채팅방 이름:', chat_name);
+        const chat_users_name = chatNames.join(', ');
+        console.log('생성된 채팅방 이름:', chat_users_name);
     
-	    if(chat_name && selectedUsers.length > 0) {
+	    if(selectedUsers.length > 0) {
 	        $.ajax({
 	            url: "chat/create.do",
 	            method: "POST",
 	            contentType: "application/json; charset=utf-8",
-	            data: JSON.stringify({user_id: user_id, chat_name: chat_name, users: selectedUsers}),
+	            data: JSON.stringify({user_id: user_id, user_name: user_name, chat_users_name: chat_users_name, users: selectedUsers}),
 	            success: function (result) {
 	                result.trim();
 	                console.log("result : " + result);
@@ -235,11 +445,11 @@ $(document).on("click", "#completeChatButton", function () {
 	                	let parts = chat.split(":");
 	
 	                	let chat_no = parts[0];   // 왼쪽 부분
-	                	let chat_name = parts[1]; // 오른쪽 부분
+	                	let chat_users_name = parts[1]; // 오른쪽 부분
 	                	console.log("채팅방 생성 후 chatModal()실행전 chat_no" + chat_no);
-	                	console.log("채팅방 생성 후 chatModal()실행전 chat_name" + chat_name);
+	                	console.log("채팅방 생성 후 chatModal()실행전 chat_users_name" + chat_users_name);
 	                	closeSlider();
-	                	chatRoomView(chat_no,chat_name);
+	                	chatRoomView(chat_no,chat_users_name);
 	                	chatModal();
 	                }
 	            },
@@ -247,14 +457,14 @@ $(document).on("click", "#completeChatButton", function () {
 	                console.error("채팅방 생성 실패");
 	            },
 	        });
+	    }else {
+	        alert("채팅방 이름과 사용자를 선택해주세요.");
 	    }	
-    }else {
-        alert("채팅에 초대할 직원을 선택해주세요.");
     }
 });
 
 /* 개별채팅방 모달 만드는 함수 */
-function chatRoomView(chat_no,chat_name){
+function chatRoomView(chat_no,chat_users_name){
 	if(!openChats.includes(chat_no)) {
 		openChats.push(chat_no); // 배열에 chat_no 추가
     }
@@ -262,7 +472,7 @@ function chatRoomView(chat_no,chat_name){
 	loadMessage(chat_no);
 	connectWebSocket(chat_no);
 	console.log("chatRoomView chat_no :" + chat_no);
-	console.log("chatRoomView chat_name :" + chat_name);
+	console.log("chatRoomView chat_users_name :" + chat_users_name);
 	
 	const modalId = 'chatModal_' + chat_no;
 	console.log("modalId :"+modalId);
@@ -272,7 +482,7 @@ function chatRoomView(chat_no,chat_name){
             <div class="chatModal" id="\${modalId}">
                 <div class="chatModalHeader">
                     <button class="hamburgerMenu" onclick="toggleChatMenu('\${modalId}')">☰</button>
-                    <h2>\${chat_name}</h2>
+                    <h2 id="chatName_\${chat_no}" onclick="modifyChatName('\${chat_no}')">\${chat_users_name || "로딩 중..."}</h2>
                    	<button class="closeBtn" onclick="closeChatModal('\${chat_no}')">X</button>
                 </div>
                 <div class="chatContent">
@@ -284,7 +494,7 @@ function chatRoomView(chat_no,chat_name){
 	                style="width: 92%;" placeholder="메시지를 입력하세요" />
                 </div>
                 <div class="chatSidebar" id="chatSidebar_\${modalId}">
-	                <h3>채팅초대</h3>
+	                <h3 style="cursor:pointer;" onclick="chatUserAdd(\${chat_no},'\${chat_users_name}');">채팅초대</h3>
 	                <ul id="participantList_\${chat_no}">
 	                    <!-- 참가자 목록 -->
 	                </ul>
@@ -345,18 +555,17 @@ function closeChatModal(chat_no) {
     $("#chatModal_" + chat_no).remove();  
 }
 
-let user_list = "";
 function chatUser(chat_no){
+	let user_list = "";
 	$.ajax({
 		url : "<%= request.getContextPath() %>/chat/chatUsers.do",
 		type: 'post',
 		data : {chat_no : chat_no},
 		success : function(data){
 			for(item of data){
-				console.log(item.user_name);
 				user_list += "<li>" + item.user_name + "</li>";
 			}
-			$("#participantList_"+chat_no).append(user_list);
+			$("#participantList_"+chat_no).html(user_list);
 			user_list = "";
 		}
 	});
@@ -367,7 +576,7 @@ function leaveChatRoom(chat_no,user_id) {
     $.ajax({
         url: "<%= request.getContextPath() %>/chat/leaveChatRoom.do",
         type: "POST",
-        data: { chat_no : chat_no, user_id : user_id },
+        data: { chat_no: chat_no, user_id:user_id, user_name:user_name },
         success: function(response) {
             if(response === 'Success'){
 	            chatModal();
@@ -422,7 +631,13 @@ function connectWebSocket(chat_no) {
 
             // 현재 시간을 '시:분' 형식으로 가져오기
             const formattedTime = `\${currentDate.getHours()}:\${currentDate.getMinutes().toString().padStart(2, '0')}`;
-
+			
+            // 읽지 않은 메시지 수 표시
+            let unreadCount = "";
+            if(messageData.unread_count > 0) {
+            	unreadCount = `<span class="unreadMessage">\${messageData.unread_count}</span>`;
+            }
+            
 
             // 현재 로그인한 사용자인지 확인
             const isCurrentUser = messageData.user_name === user_name;
@@ -435,14 +650,20 @@ function connectWebSocket(chat_no) {
 	        ? `
 	            <div class="\${messageClass}">
 	                <div class="messageContent textbox">\${messageData.chat_message_content}</div>
-	                <div class="messageDate_ch2">\${formattedTime}</div>
+	                <div class="messageDate_ch2">	
+	                	\${unreadCount}
+	                	\${formattedTime}
+                	</div>
 	            </div>
 	        `
 	        : `
                 <div class="messageUser">\${messageData.user_name}</div>
 	            <div class="\${messageClass}">
 	                <div class="messageContent textbox">\${messageData.chat_message_content}</div>
-	                <div class="messageDate_ch1">\${formattedTime}</div>
+	                <div class="messageDate_ch1">
+	                	\${formattedTime}
+	                	\${unreadCount}
+                	</div>
 	            </div>
 	        `;
 
@@ -477,8 +698,8 @@ function sendMessage(chat_no) {
         $.ajax({
             url: '<%= request.getContextPath() %>/chat/sendMessage.do',
             method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ chat_no, user_id, chat_message_content }),
+            //contentType: 'application/json',
+            data: { chat_no : chat_no, user_id : user_id, chat_message_content : chat_message_content },
             success: function() {
                 console.log('메시지가 저장되었습니다.');
             },
@@ -520,35 +741,377 @@ function loadMessage(chat_no){
                     `;
                 }
                 
+                // 읽지 않은 메시지 수 표시
+                let unreadCount = "";
+                if(item.unread_count > 0) {
+                	unreadCount = `<span class="unreadMessage">\${item.unread_count}</span>`;
+                }
+                
 	            // 현재 로그인한 사용자인지 확인
 	            let isCurrentUser = item.user_id === user_id;
 
 	            // 동적으로 스타일 클래스 지정
 	            let messageClass = isCurrentUser ? "chat ch2" : "chat ch1";
-
-	            // DOM에 메시지 추가
-	            html += isCurrentUser
-		        ? `
-		            <div class="\${messageClass}">
-		                <div class="messageContent textbox">\${item.chat_message_content}</div>
-		                <div class="messageDate_ch2">\${item.chat_message_time}</div>
-		            </div>
-		        `
-		        : `
-	                <div class="messageUser">\${item.user_name}</div>
-		            <div class="\${messageClass}">
-		                <div class="messageContent textbox">\${item.chat_message_content}</div>
-		                <div class="messageDate_ch1">\${item.chat_message_time}</div>
-		            </div>
-		        `;
+	            
+	            if(item.user_id === 'SYSTEM') {
+                    html += `<div class="systemMessage">\${item.chat_message_content}</div>`;
+                }else{
+                	// DOM에 메시지 추가
+    	            html += isCurrentUser
+    		        ? `
+    		            <div class="\${messageClass}">
+    		                <div class="messageContent textbox">\${item.chat_message_content}</div>
+    		                <div class="messageDate_ch2">
+    		                	\${unreadCount}
+    		                	\${item.chat_message_time}
+    		                </div>
+    		            </div>
+    		        `
+    		        : `
+    	                <div class="messageUser">\${item.user_name}</div>
+    		            <div class="\${messageClass}">
+    		                <div class="messageContent textbox">\${item.chat_message_content}</div>
+    		                <div class="messageDate_ch1">
+    		                	\${item.chat_message_time}
+    		                	\${unreadCount}
+    	                	</div>
+    		            </div>
+    		        `;
+                }
 			}
 			
 			$("#chatLog_"+chat_no).html(html);
+			
+			// 읽지 않은 메시지 읽음 처리 요청
+            messagesRead(chat_no);
 		},
 	    error: function(xhr, status, error) {
 	        console.error("Error:", status, error);
 	    }
 	});
+}
+
+function messagesRead(chat_no) {
+    $.ajax({
+        url: "<%= request.getContextPath() %>/chat/messagesRead.do",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ chat_no: chat_no, user_id: user_id }),
+        success: function () {
+            console.log("읽음 상태 업데이트 완료");
+        }
+    });
+}
+
+function modifyChatName(chat_no) {
+    const chatNameElement = $("#chatName_" + chat_no);
+    const currentName = chatNameElement.text().trim();
+
+    // h2를 input으로 교체
+    const inputElement = $(`<input type="text" id="chatNameInput_\${chat_no}" class="chatNameInput" />`)
+        .val(currentName);
+
+    chatNameElement.replaceWith(inputElement);
+
+    // input에서 포커스가 해제되거나 Enter를 누르면 저장
+    inputElement.on("blur keydown", function (e) {
+        if (e.type === "blur" || (e.type === "keydown" && e.key === "Enter")) {
+            const newName = inputElement.val().trim();
+            if(newName !== currentName && newName !== "") {
+                saveChatName(chat_no, newName, inputElement);
+            }else {
+                // 변경이 없거나 이름이 비어 있으면 원래 h2로 복원
+                inputElement.replaceWith(chatNameElement);
+            }
+        }
+    });
+
+    // input에 포커스 설정
+    inputElement.focus();
+}
+
+function saveChatName(chat_no, newName, inputElement) {
+	const originalElement = $(`<h2 id="chatName_\${chat_no}" onclick="modifyChatName(\${chat_no})"></h2>`)
+    .text(inputElement.val().trim());
+	$.ajax({
+        url: "<%= request.getContextPath() %>/chat/updateChatUserName.do",
+        method: "POST",
+        data: {
+            chat_no: chat_no,
+            chat_users_name: newName,
+            user_id: user_id
+        },
+        success: function(data) {
+        	if(data.result === "Success"){
+	            // 성공적으로 저장된 경우 이름 업데이트
+	            const updatedElement = $(`<h2 id="chatName_\${chat_no}" onclick="modifyChatName(\${chat_no})"></h2>`)
+	                .text(data.vo.chat_users_name);
+	            inputElement.replaceWith(updatedElement);
+        	}else {
+                alert("저장 실패: 다시 시도해주세요.");
+                // 저장 실패 시 원래 h2 복원
+                inputElement.replaceWith(originalElement);
+            }
+        },
+        error: function () {
+            alert("서버 오류로 인해 저장에 실패했습니다.");
+            // 서버 오류 시 원래 h2 복원
+            inputElement.replaceWith(originalElement);
+        }
+    });
+}
+
+function chatUserAdd(chat_no, chat_users_name) {
+    const modalId = "addUserModal_"+chat_no; // 고유한 모달 ID 생성
+
+    // 이미 모달이 존재하면 열기만 함
+    if($("#"+modalId).length > 0) {
+        $("#"+modalId).fadeIn();
+        return;
+    }
+
+    // 모달 HTML 동적 생성
+    const modalHTML = `
+        <div id="\${modalId}" class="addUserModalWrapper">
+            <div class="addUserModal">
+                <div class="modalHeader">
+                    <h2>참가자 초대</h2>
+                    <button class="closeBtn" onclick="closeAddUserModal('\${modalId}')">X</button>
+                </div>
+                <input type="text" id="user_search_add_\${chat_no}" class="user_search_add" placeholder="이름, 부서, 직책으로 검색하세요">
+                <ul id="addUserList_\${chat_no}" class="addUserList" style="display:none;"></ul>
+                <button id="addUserButton_\${chat_no}" class="addUserButton">초대</button>
+            </div>
+        </div>
+    `;
+
+    // Body에 모달 추가
+    $("body").append(modalHTML);
+
+    // 모달 스타일링
+    $("#"+modalId).fadeIn();
+    
+    // 외부 클릭으로 모달 닫기
+    $("#"+modalId).on("click", function (event) {
+        if($(event.target).hasClass("addUserModalWrapper")) {
+            closeAddUserModal(modalId); // 외부 클릭 시 모달 닫기
+        }
+    });
+
+    // 검색 기능 초기화
+    $(document).on('keyup', `#user_search_add_\${chat_no}`, function () {
+        let search_value = $(this).val();
+        if (search_value.length > 0) {
+            $.ajax({
+                url: '<%= request.getContextPath() %>/chat/searchUsers.do',
+                method: 'GET',
+                data: { search_value: search_value, chat_no: chat_no },
+                success: function (data) {
+                    $("#addUserList_"+chat_no).empty();
+                    if(data.length === 0) {
+                        $("#addUserList_"+chat_no).append('<li>검색 결과가 없습니다.</li>');
+                    }else {
+                        $("#addUserList_"+chat_no).show();
+                        data.forEach(function (item) {
+                            $("#addUserList_"+chat_no).append(
+                                `<li>
+                                    <input type="checkbox" value="\${item.user_id}:\${item.user_name}">
+                                    \${item.user_name} - \${item.department_name} - \${item.job_position_name}
+                                </li>`
+                            );
+                        });
+                    }
+                },
+                error: function () {
+                    alert("검색 중 문제가 발생했습니다.");
+                }
+            });
+        }
+    });
+
+    // 사용자 초대 처리
+    $(document).on("click", `#addUserButton_\${chat_no}`, function () {
+        let selectedUsers = [];
+        let chatNames = [];
+        $(`#addUserList_\${chat_no} input[type="checkbox"]:checked`).each(function () {
+            const value = $(this).val();
+            selectedUsers.push(value.split(":")[0]);
+            chatNames.push(value.split(":")[1]);
+        });
+
+        if (selectedUsers.length > 0) {
+            chat_users_name += ", " + chatNames.join(', ');
+            console.log("addUser chat_users_name:", chat_users_name);
+            $.ajax({
+                url: '<%= request.getContextPath() %>/chat/addUser.do',
+                method: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ chat_no: chat_no, chat_users_name: chat_users_name, users: selectedUsers }),
+                success: function (result) {
+                    if(result.trim() === "Success") {
+                        closeAddUserModal(modalId);
+                        chatUser(chat_no);
+                        chatName(chat_no);
+                    }else {
+                        alert("사용자 초대에 실패했습니다.");
+                    }
+                },
+                error: function () {
+                    alert("서버 오류로 인해 사용자 초대에 실패했습니다.");
+                }
+            });
+        } else {
+            alert("초대할 사용자를 선택해주세요.");
+        }
+    });
+}
+
+// 모달 닫기 함수
+function closeAddUserModal(modalId) {
+    $("#"+modalId).fadeOut(function () {
+        $("#"+modalId).remove(); // 모달 삭제
+    });
+}
+
+function chatName(chat_no){
+	$.ajax({
+		url : "<%= request.getContextPath()%>/chat/chatName.do",
+		data : {chat_no : chat_no, user_id : user_id},
+		success : function(data){
+			$("#chatName_"+chat_no).text(data.chat_users_name);
+		}
+	});
+}
+
+function unreadMessageCounts() {
+    $.ajax({
+        url: "<%= request.getContextPath()%>/chat/unreadMessageCounts.do",
+        method: "GET",
+        data: { user_id: user_id },
+        success: function (totalUnread) {
+            showUnreadCount(totalUnread);
+        },
+        error: function () {
+            console.error("안 읽은 메시지 개수를 가져오지 못했습니다.");
+        }
+    });
+}
+
+function showUnreadCount(totalUnread) {
+    const chatIcon = document.querySelector('div[onclick="chatModal();"]');
+    let unreadBubble = document.getElementById('unreadBubble');
+
+    if(!unreadBubble) {
+        unreadBubble = document.createElement('div');
+        unreadBubble.id = 'unreadBubble';
+        unreadBubble.style.cssText = `
+            font-size: 16px;
+            background-color: #FE6450;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            position: absolute;
+            top: 5%;
+            right: 28%;
+        `;
+        chatIcon.appendChild(unreadBubble);
+    }
+
+    if(totalUnread > 0) {
+        if(totalUnread > 99) {
+            unreadBubble.textContent = '99+';
+        }else if (totalUnread > 9) {
+            unreadBubble.textContent = '9+';
+        }else {
+            unreadBubble.textContent = totalUnread;
+        }
+    }else {
+        unreadBubble.remove();
+    }
+}
+</script>
+<script>
+function checkIn() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+
+                // AJAX 요청
+                $.ajax({
+                    url: "user/checkIn.do",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        latitude: latitude,         // 위도
+                        longitude: longitude,       // 경도
+                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
+                    }),
+                    success: function (data) {
+                    	console.log(data);
+                        alert('출근 완료!');
+                    },
+                    error: function (xhr, status, error) {
+                        alert('출근 실패! 이미 존재하는 출근 기록입니다.');
+                       console.log(xhr.responseText);
+                    }
+                });
+            },
+            (error) => {
+                alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
+            },
+            {
+                enableHighAccuracy: true, // 정확도 우선 모드
+                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
+                maximumAge: 0             // 항상 최신 위치 정보 수집
+            }
+        );
+    } else {
+        alert("브라우저가 위치 서비스를 지원하지 않습니다.");
+    }
+}
+// 퇴근 함수 
+function checkOut() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+
+                // AJAX 요청
+                $.ajax({
+                    url: "user/checkOut.do",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        latitude: latitude,         // 위도
+                        longitude: longitude,       // 경도
+                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
+                    }),
+                    success: function (data) {
+                        alert('퇴근 완료! ');
+                    },
+                    error: function (xhr, status, error) {
+                        alert('퇴근 처리가 되지 않았습니다.');
+                       console.log(xhr.responseText);
+                    }
+                });
+            },
+            (error) => {
+                alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
+            },
+            {
+                enableHighAccuracy: true, // 정확도 우선 모드
+                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
+                maximumAge: 0             // 항상 최신 위치 정보 수집
+            }
+        );
+    } else {
+        alert("브라우저가 위치 서비스를 지원하지 않습니다.");
+    }
 }
 </script>
 </head>
@@ -559,7 +1122,7 @@ function loadMessage(chat_no){
             <img src="<%= request.getContextPath() %>/resources/img/메인.jpg" alt="메인 이미지" 
             style="width: 100%; height: 820px;">
             <div class="log_Info" style="font-size: 18px; text-decoration: none; color: white; font-weight: bold; margin-top: 20px;">
-                <a href="join.do" style="color:white;">회원가입</a> | 
+                <!-- <a href="join.do" style="color:white;">회원가입</a> | --> 
                 <a id="loginBtn" style="color:white;">로그인</a><br>
             </div>
         </div>
@@ -588,7 +1151,7 @@ function loadMessage(chat_no){
 							</td>
 						</tr>
 					</table>
-					<br>
+					<div id="loginError" style="color: red; text-align: center; display: none;"></div>
 					<button class="login_modal_btn">로그인</button>
 					<button type="button" class="login_modal_btn">비밀번호 찾기</button>
 				</form>
@@ -601,7 +1164,7 @@ function loadMessage(chat_no){
 				<img id="logo_img"  src="<%= request.getContextPath() %>/resources/img/logo.png" alt="회사로고" >
 			</a>
 			<div id = "login_info">
-				<a href="logout.do">로그아웃</a>
+				<a href="<%= request.getContextPath() %>/logout.do">로그아웃</a>
 				|
 				<a href="<%= request.getContextPath() %>/mypage/info.do">마이페이지</a>
 			</div>
@@ -611,6 +1174,8 @@ function loadMessage(chat_no){
 			<div id="bar">
 				<div id="working_info_bar">
 					<div id="working_info">근태정보</div><br>
+					<button onclick="checkIn()">출근 </button> &nbsp;&nbsp;&nbsp;&nbsp;
+					<button onclick="checkOut()">퇴근</button>
 					<div id="working_info">2024-12-05 11:51</div><br>
 					<div id="working_info">출근시각 : </div><br>
 					<div id="working_info">퇴근시각 : </div>
@@ -620,14 +1185,10 @@ function loadMessage(chat_no){
 					<div id="menu"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/groups.png" alt="조직도"></div>
 					<div id="menu"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/calendar.png" alt="근태"></div>
 					<div id="menu" style="cursor: pointer;" onclick="chatModal();"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/talk.png" alt="대화"></div>
-					<sec:authorize access="hasAnyRole('ROLE_ADMIN')">
+					<sec:authorize access="hasRole('ROLE_ADMIN') or authentication.principal.department_id == 2 and authentication.principal.job_position_id >= 5">
 						<div id="menu" style="cursor: pointer;" onclick="location.href='<%= request.getContextPath() %>/admin/list.do'"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/setting.png" alt="관리자"></div>
 					</sec:authorize>
 				</div>
-			</div>
-			<div id="member">
-				<img id="member_img" src="<%= request.getContextPath() %>/resources/img/member1.jpeg" alt="회사원1">
-				<div id="member_name">JJ417976 홍길자</div>
 			</div>
 		</div>
 		<hr>
@@ -647,4 +1208,14 @@ function loadMessage(chat_no){
 		    <ul id="userList" style="display:none;"></ul>
 		    <button id="completeChatButton">완료</button>
 		</div>
+		
+		<table class="mainTable" style="font-size:18px; text-decoration: none; color:black; font-weight: bold;">
+	        <tr>
+	            <th class="existValue"><a href="<%=request.getContextPath() %>/post/list.do?post_type=1">공지사항</a></th>
+	            <th>|</th>
+	            <th class="existValue"><a href="<%=request.getContextPath() %>/post/list.do?post_type=0">사내 커뮤니티</a></th>
+	            <th>|</th>
+	            <th class="existValue"><a href="<%=request.getContextPath() %>/user/myDepartment.do">나의 부서 업무 상황</a></th>
+	        </tr>
+	    </table>
 	</sec:authorize>

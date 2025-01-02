@@ -23,7 +23,7 @@ public class MyDepartmentDAO {
 		return sqlSession.selectOne(namespace + "selectUser" , user_id);
 	}
 	
-	// 부서 업무 조회 
+	// 부서 업무 조회    
 	public List<ScheduleVO> selectSchedulesByDepartment(int departmentId) {
 		
 		return sqlSession.selectList(namespace + "selectAllSchedule",departmentId);

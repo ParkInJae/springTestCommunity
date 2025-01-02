@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initialDate: new Date(),
         navLinks: true,
         editable: true,
-        dayMaxEvents: true,
+        dayMaxEvents: true, 
         selectable: true,
         
         slotMinTime: '00:00:00',
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 success: function(response) {
                     if (response.status === 'success' && response.data) {
                         const events = response.data.map(event => ({
-                            id: event.schedule_id,
+                            id: event.schedule_no,
                             title: event.schedule_name,
                             start: event.schedule_start_date,
                             end: event.schedule_end_date,
@@ -87,7 +87,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 schedule_state: '0',
                 department_id: parseInt('${vo.department_id}'),
                 job_position_id: parseInt('${vo.job_position_id}'),
-                user_id: manager  // manager를 사용
+                user_id: manager,  // manager를 사용
+                schedule_no: null // 새로 생성될 일정에 대해 no 값은 null (후에 서버에서 처리)
             };
 
             $.ajax({
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 success: function(response) {
                     if (response.status === 'success') {
                         calendar.addEvent({
-                            id: response.data,  // 서버에서 반환된 schedule_id
+                            id: event.schedule_no,  // 서버에서 반환된 schedule_id
                             title: event.schedule_name,
                             start: event.schedule_start_date,
                             end: event.schedule_end_date,
@@ -135,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     info.event.end.getMinutes().toString().padStart(2, '0'));
 
                 const updateData = {
-                    schedule_id: parseInt(info.event.id),
+                    schedule_no: parseInt(info.event.id),
                     schedule_name: newTitle,
                     schedule_start_date: formatDateTime(info.event.start, startTime),
                     schedule_end_date: formatDateTime(info.event.end, endTime),
@@ -143,6 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     job_position_id: parseInt('${vo.job_position_id}'),
                     user_id: manager
                 };
+                console.log("-----------------------------------");
+                console.log(info.event);
 
                 $.ajax({
                     url: '<c:url value="/api/scheduleUpdate.do" />',
@@ -165,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 삭제하는 로직
                 if (confirm('이 일정을 삭제하시겠습니까?')) {
                     const deleteData = {
-                        schedule_id: parseInt(info.event.id)
+                        schedule_no: parseInt(info.event.id)
                     };
 
                     $.ajax({

@@ -16,7 +16,7 @@ public class ScheduleVO {
 	
 	
 	
-	public int getSchedule_id() {
+	public int getSchedule_id() {  
 		return schedule_id;
 	}
 	

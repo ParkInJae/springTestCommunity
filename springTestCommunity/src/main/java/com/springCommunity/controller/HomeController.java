@@ -26,7 +26,7 @@ import com.springCommunity.vo.UserVO;
 public class HomeController {
 	
 	@Autowired
-	private DailyWorkTimeService dailyWorkTimeService;
+	private DailyWorkTimeService dailyWorkTimeService;  
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
