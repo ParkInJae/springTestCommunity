@@ -4,8 +4,50 @@
 <mapper namespace="com.springCommunity.mapper.ScheduleServiceMapper">
 
 <select id="selectAllSchedule"  resultType="scheduleVO">
-	select * from SCHEDULE
+	select * from SCHEDULE 
 </select>
 
+<select id="selectSchedulesByDepartment" parameterType="ScheduleVO" resultType="ScheduleVO">
+        SELECT * FROM schedule 
+        WHERE department_id = #{department_id}
+        ORDER BY schedule_start_date DESC
+</select>
 
+<insert id="insertSchedule" parameterType="ScheduleVO">
+        INSERT INTO schedule (
+            SCHEDULE_NAME, SCHEDULE_START_DATE,SCHEDULE_END_DATE,
+           DEPARTMENT_ID, JOB_POSITION_ID, USER_ID
+        ) VALUES (
+           #{schedule_name}, #{schedule_start_date}, #{schedule_end_date},
+           #{department_id}, #{job_position_id}, #{user_id}
+        )
+</insert>
+<!-- render로 ㄹ새로고침 하기에 , 아래코드는 필요 없음  
+<selectKey keyProperty="schedule_id" resultType="int" order="AFTER">
+	SELECT LAST_INSERT_ID()
+</selectKey>-->
+    
+<update id="updateSchedule" parameterType="ScheduleVO">
+	UPDATE schedule
+	SET 
+		schedule_name = #{schedule_name},
+		schedule_start_date = #{schedule_start_date},
+		schedule_end_date = #{schedule_end_date},
+		schedule_state = #{schedule_state},
+		department_id = #{department_id},
+		job_position_id = #{job_position_id},
+		user_id = #{user_id}
+	WHERE SCHEDULE_NO  = #{schedule_no}
+</update>
+
+<delete id="deleteSchedule" parameterType="int">
+	DELETE FROM schedule WHERE SCHEDULE_NO = #{schedule_no}
+</delete>
+<!-- 해당 코드도 render로 의해서 필요 없음
+<select id="selectNextSerialNo" resultType="int">
+	SELECT COALESCE(MAX(CAST(SUBSTRING(schedule_no, 14) AS INTEGER)), 0) + 1
+	FROM schedule
+	WHERE schedule_no LIKE CONCAT('SCH-', DATE_FORMAT(CURRENT_DATE, '%Y%m%d'), '-%')
+</select>
+-->
 </mapper>

@@ -13,6 +13,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+	 var manager = "${vo.user_id}";  // EL 태그 사용
+	  console.log(manager);
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         headerToolbar: {
@@ -36,127 +38,213 @@ document.addEventListener('DOMContentLoaded', function() {
             hour12: false
         },
 
-        events: '/api/schedule',  // 이벤트 조회를 위한 API 엔드포인트
-
-        select: function(info) {
-            const title = prompt('일정 제목을 입력하세요:');
-            if (!title) return;
-            
-            const startTime = prompt('시작 시간을 입력하세요 (HH:MM):', 
-                info.start.getHours().toString().padStart(2, '0') + ':' + 
-                info.start.getMinutes().toString().padStart(2, '0'));
-            
-            const endTime = prompt('종료 시간을 입력하세요 (HH:MM):', 
-                info.end.getHours().toString().padStart(2, '0') + ':' + 
-                info.end.getMinutes().toString().padStart(2, '0'));
-            
-            const event = {
-                schedule_name: title,  
-                schedule_start_date: combineDateAndTime(info.start, startTime),
-                schedule_end_date: combineDateAndTime(info.end, endTime),
-                schedule_state: '0',
-                department_id: '${vo.department_id}',  
-                job_position_id: '${vo.job_position_id}', 
-                user_id: '${vo.user_id}'
-            };
-            
+        events: function(info, successCallback, failureCallback) {
             $.ajax({
-                url: '/api/schedule',
-                method: 'POST',
-                data: JSON.stringify(event),
-                contentType: 'application/json',
-                success: function(result) {
-                    calendar.addEvent({
-                        id: result.schedule_id,
-                        title: result.schedule_name,
-                        start: result.schedule_start_date,
-                        end: result.schedule_end_date,
-                        allDay: false
-                    });
-                    alert('일정이 생성되었습니다.');
+                url: '<c:url value="/api/schedule.do" />',
+                method: 'GET',
+                success: function(response) {
+                    if (response.status === 'success' && response.data) {
+                        const events = response.data.map(event => ({
+                            id: event.schedule_id,
+                            title: event.schedule_name,
+                            start: event.schedule_start_date,
+                            end: event.schedule_end_date,
+                            allDay: false
+                        }));
+                        successCallback(events);
+                    } else {
+                        failureCallback(response.message || '일정을 불러오는데 실패했습니다.');
+                    }
                 },
                 error: function(xhr) {
-                    alert('일정 생성 실패: ' + xhr.responseText);
+                    failureCallback('일정을 불러오는데 실패했습니다.');
+                    handleError(xhr);
                 }
             });
         },
 
-        eventDrop: function(info) {
-            updateEvent(info.event, calendar);
-        },
-        eventResize: function(info) {
-            updateEvent(info.event, calendar);
-        },
+        select: function(info) {
+            if (parseInt('${vo.job_position_id}') < 3) {
+                alert('일정 생성 권한이 없습니다.');
+                return;
+            }
 
-        eventClick: function(info) {
-            if (confirm('이 일정을 삭제하시겠습니까?')) {
-                $.ajax({
-                    url: '/api/scheduleDelete.do', // 삭제 요청 URL
-                    method: 'DELETE',
-                    data: JSON.stringify({schedule_id: info.event.id}),
-                    contentType: 'application/json',
-                    success: function() {
-                        info.event.remove();
-                        alert('일정이 삭제되었습니다.');
-                    },
-                    error: function(xhr) {
-                        alert('일정 삭제 실패: ' + xhr.responseText);
+            const title = prompt('일정 제목을 입력하세요:');
+            if (!title) return;
+
+            const startTime = prompt('시작 시간을 입력하세요 (HH:MM):', 
+                info.start.getHours().toString().padStart(2, '0') + ':' + 
+                info.start.getMinutes().toString().padStart(2, '0'));
+
+            const endTime = prompt('종료 시간을 입력하세요 (HH:MM):', 
+                info.end.getHours().toString().padStart(2, '0') + ':' + 
+                info.end.getMinutes().toString().padStart(2, '0'));
+
+            const event = {
+                schedule_name: title,
+                schedule_start_date: formatDateTime(info.start, startTime),
+                schedule_end_date: formatDateTime(info.end, endTime),
+                schedule_state: '0',
+                department_id: parseInt('${vo.department_id}'),
+                job_position_id: parseInt('${vo.job_position_id}'),
+                user_id: manager  // manager를 사용
+            };
+
+            $.ajax({
+                url: '<c:url value="/api/schedule.do" />',
+                method: 'POST',
+                data: JSON.stringify(event),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        calendar.addEvent({
+                            id: response.data,  // 서버에서 반환된 schedule_id
+                            title: event.schedule_name,
+                            start: event.schedule_start_date,
+                            end: event.schedule_end_date,
+                            allDay: false
+                        });
+                        alert('일정이 생성되었습니다.');
+                    } else {
+                        alert(response.message || '일정 생성에 실패했습니다.');
                     }
+                },
+                error: handleError
+            });
+        },
+        eventClick: function(info) {
+            if (parseInt('${vo.job_position_id}') < 3) {
+                alert('일정 수정 권한이 없습니다.');
+                return;
+            }
+
+            // 사용자에게 수정 또는 삭제 선택을 묻는 팝업
+            const action = prompt('수정하려면 "edit"을, 삭제하려면 "delete"를 입력하세요:', 'edit');
+
+            if (action === 'edit') {
+                // 수정하는 로직
+                const newTitle = prompt('일정 제목을 수정하세요:', info.event.title);
+                if (!newTitle) return;
+
+                const startTime = prompt('시작 시간을 수정하세요 (HH:MM):', 
+                    info.event.start.getHours().toString().padStart(2, '0') + ':' + 
+                    info.event.start.getMinutes().toString().padStart(2, '0'));
+
+                const endTime = prompt('종료 시간을 수정하세요 (HH:MM):', 
+                    info.event.end.getHours().toString().padStart(2, '0') + ':' + 
+                    info.event.end.getMinutes().toString().padStart(2, '0'));
+
+                const updateData = {
+                    schedule_id: parseInt(info.event.id),
+                    schedule_name: newTitle,
+                    schedule_start_date: formatDateTime(info.event.start, startTime),
+                    schedule_end_date: formatDateTime(info.event.end, endTime),
+                    department_id: parseInt('${vo.department_id}'),
+                    job_position_id: parseInt('${vo.job_position_id}'),
+                    user_id: manager
+                };
+
+                $.ajax({
+                    url: '<c:url value="/api/scheduleUpdate.do" />',
+                    method: 'PUT',
+                    data: JSON.stringify(updateData),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            info.event.setProp('title', newTitle); // 제목 수정
+                            info.event.setStart(formatDateTime(info.event.start, startTime)); // 시작 시간 수정
+                            info.event.setEnd(formatDateTime(info.event.end, endTime)); // 종료 시간 수정
+                            alert('일정이 수정되었습니다.');
+                        } else {
+                            alert(response.message || '일정 수정에 실패했습니다.');
+                        }
+                    },
+                    error: handleError
                 });
+            } else if (action === 'delete') {
+                // 삭제하는 로직
+                if (confirm('이 일정을 삭제하시겠습니까?')) {
+                    const deleteData = {
+                        schedule_id: parseInt(info.event.id)
+                    };
+
+                    $.ajax({
+                        url: '<c:url value="/api/scheduleDelete.do" />',
+                        method: 'DELETE',
+                        data: JSON.stringify(deleteData),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                info.event.remove();
+                                alert('일정이 삭제되었습니다.');
+                            } else {
+                                alert(response.message || '일정 삭제에 실패했습니다.');
+                            }
+                        },
+                        error: handleError
+                    });
+                }
+            } else {
+                alert('잘못된 입력입니다. "edit" 또는 "delete"를 입력해주세요.');
             }
         }
     });
+    
     calendar.render();
 });
 
 function updateEvent(event, calendar) {
     const updateData = {
-        schedule_id: event.id,
+        schedule_id: parseInt(event.id),
         schedule_name: event.title,
-        schedule_start_date: event.start,
-        schedule_end_date: event.end,
-        department_id: '${vo.department_id}',
-        job_position_id: '${vo.job_position_id}',
-        user_id: '${vo.user_id}'
+        schedule_start_date: formatDateTime(event.start),
+        schedule_end_date: formatDateTime(event.end),
+        department_id: parseInt('${vo.department_id}'),
+        job_position_id: parseInt('${vo.job_position_id}'),
+        user_id: manager
     };
     
     $.ajax({
-        url: '/api/scheduleUpdate.do',
+        url: '<c:url value="/api/scheduleUpdate.do" />',
         method: 'PUT',
         data: JSON.stringify(updateData),
         contentType: 'application/json',
-        success: function(result) {
-            alert('일정이 수정되었습니다.');
+        success: function(response) {
+            if (response.status === 'success') {
+                alert('일정이 수정되었습니다.');
+            } else {
+                event.revert();
+                alert(response.message || '일정 수정에 실패했습니다.');
+            }
         },
         error: function(xhr) {
             event.revert();
-            alert('일정 수정 실패: ' + xhr.responseText);
+            handleError(xhr);
         }
     });
 }
 
-function combineDateAndTime(date, timeString) {
-    const [hours, minutes] = timeString.split(':').map(Number);
-    const newDate = new Date(date);
-    newDate.setHours(hours, minutes, 0);
-    return newDate.toISOString();
+function formatDateTime(date, timeStr = null) {
+    if (!date) return null;
+    const d = new Date(date);
+    if (timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        d.setHours(hours, minutes, 0);
+    }
+    return moment(d).format('YYYY-MM-DD HH:mm:ss');  // moment.js를 사용하여 날짜 포맷팅
+}
+
+function handleError(xhr) {
+    console.error('API Error:', xhr);
+    if (xhr.status === 403) {
+        alert('권한이 없습니다.');
+    } else if (xhr.status === 400) {
+        alert('잘못된 일정 데이터입니다: ' + (xhr.responseJSON?.message || xhr.responseText));
+    } else {
+        alert('서버 오류가 발생했습니다. 개발자 도구의 콘솔을 확인해주세요.');
+    }
 }
 </script>
-<style>
-
-  body {
-    margin: 40px 10px;
-    padding: 0;
-    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-    font-size: 14px;
-  }
-
-  #calendar {
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-</style>
 </head>
 <body>
   <div id='calendar'></div>
