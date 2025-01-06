@@ -1122,7 +1122,7 @@ function checkOut() {
             <img src="<%= request.getContextPath() %>/resources/img/메인.jpg" alt="메인 이미지" 
             style="width: 100%; height: 820px;">
             <div class="log_Info" style="font-size: 18px; text-decoration: none; color: white; font-weight: bold; margin-top: 20px;">
-                <!-- <a href="join.do" style="color:white;">회원가입</a> | --> 
+                <a href="join.do" style="color:white;">회원가입</a>  
                 <a id="loginBtn" style="color:white;">로그인</a><br>
             </div>
         </div>
@@ -1177,8 +1177,6 @@ function checkOut() {
 					<button onclick="checkIn()">출근 </button> &nbsp;&nbsp;&nbsp;&nbsp;
 					<button onclick="checkOut()">퇴근</button>
 					<div id="working_info">2024-12-05 11:51</div><br>
-					<div id="working_info">출근시각 : </div><br>
-					<div id="working_info">퇴근시각 : </div>
 					<div id="alarm"><img id="alarm_icon" src="<%= request.getContextPath() %>/resources/img/icon/alarm.png" alt="알림"></div>
 				</div>
 				<div id="menu_bar">
