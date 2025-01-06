@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springCommunity.mapper.mypageMapper">
+	<update id="userUpdate" parameterType="mypageVO">
+		UPDATE USER 
+			SET USER_EMAIL = #{user_email}
+				 ,USER_PHONE = #{user_phone}
+				 ,USER_ACCOUNT = #{user_account}
+				 ,USER_ADDRESS = #{user_address}
+				 ,BANK_ID = #{bank_id}
+			WHERE USER_ID = #{user_id}
+	</update>
+	
+	<update id="userPwUpdate" parameterType="mypageVO">
+		UPDATE USER 
+			 SET USER_PASSWORD = #{user_password}
+		 WHERE USER_ID = #{user_id}
+	</update>
+	
+	<select id="selectOne" parameterType="String" resultType="mypageVO">
+		SELECT *
+			,concat(floor((DATEDIFF(date_format(NOW(),'%Y-%m-%d'),date_format(USER_JOIN_DATE,'%Y-%m-%d'))/365)),'년 이상') as years
+			FROM USER
+		 WHERE USER_ID = #{user_id}
+	</select>
+	
+ 	<insert id="insertBenefit" parameterType="mypageVO">
+		INSERT INTO REQUEST(
+			 USER_ID
+			,BENEFIT_SUB
+			,BENEFIT_TYPE
+			,BENEFIT_TOUR
+			,BENEFIT_DATE
+			,BENEFIT_MONEY
+			,BENEFIT_CONTENT
+			,REQUEST_TYPE
+		)VALUES(
+			 #{user_id}
+			,#{benefit_sub}
+			,#{benefit_type}
+			,#{benefit_tour}
+			,#{benefit_date}
+			,#{benefit_money}
+			,#{benefit_content}
+			,'1'
+		)
+		<selectKey order="AFTER" resultType="int" keyProperty="request_no">
+			SELECT MAX(REQUEST_NO) FROM REQUEST
+		</selectKey>
+	</insert>
+	
+	<insert id="insertMedical" parameterType="mypageVO">
+		INSERT INTO REQUEST(
+			 USER_ID
+			,MEDICAL_NAME
+			,MEDICAL_TYPE
+			,MEDICAL_CENTER_TYPE
+			,MEDICAL_CENTERL_NAME
+			,MEDICAL_START_DATE
+			,MEDICAL_END_DATE
+			,MEDICAL_MONEY
+			,MEDICAL_ATTACH_TYPE
+			,MEDICAL_CONTENT
+			,REQUEST_TYPE
+		)VALUES(
+			 #{user_id}
+			,#{medical_name}
+			,#{medical_type}
+			,#{medical_center_type}
+			,#{medical_center_name}
+			,#{medical_start_date}
+			,#{medical_end_date}
+			,#{medical_money}
+			,#{medical_attach_type}
+			,#{medical_content}
+			,'2'
+		)
+		<selectKey order="AFTER" resultType="int" keyProperty="request_no">
+			SELECT MAX(REQUEST_NO) FROM REQUEST
+		</selectKey>
+	</insert>
+	
+	<select id="selectOneRequest" parameterType="int" resultType="mypageVO">
+		SELECT *
+			FROM REQUEST
+		 WHERE REQUEST_NO = #{request_no}
+	</select>
+	
+	<insert id="insertAttach" parameterType="mypageVO">
+		INSERT INTO ATTACH(
+			 REQUEST_NO
+			,FILE_NAME
+			,ATTACH_NAME
+		)VALUES(
+			 #{request_no}
+			,#{file_name}
+			,#{attach_name}
+		)
+	</insert>
+	
+	<select id="selectAll" resultType="mypageVO">
+		SELECT * FROM REQUEST
+	</select>
+	
+	<select id="selectAllBene" resultType="mypageVO">
+		SELECT * 
+			FROM REQUEST
+		 WHERE BENEFIT_TYPE = #{benefit_type}
+	</select>
+	
+	<select id="selectAllMedi" resultType="mypageVO">
+		SELECT * 
+			FROM REQUEST
+		 WHERE MEDICAL_TYPE = #{medical_type} 
+	</select>
+	
+		<update id="updateRequest" parameterType="mypageVO">
+		UPDATE REQUEST 
+			 SET REQUEST_APPROVE_STATE1 = #{request_approve_state1}
+			   , REQUEST_REPUSE = #{request_repuse}
+		 WHERE REQUEST_NO = #{request_no}
+	</update>
+	
+</mapper>

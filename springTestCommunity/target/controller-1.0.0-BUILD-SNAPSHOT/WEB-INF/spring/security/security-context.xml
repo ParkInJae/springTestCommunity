@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
+	
+	<!-- 제외 url pattern -->
+	<security:http pattern="/resources/**" security="none" />
+	<security:http auto-config="true" use-expressions="true" create-session="never">
+		<security:intercept-url pattern="/" access="permitAll" />
+		<security:intercept-url pattern="/user/**" access="hasAnyRole('ROLE_USER,ROLE_ADMIN')"  />
+		<security:intercept-url pattern="/chat/**" access="hasAnyRole('ROLE_USER,ROLE_ADMIN')"  />
+		<security:intercept-url pattern="/mypage/**" access="hasAnyRole('ROLE_USER,ROLE_ADMIN')"  />
+		<security:intercept-url pattern="/admin/**"
+        access="hasRole('ROLE_ADMIN') or authentication.principal.department_id == 2 and authentication.principal.job_position_id >= 5" />
+		<security:form-login login-page="/login.do"
+							 login-processing-url="/loginOk.do"
+							 authentication-success-handler-ref="userLoginSuccessHandler"
+							 authentication-failure-handler-ref="userLoginFailureHandler"
+							 username-parameter="user_id"
+							 password-parameter="user_password"/>
+		<!-- 로그아웃 설정 -->
+		<security:logout logout-url="/logout.do" 
+						 logout-success-url="/"
+						 invalidate-session="true"
+						 delete-cookies="JSESSIONID,SPRING_SECURITY_REMEMBER_ME_COOKIE"/>
+		<!-- 로그인은 했으나 경로 접근 권한 없을시 호출 객체 설정 -->				 
+	 	<security:access-denied-handler ref="userDeniedHandler"/>
+	</security:http>
+	
+	<bean id="userLoginSuccessHandler" class="com.springCommunity.service.UserLoginSuccessHandler" />
+	<bean id="userLoginFailureHandler" class="com.springCommunity.service.UserLoginFailureHandler" />
+	<bean id="userDeniedHandler" class="com.springCommunity.service.UserDeniedHandler" />
+	<bean id="userService" class="com.springCommunity.service.UserAuthenticationService">
+		<constructor-arg name="sqlSession" ref="sqlSession" /> <!-- 생성자 매개변수이름 name -->
+	</bean>
+	
+	
+	<!-- 비밀번호 비교할 암호화 객체 선언 -->
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	
+	<!-- 
+	로그인 버튼 클릭시 security에서 어떤 userAuthenticationService를
+	사용할 지와 반환된 User 객체에서 어떤 비밀번호 암호화를 사용하여 비교할 것인지에 대한 정보를 설정 영역
+	-->
+	<security:authentication-manager>
+		<security:authentication-provider user-service-ref="userService"><!-- userVO 반환 객체 참조 -->
+			<security:password-encoder ref="passwordEncoder" />
+		</security:authentication-provider>
+	</security:authentication-manager>
+	
+</beans>
