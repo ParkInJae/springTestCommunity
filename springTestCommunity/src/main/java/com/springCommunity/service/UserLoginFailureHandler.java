@@ -17,7 +17,8 @@ public class UserLoginFailureHandler implements AuthenticationFailureHandler {
 		//로그인 실패시 호출!
 		System.out.println("로그인 실패!");
 	
-		response.sendRedirect(request.getContextPath()+"/login.do"); //다시 로그인페이지
+		request.getSession().setAttribute("loginError", "아이디 또는 비밀번호가 잘못되었습니다.");
+		response.sendRedirect(request.getContextPath()); 
 	}
 
 }

@@ -8,13 +8,12 @@
 </select>
 
 <select id="selectSchedulesByDepartment" parameterType="ScheduleVO" resultType="ScheduleVO">
-        SELECT * FROM SCHEDULE 
+        SELECT * FROM schedule 
         WHERE department_id = #{department_id}
-        ORDER BY schedule_start_date DESC 
 </select>
 
 <insert id="insertSchedule" parameterType="ScheduleVO">
-        INSERT INTO SCHEDULE (
+        INSERT INTO schedule (
             SCHEDULE_NAME, SCHEDULE_START_DATE,SCHEDULE_END_DATE,
            DEPARTMENT_ID, JOB_POSITION_ID, USER_ID
         ) VALUES (
@@ -28,19 +27,19 @@
 </selectKey>-->
     
 <update id="updateSchedule" parameterType="ScheduleVO">
-	UPDATE SCHEDULE
+	UPDATE schedule
 	SET 
-		SCHEDULE_NAME = #{schedule_name},
-		SCHEDULE_START_DATE = #{schedule_start_date},
-		SCHEDULE_END_DATE = #{schedule_end_date},
-		DEPARTMENT_ID = #{department_id},
-		JOB_POSITION_ID = #{job_position_id},
-		USER_ID = #{user_id}
-	WHERE SCHEDULE_NO = #{schedule_no}
+		schedule_name = #{schedule_name},
+		schedule_start_date = #{schedule_start_date},
+		schedule_end_date = #{schedule_end_date},
+		department_id = #{department_id},
+		job_position_id = #{job_position_id},
+		user_id = #{user_id}
+	WHERE SCHEDULE_NO  = #{schedule_no}
 </update>
 
-<delete id="deleteSchedule" parameterType="int">
-	DELETE FROM SCHEDULE  WHERE SCHEDULE_NO = #{schedule_no} 
+<delete id="deleteSchedule" parameterType="ScheduleVO">
+	DELETE FROM schedule WHERE SCHEDULE_NO = #{schedule_no}
 </delete>
 <!-- 해당 코드도 render로 의해서 필요 없음
 <select id="selectNextSerialNo" resultType="int">

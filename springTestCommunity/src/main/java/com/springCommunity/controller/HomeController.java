@@ -26,7 +26,7 @@ import com.springCommunity.vo.UserVO;
 public class HomeController {
 	
 	@Autowired
-	private DailyWorkTimeService dailyWorkTimeService;  
+	private DailyWorkTimeService dailyWorkTimeService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
@@ -50,7 +50,7 @@ public class HomeController {
 			 logger.info("dailyWorkHours : {}", WorkTimeData.get("dailyWorkHours"));
 			 logger.info("weeklyWorkHours : {}", WorkTimeData.get("weeklyWorkHours"));
 			 
-			 
+			  
 			 // service의 리턴값을 받아서 모델에 데이터 추가
 			 model.addAttribute("dailyWorkHours",WorkTimeData.get("dailyWorkHours"));  	// 일간 정규 근무 시간
 			 model.addAttribute("weeklyWorkHours",WorkTimeData.get("weeklyWorkHours"));	// 주간 정규 근무 시간

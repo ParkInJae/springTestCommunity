@@ -28,7 +28,7 @@ public class ScheduleController {
 	MyDepartmentService myDepartmentService;
 	
 	@Autowired
-	ScheduleService scheduleService;  
+	ScheduleService scheduleService;
 
     // 전체 일정 조회 (GET)
     // ModelAttribute 바인딩하여 URL에서 파라미터로 전달되는 값들을 SearchVO 객체로 묶어서 처리할 수 있습니다.
@@ -63,7 +63,7 @@ public class ScheduleController {
     }
 
     //일정 삽입
-    @PostMapping("/api/schedule.do")
+    @PostMapping("/api/scheduleInsert.do")
     public ResponseEntity<Map<String, Object>> insertSchedule(@RequestBody ScheduleVO scheduleVO) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -84,7 +84,7 @@ public class ScheduleController {
     public ResponseEntity<Map<String, Object>> updateSchedule(@RequestBody ScheduleVO scheduleVO) {
         Map<String, Object> response = new HashMap<>();
         try {
-        	System.out.println("scheduleVO.getSchedule_no()=============================" + scheduleVO.getSchedule_no());
+        	 System.out.println("Received delete request for schedule: " + scheduleVO.getSchedule_no());
             int result = scheduleService.updateSchedule(scheduleVO);  // 반환 타입을 int로 변경
             response.put("status", "success");
             response.put("data", result);
@@ -100,7 +100,6 @@ public class ScheduleController {
     @DeleteMapping("/api/scheduleDelete.do")
     public ResponseEntity<Map<String, Object>> deleteSchedule(@RequestBody ScheduleVO scheduleVO) {
         Map<String, Object> response = new HashMap<>();
-        System.out.println("scheduleVO.getSchedule_no()=============================" + scheduleVO.getSchedule_no());
         try {
             scheduleService.deleteSchedule(scheduleVO);  // ScheduleVO 객체 전체를 전달
             response.put("status", "success");

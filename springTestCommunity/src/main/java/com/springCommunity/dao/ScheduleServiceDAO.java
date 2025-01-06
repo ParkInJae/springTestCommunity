@@ -23,7 +23,7 @@ public class ScheduleServiceDAO {
     public List<ScheduleVO> selectSchedulesByDepartment(ScheduleVO scheduleVO) {
         return sqlSession.selectList(namespace + "selectSchedulesByDepartment", scheduleVO);
     }
-  
+
     // 일정 추가
     public int insertSchedule(ScheduleVO scheduleVO) {
         return sqlSession.insert(namespace + "insertSchedule", scheduleVO);
@@ -35,8 +35,8 @@ public class ScheduleServiceDAO {
     }
 
     // 일정 삭제
-    public void deleteSchedule(ScheduleVO scheduleVO) {
-        sqlSession.delete(namespace + "deleteSchedule", scheduleVO);
+    public int deleteSchedule(ScheduleVO scheduleVO) {
+        return sqlSession.delete(namespace + "deleteSchedule", scheduleVO);
     }
 
 }

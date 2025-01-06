@@ -10,10 +10,7 @@ public class DailyWorkTimeVO {
 	public String latitude;
 	public String longitude;
 	
-	/*
-	 @RequestBody를 사용하면, AJAX에서 보낸 JSON 데이터가 VO 객체로 자동 매핑됩니다.
-	매핑 과정에서 JSON의 키 이름이 VO의 필드 이름과 동일하다면, Spring이 VO의 setter 메서드를 사용해 데이터를 채웁니다.
-	 */
+	
 	
 	// 기본 생성자 
 	public DailyWorkTimeVO() {}
@@ -36,13 +33,7 @@ public class DailyWorkTimeVO {
 	public void setLatitude(String latitude) 					{this.latitude = latitude;			  	  }
 	public void setLongitude(String longitude) 					{this.longitude = longitude;	 	 	  }
 
-	@Override
-	public String toString() {
-		return "DailyWorkTimeVO [work_time_no=" + work_time_no + ", user_id=" + user_id + ", check_in_time="
-				+ check_in_time + ", check_out_time=" + check_out_time + ", created_at=" + created_at + ", updated_at="
-				+ updated_at + ", latitude=" + latitude + ", longitude=" + longitude + "]";
-	}
-
+	
 	
 	
 	

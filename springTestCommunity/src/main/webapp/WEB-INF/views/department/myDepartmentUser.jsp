@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initialDate: new Date(),
         navLinks: true,
         editable: true,
-        dayMaxEvents: true, 
+        dayMaxEvents: true,
         selectable: true,
         
         slotMinTime: '00:00:00',
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             $.ajax({
-                url: '<c:url value="/api/schedule.do" />',
+                url: '<c:url value="/api/scheduleInsert.do" />',
                 method: 'POST',
                 data: JSON.stringify(event),
                 contentType: 'application/json',
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 삭제하는 로직
                 if (confirm('이 일정을 삭제하시겠습니까?')) {
                     const deleteData = {
-                        schedule_no: parseInt(info.event.id)
+                        schedule_no:parseInt(info.event.id)
                     };
 
                     $.ajax({

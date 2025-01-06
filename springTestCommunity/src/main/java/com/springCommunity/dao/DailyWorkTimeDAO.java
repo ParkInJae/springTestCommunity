@@ -20,7 +20,7 @@ public class DailyWorkTimeDAO {
 		
 		return sqlSession.insert(namespace + "CheckIn" ,dailyWorkTimeVO);
 	}
-	public int checkOut(DailyWorkTimeVO dailyWorkTimeVO ) {  
+	public int checkOut(DailyWorkTimeVO dailyWorkTimeVO ) {
 		return sqlSession.update(namespace+ "checkOut",dailyWorkTimeVO); 
 	}
 	

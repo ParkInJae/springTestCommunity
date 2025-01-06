@@ -14,6 +14,5 @@ public interface ScheduleService {
     // 일정 수정
     public int updateSchedule(ScheduleVO scheduleVO);
     // 일정 삭제
-    public void deleteSchedule(ScheduleVO scheduleVO) ;
+    public int deleteSchedule(ScheduleVO scheduleVO) ;
 }
- 

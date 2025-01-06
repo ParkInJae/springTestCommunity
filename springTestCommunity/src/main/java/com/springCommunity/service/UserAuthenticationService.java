@@ -1,6 +1,7 @@
 package com.springCommunity.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -24,9 +25,12 @@ public class UserAuthenticationService implements UserDetailsService {
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
+		
 		//String username == 사용자 아이디
 		Map<String,Object> user
 			= sqlSession.selectOne("com.springCommunity.mapper.userMapper.selectOneById", username);
+		
 		
 		System.out.println("Map userid : "+ (String)user.get("USER_ID"));
 		
@@ -55,7 +59,12 @@ public class UserAuthenticationService implements UserDetailsService {
 				,authorities
 				,(String)user.get("USER_AUTHORITY")
 				,(String)user.get("USER_NAME")
+				,(Integer)user.get("DEPARTMENT_ID")
+				,(Integer)user.get("JOB_POSITION_ID")
+				,(Integer)user.get("USER_STATE")
 				);
+
+		
 		
 		return vo;
 	}

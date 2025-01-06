@@ -46,7 +46,6 @@ public class MyDepartmentController {
 		따라서, 이 코드는 부서별로 일정 데이터를 분리하고 조회하는 로직을 추가하기 위한 것입니다.*/
 		int departmentId = vo.getDepartment_id();
 		List<ScheduleVO> ScheduleList =  myDepartmentService.selectSchedulesByDepartment(departmentId);
-		System.out.println("ScheduleList.get(departmentId).getSchedule_no()==================================" + ScheduleList.get(departmentId).getSchedule_no());
 		// 담아온 부서 정보를 list에 담기 
 	    model.addAttribute("ScheduleList", ScheduleList);
 	    model.addAttribute("vo", vo);
@@ -61,11 +60,4 @@ public class MyDepartmentController {
 			return "home";
 		 	}
     	}
-
-		
-		
-		
-		
-		
-	
 }

@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>커뮤니티</title>
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/upload_users.css" />
+    <script src="<%= request.getContextPath() %>/resources/js/jquery-3.7.1.js"></script>
     <style>
     body{
 		width: 80%;
@@ -99,16 +100,38 @@
 	}
     </style>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const uploadForm = document.querySelector("form[action='upload_users.do']");
-    const uploadButton = document.getElementById("uploadButton");
-
-    uploadForm.addEventListener("submit", function(event) {
-        // 버튼 비활성화 및 텍스트 변경
-        uploadButton.disabled = true;
-        uploadButton.textContent = "등록중...";
+document.addEventListener("DOMContentLoaded", function () { 
+    const fileInput = document.querySelector("input[type='file']");
+    fileInput.addEventListener("change", function () {
+        $("#messageU").text(""); 
+        $("#messageE").text(""); 
     });
+
+    const insertForm = document.querySelector("form[action='insert_user.do']");
+    insertForm.addEventListener("input", clearInsertMessages);
+    insertForm.addEventListener("change", clearInsertMessages);
+
+    function clearInsertMessages() {
+        $("#iMessageU").text(""); 
+        $("#iMessageE").text(""); 
+    }
+
+    function disableButton(formSelector, buttonSelector, text) {
+        const form = document.querySelector(formSelector);
+        const button = form.querySelector(buttonSelector);
+
+        form.addEventListener("submit", function () {
+            button.disabled = true;
+            button.textContent = text;
+        });
+    }
+
+    disableButton("form[action='upload_users.do']", "#uploadButton", "등록중...");
+    disableButton("form[action='insert_user.do']", "button", "등록중...");
 });
+
+
+
 </script>
     
 </head>
@@ -116,98 +139,81 @@ document.addEventListener("DOMContentLoaded", function() {
 	<div id="header1">
 	    <img id="logo_img" style="cursor:pointer;" onclick="location.href='<%= request.getContextPath() %>'" src="<%= request.getContextPath() %>/resources/img/logo.png" alt="회사로고">
 	    <div id = "login_info">
-	  	    <a href="<%= request.getContextPath() %>/user/logout.jsp">로그아웃</a>
+	  	    <a href="<%= request.getContextPath() %>/logout.do">로그아웃</a>
 	  	  |
-	  	    <a href="<%= request.getContextPath() %>/user/mypage.jsp">마이페이지</a>
+	  	    <a href="<%= request.getContextPath() %>/mypage/info.do">마이페이지</a>
 	    </div>
 	</div>
 	<hr>
-	<div id="membership"><a href="<%= request.getContextPath() %>/admin/list.jsp">회원관리</a></div>
+	<div id="membership">
+		<a href="list.do" style="color:#767676;">모든사원</a>
+	  	  |
+  	    <a href="upload_users.do">신규사원등록</a>
+	</div>
 	<hr>
 	<div id="list">
-	  <div id="list_menu">
-	    <div id="menu_bar1">
-	      <div>모든사원 ></div><br>
-	      <div>임원 ></div><br>
-	      <div>그룹없음 ></div><br>
-	      <div><strong>신규사원 ></strong></div>
-	    </div>
-		<div id="menu_bar2">
-		    <div>경영 ></div><br>
-		    <div>개발 ></div><br>
-		    <div>인사 ></div><br>
-		    <div>고객 ></div><br>
-			<div>기획 ></div><br>
-			<div>디자인 ></div><br>
-			<div>마케팅 ></div><br>
-			<div>회계 ></div>
-	    </div>
-		</div>
-	  <div id="list_search">
-		  <table id="membership_table" style="left:23%; text-align: center;">
-		  	  <tr>
-		  	  	<td style="text-align: left;">
-		  	  		<h3>다건등록</h3>
-		  	  	</td>
-		  	  </tr>
-		      <tr>
-		      	<td style="text-align: left;">
-		      		<a href="<%= request.getContextPath() %>/resources/upload/회원데이터(양식).xlsx" 
-		      		download="회원데이터(양식).xlsx">
-		      			양식 파일 받기
-		      		</a>
-		      	</td>
-		      </tr>
-		      <tr>
-		      	<td style="text-align: left;">
-		      		<form action="upload_users.do" method="post" enctype="multipart/form-data">
-			        <label for="file">엑셀 파일 선택:</label>
-			        <input type="file" id="file" name="file" style="width:250px; height:30px;" accept=".xlsx, .xls" required>
-			        <button type="submit" id="uploadButton" style="width:100px; height: 30px; font-size: 16px;">직원등록</button>
-			        <!-- 업로드 결과 메시지 -->
-				    <c:if test="${not empty Message}">
-					    <div class="message" style="color:green;">${Message}</div>
-					</c:if>
-					</form>
-		      	</td>
-		      </tr>
-		      <tr>
-		      	<td>
-		      		<hr>
-		      		<form action="insert_user.do" method="post">
-			      		<table id="insert_table" style="width:700px;">
-			      			<tr>
-						  	  	<td>
-						  	  		<h3>단건등록</h3>
-						  	 	</td>
-						  	</tr>
-			      			<tr>
-			      				<th>사번</th>
-			      				<th>이름</th>
-			      				<th>이메일</th>
-			      				<th>전화번호</th>
-			      				<th>부서명</th>
-			      				<th>직책</th>
-			      				<th>입사일</th>
-			      				<th>은행</th>
-			      				<th>계좌번호</th>
-			      				<th>주소</th>
-			      			</tr>
-			      			<tr>
-			      				<td>
-			      					<input type="text" name="user_id" style="width:80px;" placeholder="사번">
-			      				</td>
-			      				<td>
-			      					<input type="text" name="user_name" style="width:80px;" placeholder="이름">
-			      				</td>
-			      				<td>
-			      					<input type="text" name="user_email" style="width:140px;" placeholder="ex)admin@naver.com">
-			      				</td>
-			      				<td>
-			      					<input type="text" name="user_phone" placeholder="ex)010-1111-2222">
-			      				</td>
-			      				<td>
-			      					<select name="department_id" id="department_id">
+		<div id="list_search">
+			<table id="membership_table" style="left:23%; text-align: center;">
+				<tr>
+					<td style="text-align: left;"><h3>다건등록</h3></td>
+				</tr>
+				<tr>
+					<td style="text-align: left;">
+						<a href="<%= request.getContextPath() %>/resources/upload/회원데이터(양식).xlsx" 
+						   download="회원데이터(양식).xlsx">양식 파일 받기</a>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: left;">
+						<form action="upload_users.do" method="post" enctype="multipart/form-data">
+							<label for="file">엑셀 파일 선택:</label>
+							<input type="file" id="file" name="file" style="width:250px; height:30px;" accept=".xlsx, .xls" required>
+							<button type="submit" id="uploadButton" style="width:100px; height: 30px; font-size: 16px;">직원등록</button>
+							<!-- 업로드 결과 메시지 -->
+							<c:if test="${not empty Message}">
+							<div class="message" id="messageU" style="color:green;">${Message}</div>
+							</c:if>
+							<!-- 이메일 발송 결과 메시지 -->
+							<c:if test="${not empty MessageE}">
+							<div class="message" id="messageE" style="color:red;">${MessageE}</div>
+							</c:if>
+						</form>
+					</td>
+				</tr>
+				<tr>
+					<td>
+					<form action="insert_user.do" method="post">
+						<table id="insert_table" style="width:700px; margin-top:100px;">
+							<tr>
+								<td><h3>단건등록</h3></td>
+							</tr>
+							<tr>
+								<th>사번</th>
+								<th>이름</th>
+								<th>이메일</th>
+								<th>전화번호</th>
+								<th>부서명</th>
+								<th>직책</th>
+								<th>입사일</th>
+								<th>은행</th>
+								<th>계좌번호</th>
+								<th>주소</th>
+							</tr>
+							<tr>
+								<td>
+									<input type="text" name="user_id" style="width:80px;" placeholder="사번">
+								</td>
+								<td>
+									<input type="text" name="user_name" style="width:80px;" placeholder="이름">
+								</td>
+								<td>
+									<input type="text" name="user_email" style="width:140px;" placeholder="ex)admin@naver.com">
+								</td>
+								<td>
+									<input type="text" name="user_phone" placeholder="ex)010-1111-2222">
+								</td>
+								<td>
+									<select name="department_id" id="department_id">
 										<option value="1">경영지원팀</option>
 										<option value="2">인사팀</option>
 										<option value="3">마케팅팀</option>
@@ -215,10 +221,10 @@ document.addEventListener("DOMContentLoaded", function() {
 										<option value="5">개발팀</option>
 										<option value="6">디자인팀</option>
 										<option value="7">고객지원팀</option>
-										<option value="8">교육팀</option>
+										<option value="8">회계팀</option>
 									</select>
-			      				</td>
-			      				<td>
+								</td>
+								<td>
 									<select name="job_position_id" id="job_position_id">
 										<option value="1">사원</option>
 										<option value="2">주임</option>
@@ -230,11 +236,11 @@ document.addEventListener("DOMContentLoaded", function() {
 										<option value="8">대표이사</option>
 									</select>
 								</td>
-			      				<td>
-			      					<input type="text" name="user_join_date" placeholder="입사일">
-			      				</td>
-			      				<td>
-			      					<select name="bank_id" id="bank_id">
+								<td>
+									<input type="text" name="user_join_date" placeholder="입사일">
+								</td>
+								<td>
+									<select name="bank_id" id="bank_id">
 										<option value="1">국민은행</option>
 										<option value="2">농협은행</option>
 										<option value="3">신한은행</option>
@@ -249,106 +255,34 @@ document.addEventListener("DOMContentLoaded", function() {
 										<option value="12">새마을금고</option>
 										<option value="13">광주은행</option>
 									</select>
-			      				</td>
-			      				<td>
-			      					<input type="text" name="user_account" placeholder="계좌번호">
-			      				</td>
-			      				<td>
-			      					<input type="text" name="user_address" placeholder="주소">
-			      				</td>
-			      				<td>
-					      		<button style="width:80px; height: 30px; font-size: 16px;">등록</button>
-			      				</td>
-			      			</tr>
-			      		</table>
-		      		</form>
-		      	</td>
-		      </tr>
-		      <tr>
-		      	<td style="text-align: left;">
-		      		<hr>
-		      		초기비밀번호 발송
-		      		<hr>
-		      	</td>
-		      </tr>
-		      <tr>
-		      	<td>
-		      		<table id="pass_table">
-		      			<tr>
-		      				<th>번호</th>
-		      				<th>사번</th>
-		      				<th>이름</th>
-		      				<th>부서</th>
-		      				<th>직책</th>
-		      				<th>입사일</th>
-		      				<th>이메일</th>
-		      				<th>발송상태</th>
-		      			</tr>
-		      			<tr>
-		      				<td>15</td>
-		      				<td>000015</td>
-		      				<td>김길동</td>
-		      				<td>인사팀</td>
-		      				<td>대리</td>
-		      				<td>2024-12-10</td>
-		      				<td>kim@kim.com</td>
-		      				<td>발송전</td>
-		      			</tr>
-		      			<tr>
-		      				<td>15</td>
-		      				<td>000015</td>
-		      				<td>김길동</td>
-		      				<td>인사팀</td>
-		      				<td>대리</td>
-		      				<td>2024-12-10</td>
-		      				<td>kim@kim.com</td>
-		      				<td>발송전</td>
-		      			</tr>
-		      			<tr>
-		      				<td>15</td>
-		      				<td>000015</td>
-		      				<td>김길동</td>
-		      				<td>인사팀</td>
-		      				<td>대리</td>
-		      				<td>2024-12-10</td>
-		      				<td>kim@kim.com</td>
-		      				<td>발송전</td>
-		      			</tr>
-		      			<tr>
-		      				<td>15</td>
-		      				<td>000015</td>
-		      				<td>김길동</td>
-		      				<td>인사팀</td>
-		      				<td>대리</td>
-		      				<td>2024-12-10</td>
-		      				<td>kim@kim.com</td>
-		      				<td>발송전</td>
-		      			</tr>
-		      			<tr>
-		      				<td>15</td>
-		      				<td>000015</td>
-		      				<td>김길동</td>
-		      				<td>인사팀</td>
-		      				<td>대리</td>
-		      				<td>2024-12-10</td>
-		      				<td>kim@kim.com</td>
-		      				<td>발송전</td>
-		      			</tr>
-		      			<tr>
-		      				<td>15</td>
-		      				<td>000015</td>
-		      				<td>김길동</td>
-		      				<td>인사팀</td>
-		      				<td>대리</td>
-		      				<td>2024-12-10</td>
-		      				<td>kim@kim.com</td>
-		      				<td>발송전</td>
-		      			</tr>
-		      		</table>
-		      	</td>
-		      </tr>
-		   </table>
-	  </div>
+								</td>
+								<td>
+									<input type="text" name="user_account" placeholder="계좌번호">
+								</td>
+								<td>
+									<input type="text" name="user_address" placeholder="주소">
+								</td>
+								<td>
+									<button style="width:80px; height: 30px; font-size: 16px;">등록</button>
+								</td>
+							</tr>
+						</table>
+					</form>
+					<div>
+						<!-- 등록 결과 메시지 -->
+						<c:if test="${not empty iMessage}">
+						<p id="iMessageU" style="color: green; font-weight: bold;">${iMessage}</p>
+						</c:if>
+						
+						<!-- 이메일 발송 결과 메시지 -->
+						<c:if test="${not empty iMessageE}">
+						<p id="iMessageE" style="color: blue; font-weight: bold;">${iMessageE}</p>
+						</c:if>
+					</div>
+					</td>
+				</tr>
+			</table>
+		</div>
 	</div>
 </body>
 </html>

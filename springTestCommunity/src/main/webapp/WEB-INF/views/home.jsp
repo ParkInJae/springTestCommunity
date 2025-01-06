@@ -5,10 +5,10 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ include file="./include/header.jsp" %>
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/home.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 	<hr>
 	<sec:authorize access="isAuthenticated()">
 		<div style="font-size:18px; text-decoration: none; color:black; font-weight: bold;">
+			<br>
 			<!-- 근무시간 나타내기  -->
 			 <div class="summaryContainer">
 			    <div>근무 관련 요약 </div>
@@ -42,7 +42,7 @@
 					    <fmt:formatNumber value="${entry.value/ 60}" type="number" var="hours" /> 
 					    <fmt:formatNumber value="${entry.value % 60}" type="number" var="minutes" />
 					    <fmt:formatNumber value="${hours - (hours % 1)}" type="number" var="roundedHours" />
-					 	<tr>  
+					 	<tr>
 					 	<!-- key > 날짜, value > 근무 시간  -->
 			                <td>${entry.key}</td>
 			                <td>${roundedHours}시간${minutes}분</td>

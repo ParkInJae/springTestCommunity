@@ -52,14 +52,11 @@
 		#form_table{
 			width: 900px;
       border: 1px none lightgray;
-      text-align: left;
+      text-align: center;
 		}
-    #form_table_text{
-      font-size: small;
-      display: contents;
-    }
-    th:nth-child(1){
+		th{
 			background-color: lightgray;
+			text-align: center;
 		}
 		select{
 			width: 70px;
@@ -95,7 +92,7 @@
     	<img id="logo_img" src="<%= request.getContextPath() %>/resources/img/logo.png" alt="회사로고" >
     </a>
     <div id = "login_info">
-      <a href="logout.do">로그아웃</a>
+      <a href="<%= request.getContextPath() %>/logout.do">로그아웃</a>
       |
       <a href="info.do">마이페이지</a>
     </div>
@@ -107,136 +104,74 @@
     <a href="benefit.do">경조금 신청</a>
     |
     <a href="medical.do">의료비 신청</a>
+    <c:if test="${vo.job_position_id >= 5 }">
     |
-    <a href="form.do">증명서 발급</a>
+    <a href="form.do">신청내용 확인</a>
+    </c:if>
   </div>
   <hr>
 	<div id="mypage_form">
     <div id="mypage_form_top">
-      <form>
-				<br>
-        <input id="form_btn" type="button" value="신청">
-        <br>
-        <br>
-        <div id="form_table_div">
-					<table id="form_table" border="1">
-            <tr>
-              <th style="text-align: left;">신청자</th>
-              <td>&nbsp;홍길자</td>
-            </tr>
-            <tr>
-              <th style="text-align: left;">사원번호</th>
-              <td>&nbsp;417976</td>
-            </tr>
-            <tr>
-              <th style="text-align: left;">신청할 증명서 선택</th>
-              <td>
-                <label><input type="radio" checked>재직증명서</label>
-                <label><input type="radio">경력증명서</label>
-              </td>
-            </tr>
-            <tr>
-              <th style="text-align: left;">주민번호 노출 선택</th>
-              <td>
-                <label><input type="radio" checked>주민번호 앞부분(123456-*******)</label>
-                <label><input type="radio">주민번호 전부(123456-1234567)</label>
-              </td>
-            </tr>
-            <tr>
-              <th style="text-align: left;">신청부수</th>
-              <td>
-                &nbsp;<select>
-                  <option>선택</option>
-                  <option>1부</option>
-                  <option>2부</option>
-                  <option>3부</option>
-                  <option>4부</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th style="text-align: left;">사용용도</th>
-              <td>&nbsp;<input type="text" style="width: 320px;">&nbsp;&nbsp;<p id="form_table_text">*예:은행제출용/관공서제출용 등</p></td>
-            </tr>
-            <tr>
-              <th style="text-align: left;">제출처</th>
-              <td>&nbsp;<input type="text" style="width: 320px;">&nbsp;&nbsp;<p id="form_table_text">*예:은행제출용/관공서제출용 등</p></td>
-            </tr>
-          </table>
-				</div>
-  		</form>
+     
+				<table id="form_table" border="1">
+    			<tr>
+      			<th colspan="9" style="text-align:left">>신청내용확인</th>
+    			</tr>
+    			<tr>
+      			<th>번호</th>
+      			<th>신청자</th>
+      			<th>구분</th>
+      			<th>신청일자</th>
+      			<th>신청금액</th>
+      			<th>신청관련서류확인</th>
+      			<th>승인Y/N</th>
+      			<th>반려사유</th>
+      			<th>결제</th>
+    			</tr>
+    		<c:forEach items="${list}" var="vo">
+    		 <form action="form.do" name="mypage_form" method="post" enctype="form-data">
+    		 	<input type="hidden" name="request_no" value="${vo.request_no}">
+    			<tr>
+      			<td>${vo.request_no}</td>
+      			<td>${vo.user_id}</td>
+      			<td>
+      				<c:choose>
+      					<c:when test="${vo.benefit_type eq 1}">결혼</c:when>
+      					<c:when test="${vo.benefit_type eq 2}">회갑</c:when>
+      					<c:when test="${vo.benefit_type eq 3}">칠순</c:when>
+      					<c:when test="${vo.benefit_type eq 4}">출산</c:when>
+      					<c:when test="${vo.benefit_type eq 5}">사망</c:when>
+      					<c:when test="${vo.medical_type eq 1}">입원</c:when>
+      					<c:when test="${vo.medical_type eq 2}">외래</c:when>
+      				</c:choose>
+      			</td>
+      			<td>${vo.benefit_date} ${vo.medical_start_date}</td>
+      			<td>${vo.benefit_money}${vo.medical_money}</td>
+      			<td>${vo.file_name}${vo.medical_attach_type}</td>
+      			<td>
+      				<select style="text-align: center;" id="request_approve_state1" name="request_approve_state1" >
+      					<option value="0">선택</option>
+      					<option value="1">Y</option>
+      					<option value="2">N</option>
+      				</select>
+      			</td>
+      			<td>
+      				<input type="text" name="request_repuse" value="${vo.request_repuse}">
+      			</td>
+      			<td>
+      				<input type="submit" value="결제">
+      			</td>
+    			</tr>
+    			</form>
+    		</c:forEach>
+  			</table>
+  		
   	</div>
   	<div id="mypage_form_mid">
-    	<div id="form_info_list">
-      	<ul id="form_info_list_ul">
-      		<li>- 출력가능한 기간은 신청일 기준 5일 까지 입니다.</li>
-      		<li>- 사용용도에 대해 정확한 기재가 필요합니다.</li>
-      	</ul>
-    	</div>
+
   	</div>
   	<div id="mypage_form_bottom">
-    	<form>
-        <table id="form_check_table" border="1">
-          <tr>
-            <th colspan="10"style="text-align: left; background-color: lightgray;"> >증명서신청/진행현황</th>
-          </tr>
-          <tr style="background-color: lightgray;">
-            <th>번호</th>
-            <th>구분</th>
-            <th>신청일자</th>
-            <th>처리상태</th>
-            <th>사용용도</th>
-            <th>부수</th>
-            <th>출력</th>
-            <th>출력기간</th>
-            <th>비고</th>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td>재직증명서</td>
-            <td>2025-01-02</td>
-            <td>승인</td>
-            <td>은행납부</td>
-            <td>0/1</td>
-            <td><input type="button" value="출력가능"></td>
-            <td>~2025-01-07까지 : 5일</td>
-            <td style="width: 100px;"></td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>재직증명서</td>
-            <td>2024-10-02</td>
-            <td>승인</td>
-            <td>은행납부</td>
-            <td>0/1</td>
-            <td></td>
-            <td>~2024-09-07까지 : 5일</td>
-            <td style="width: 100px;"></td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>경력증명서</td>
-            <td>2024-09-05</td>
-            <td>승인</td>
-            <td>정부기관납부</td>
-            <td>0/1</td>
-            <td></td>
-            <td>~2024-09-10까지 : 5일</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>재직증명서</td>
-            <td>2024-09-05</td>
-            <td>승인</td>
-            <td>정부기관납부</td>
-            <td>0/1</td>
-            <td></td>
-            <td>~2024-09-10까지 : 5일</td>
-            <td></td>
-          </tr>
-        </table>
-      </form>
+
   	</div>
   </div>
 </body>

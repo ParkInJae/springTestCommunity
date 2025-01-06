@@ -21,7 +21,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     public List<ScheduleVO> selectSchedulesByDepartment(ScheduleVO scheduleVO) {
         return scheduleServiceDAO.selectSchedulesByDepartment(scheduleVO);
     }
- 
+
     // 일정 추가
     public int insertSchedule(ScheduleVO scheduleVO) {
         return scheduleServiceDAO.insertSchedule(scheduleVO);
@@ -33,8 +33,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     // 일정 삭제
-    public void deleteSchedule(ScheduleVO scheduleVO) {
-
+    public int deleteSchedule(ScheduleVO scheduleVO) {
+    	return scheduleServiceDAO.deleteSchedule(scheduleVO);
     }
 
 }

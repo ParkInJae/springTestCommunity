@@ -90,11 +90,13 @@ div a:hover{
     list-style-type: none;
     padding: 0;
     margin: 10px 0;
-    width: 80%;
+    width: 99%;
     max-width: 500px;
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 5px;
+    max-height: 300px; /* 최대 높이를 설정 */
+    overflow-y: auto; /* 세로 스크롤 표시 */
 }
 #userList li {
     padding: 10px;
@@ -163,6 +165,21 @@ div a:hover{
     border-radius: 5px 5px 0 0;
     height: 30px;
 }
+
+/* 채팅방 이름 스타일 */
+.chatModalHeader h2 {
+    flex: 1; /* 남은 공간을 채우도록 설정 */
+    margin: 0;
+    padding: 0 10px; /* 텍스트와 버튼 간 여백 추가 */
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    overflow: hidden; /* 넘치는 텍스트 숨김 */
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    text-overflow: ellipsis; /* 말줄임표(...) 표시 */
+    max-width: calc(100% - 60px); /* 햄버거 메뉴와 닫기 버튼의 공간을 제외 */
+}
+
 
 /* 닫기 버튼 스타일 */
 .chatModalHeader .closeBtn {
@@ -423,4 +440,147 @@ div a:hover{
     justify-content: center;
     align-items: center;
     border-radius: 50%;
+}
+
+.no_unread{
+	display: none;	
+}
+
+.unreadMessage{
+	color: #FE6450;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+.chatNameInput{
+	outline:none;
+	height: 30px;
+	border: 1px solid #EEEEEE;
+	border-radius: 5px;
+	width: 90%;
+	font-size : 1.2em;
+}
+
+/* .addUserModalWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 반투명 배경
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.addUserModal {
+   position: fixed;
+   top: 6%; 
+   left: 8%;
+   width: 270px; 
+   background-color: white;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+   border-radius: 10px;
+   padding: 20px;
+   display: none; 
+} */
+
+.addUserModalWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* background-color: rgba(0, 0, 0, 0.5); */ 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.addUserModal {
+    position: fixed;
+    top: 6%;
+    left: 8%;
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 20px;
+    width: 270px;
+}
+
+
+.user_search_add {
+	outline:none;
+	height: 30px;
+	border: 1px solid #EEEEEE;
+	border-radius: 5px;
+	width: 98%;
+}
+
+.user_search_add{
+	outline:none;
+	height: 30px;
+	border: 1px solid #EEEEEE;
+	border-radius: 5px;
+	width: 98%;
+}
+
+.addUserButton{
+	width: 270px;
+	height: 40px;
+	color:white;
+	font-weight: bold;
+	border: 1px solid white;
+	border-radius: 5px;
+	cursor:pointer;
+	font-size: 18px;
+	background-color: #333333;	
+}
+
+.addUserList {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+    width: 99%;
+    max-width: 500px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 300px; /* 최대 높이를 설정 */
+    overflow-y: auto; /* 세로 스크롤 표시 */
+}
+.addUserList li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+.addUserList li:last-child {
+    border-bottom: none;
+}
+.addUserList li:hover {
+    background-color: #f0f0f0;
+}
+
+.systemMessage{
+    color: #333333;
+    margin: auto;
+    background-color: #F4F4F4;
+    /* background-color: #333333; */
+    width: 200px;
+    height: 28px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    font-size: 14px;
+    margin-top: 5px;  
+    font-weight: bold;
+}
+
+
+.user_count{
+	font-size: 14px;
+    color: #888;
 }

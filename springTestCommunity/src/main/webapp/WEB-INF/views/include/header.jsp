@@ -1183,7 +1183,7 @@ function checkOut() {
 				</div>
 				<div id="menu_bar">
 					<div id="menu"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/groups.png" alt="조직도"></div>
-					<div id="menu"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/calendar.png" alt="근태"></div>
+					<div id="menu" style="cursor: pointer;" onclick="location.href='<%= request.getContextPath() %>/vacation/view.do'"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/calendar.png" alt="근태"></div>
 					<div id="menu" style="cursor: pointer;" onclick="chatModal();"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/talk.png" alt="대화"></div>
 					<sec:authorize access="hasRole('ROLE_ADMIN') or authentication.principal.department_id == 2 and authentication.principal.job_position_id >= 5">
 						<div id="menu" style="cursor: pointer;" onclick="location.href='<%= request.getContextPath() %>/admin/list.do'"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/setting.png" alt="관리자"></div>

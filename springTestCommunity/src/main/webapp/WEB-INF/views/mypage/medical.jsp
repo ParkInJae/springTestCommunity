@@ -5,6 +5,67 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<script src="<%= request.getContextPath() %>/resources/js/jquery-3.7.1.js"></script>
+  <%-- <script>
+	function addMedicalTable() {//행 추가
+	  var form = new FormData();
+	  form.append( "medical_name", $("#medical_name").val() );
+	  form.append( "medical_type", $("#medical_type").val() );
+	  form.append( "medical_center_type", $("#medical_center_type").val() );
+	  form.append( "medical_center_name", $("#medical_center_name").val() );
+	  form.append( "medical_start_date", $("#medical_start_date").val() );
+	  form.append( "medical_end_date", $("#medical_end_date").val() );
+	  form.append( "medical_money", $("#medical_money").val() );
+	  form.append( "medical_attach_type", $("#medical_attach_type").val() );
+	  form.append( "medical_content", $("#medical_content").val() );
+	  form.append( "fileName", $("#file_name")[0].files[0] );
+	  
+	  $.ajax({
+	  	url : '<%= request.getContextPath() %>/mypage/medical.do',
+	  	type : "POST",
+	  	processData : false,
+	  	contentType : false,
+	  	data: form,      // 폼 데이터를 전송
+	  	success: function(data){
+			console.log("등록에 성공했습니다.");
+
+			let requestApproveState1 = "";
+			let requestApproveState2 = "";
+			
+			if(data.request_approve_state1 == 0){
+				requestApproveState1 = "대기";
+			}else if(data.request_approve_state1 == 1){
+				requestApproveState1 = "승인";
+			}else if(data.request_approve_state1 == 2){
+				requestApproveState1 = "거절";
+			}
+			
+			if(data.request_approve_state2 == 0){
+				requestApproveState2 = "대기";
+			}else if(data.request_approve_state2 == 1){
+				requestApproveState2 = "승인";
+			}else if(data.request_approve_state2 == 2){
+				requestApproveState2 = "거절";
+			}
+				
+			let html = "";
+			html += "<tr>";
+			html += "<td>"+data.request_no+"</td>";
+			html += "<td>"+data.request_date+"</td>";
+			html += "<td>"+data.medical_money+"</td>";
+			html += "<td>"+requestApproveState1+"</td>";
+			html += "<td>"+requestApproveState2+"</td>";
+			html += "<td>"+data.request_approve_money+"</td>";
+			html += "<td>"+data.request_repuse+"</td>";
+			html += "</tr>";
+			$("#medical_check_table").append(html);
+		},
+	  	error: function (xml,error){ 
+	  	  alert("등록에 실패했습니다. 다시시도하세요."); 
+	  	}
+	  });
+	}
+</script> --%>
   <style>
     body{
       width: 80%;
@@ -39,7 +100,7 @@
 			width: 100%;
       height: 50%;
 		}
-		#medical_btn{
+		#medicalBtn{
 			width: 80px;
       height: 30px;
       border: 1px solid lightgray;
@@ -48,6 +109,7 @@
       background-color: lightgray;
       font-size: medium;
       color: black;
+      cursor: pointer;
 		}
 		#medical_table{
 			width: 900px;
@@ -92,7 +154,7 @@
     	<img id="logo_img" src="<%= request.getContextPath() %>/resources/img/logo.png" alt="회사로고" >
     </a>
     <div id = "login_info">
-      <a href="logout.do">로그아웃</a>
+      <a href="<%= request.getContextPath() %>/logout.do">로그아웃</a>
       |
       <a href="info.do">마이페이지</a>
     </div>
@@ -104,21 +166,23 @@
     <a href="benefit.do">경조금 신청</a>
     |
     <a href="medical.do">의료비 신청</a>
+    <c:if test="${vo.job_position_id >= 5 }">
     |
-    <a href="form.do">증명서 발급</a>
+    <a href="form.do">신청내용 확인</a>
+    </c:if>
   </div>
   <hr>
 	<div id="mypage_medical">
     <div id="mypage_medical_top">
-      <form>
+      <form action="medical.do" method="post" enctype="multipart/form-data">
 				<br>
-        <input id="medical_btn" type="button" value="신청">
+        <input id="medicalBtn" type="submit" value="신청">
         <br>
         <br>
         <div id="medical_table_div">
 					<table id="medical_table" border="1">
 						<tr>
-							<th colspan="10"style="text-align: left; background-color: lightgray;"> >의료비신청/진행현황</th>
+							<th colspan="9"style="text-align: left; background-color: lightgray;"> >의료비신청/진행현황</th>
 						</tr>
 						<tr style="background-color: lightgray;">
 							<th>상병명</th>
@@ -129,49 +193,34 @@
 							<th>진료종료일</th>
 							<th>수납금액</th>
 							<th>진단서제출</th>
-							<th style="width: 50px;">+</th>
 						</tr>
 						<tr>
-							<td>인후두염</td>
+							<td><input style="width: 70px;" type="text" name="medical_name" id="medical_name"></td>
 							<td>
-								<select>
-									<option>입원</option>
-									<option>외래</option>
+								<select name="medical_type" id="medical_type">
+									<option value="0" selected="selected">선택</option>
+									<option value="1">입원</option>
+									<option value="2">외래</option>
 								</select>
 							</td>
 							<td>
-								<select>
-									<option>약국</option>
-									<option>병원</option>
+								<select name="medical_center_type" id="medical_center_type">
+									<option value="0" selected="selected">선택</option>
+									<option value="1">약국</option>
+									<option value="2">병원</option>
 								</select>
 							</td>
-							<td>이젠이비인후과</td>
-							<td>2024-12-03</td>
-							<td>2024-12-03</td>
-							<td>25,800</td>
-							<td>Y</td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>인후두염</td>
+							<td><input style="width: 100px;" type="text" name="medical_center_name" id="medical_center_name"></td>
+							<td><input type="date" name="medical_start_date" id="medical_start_date"></td>
+							<td><input type="date" name="medical_end_date" id="medical_end_date"></td>
+							<td><input style="width: 70px;" type="text" name="medical_money" id="medical_money"></td>
 							<td>
-								<select>
-									<option>입원</option>
-									<option>외래</option>
+								<select name="medical_attach_type" id="medical_attach_type">
+									<option value="0" selected="selected">선택</option>
+									<option value="1">Y</option>
+									<option value="2">N</option>
 								</select>
 							</td>
-							<td>
-								<select>
-									<option>약국</option>
-									<option>병원</option>
-								</select>
-							</td>
-							<td>이젠약국</td>
-							<td>2024-12-03</td>
-							<td>2024-12-03</td>
-							<td>25,800</td>
-							<td>Y</td>
-							<td>-</td>
 						</tr>
 					</table>
 				</div>
@@ -180,11 +229,11 @@
 					<table id="medical_file" border="1">
 						<tr>
 							<th style="background-color: lightgray;">첨부파일</th>
-							<td><input type="file"></td>
+							<td><input type="file" name="fileName" id="file_name"></td>
 						</tr>
 						<tr>
 							<th style="background-color: lightgray">요청사유</th>
-							<td ><input type="text" style="width: 400px;"></td>
+							<td ><input type="text" style="width: 400px;" name="medical_content" id="medical_content"></td>
 						</tr>
 					</table>
 				</div>
@@ -204,44 +253,47 @@
   	<div id="mypage_medical_bottom">
     	<table id="medical_check_table" border="1">
 				<tr>
-					<th colspan="9"style="text-align: left; background-color: lightgray;"> >의료비신청/진행현황</th>
+					<th colspan="8"style="text-align: left; background-color: lightgray;"> >의료비신청/진행현황</th>
 				</tr>
 				<tr style="background-color: lightgray;">
 					<th>번호</th>
-					<th>신청일자</th>
+					<th>구분</th>
+					<th style="width: 200px;">신청일자</th>
 					<th>신청금액</th>
 					<th>1차결제</th>
 					<th>2차결제</th>
 					<th>지원금액</th>
 					<th>비고</th>
 				</tr>
+			<c:forEach items="${list}" var="vo">
 				<tr>
-					<td>3</td>
-					<td>2024-11-28</td>
-					<td>24,800</td>
-					<td>2024-11-28</td>
-					<td>2024-11-28</td>
-					<td>24,800</td>
-					<td></td>
+					<td>${vo.request_no}</td>
+					<td>
+						<c:choose>
+      					<c:when test="${vo.medical_type eq 1}">입원</c:when>
+      					<c:when test="${vo.medical_type eq 2}">외래</c:when>
+      				</c:choose>
+					</td>
+					<td>${vo.medical_start_date}</td>
+					<td>${vo.medical_money}</td>
+					<td>
+      				<c:choose>
+      					<c:when test="${vo.request_approve_state1 eq 0}">대기</c:when>
+      					<c:when test="${vo.request_approve_state1 eq 1}">승인</c:when>
+      					<c:when test="${vo.request_approve_state1 eq 2}">거절</c:when>
+      				</c:choose>
+      			</td>
+      			<td>
+      				<c:choose>
+      					<c:when test="${vo.request_approve_state2 eq 0}">대기</c:when>
+      					<c:when test="${vo.request_approve_state2 eq 1}">승인</c:when>
+      					<c:when test="${vo.request_approve_state2 eq 2}">거절</c:when>
+      				</c:choose>
+      			</td>
+					<td>${vo.medical_money}</td>
+					<td>${vo.request_repuse}</td>
 				</tr>
-				<tr>
-					<td>2</td>
-					<td>2024-11-27</td>
-					<td>24,800</td>
-					<td>2024-11-27</td>
-					<td>----------</td>
-					<td>----------</td>
-					<td>반려(영수증확인)</td>
-				</tr>
-				<tr>
-					<td>1</td>
-					<td>2024-10-18</td>
-					<td>12,800</td>
-					<td>2024-10-18</td>
-					<td>2024-10-19</td>
-					<td>12,800</td>
-					<td></td>
-				</tr>
+			</c:forEach>
 			</table>
   	</div>
   </div>

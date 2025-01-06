@@ -13,7 +13,7 @@ WHERE USER_ID =#{user_id}
 <!-- 각각의 부서별 일정에 대한 전체 테이블을 가져옴  -->
 <select id="selectAllSchedule" parameterType="UserInfoVO" resultType= "scheduleVO">
 select * from SCHEDULE
-where DEPARTMENT_ID = #{department_id}    
+where DEPARTMENT_ID = #{department_id}  
 </select>
 
 <insert id="insert" parameterType="ScheduleVO">

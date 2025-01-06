@@ -5,6 +5,331 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+	<script src="<%= request.getContextPath() %>/resources/js/jquery-3.7.1.js"></script>
+	<script>
+  function benefitSelect(obj) {
+    var select = obj
+    var option = obj.value;
+
+    console.log(obj.options[obj.selectedIndex].text);
+            		    
+    document.getElementById('btText').innerText = obj.options[obj.selectedIndex].text;
+    
+    updateCost();  
+   }
+  function updateCost() {
+      const selectedAType = $("#benefit_sub").val();
+      const selectedBType = $("#benefit_type").val();
+      let cost = null;
+      
+      console.log("selectedAType::"+selectedAType);
+      console.log("selectedBType::"+selectedBType);
+
+      if (selectedAType === '0' || selectedBType === '0') {
+    	  $("#benefit_money").val(' ');
+        return;
+      }
+
+      switch (selectedAType) {
+        case '1': // 본인
+          switch (selectedBType) {
+            case '1': // 결혼
+              cost = 1000000;
+              break;
+            case '2': // 회갑
+              cost = 1000000;
+              break;
+            case '3': // 칠순
+                cost = 50;
+                break;
+            case '4': // 출산
+                cost = 100000;
+                break;
+            case '5': // 사망
+                cost = 5000000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+        case '2': // 부
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = null;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = 500000;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 1000000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+      	case '3': // 모
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = null;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = 500000;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 1000000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+      	case '4': // 형제
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = null;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = null;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 100000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+      	case '5': // 자매
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = null;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = null;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 100000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+      	case '6': // 조부
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = null;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = null;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 200000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+      	case '7': // 조모
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = null;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = null;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 200000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+      	case '8': // 자녀
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = 300000;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = null;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 1000000;
+                break;
+            default:
+              cost = null;
+          }
+      break;
+      	case '9': // 배우자
+          switch (selectedBType) {
+          	case '1': // 결혼
+              cost = null;
+              break;
+            case '2': // 회갑
+              cost = null;
+              break;
+            case '3': // 칠순
+                cost = null;
+                break;
+            case '4': // 출산
+                cost = null;
+                break;
+            case '5': // 사망
+                cost = 1000000;
+                break;
+            default:
+              cost = null;
+          }
+          break;
+        default:
+          cost = null;
+      }
+      
+      console.log("cost::"+cost);
+
+      if (cost !== null) {
+    	  $("#benefit_money").val(`\${cost}`);
+      } else {
+    	  $("#benefit_money").val(' ');
+      }
+    }
+	</script>
+<%-- 	<script>
+  	function addBenefitTable() {//행 추가
+  		var form = new FormData();
+  	    form.append( "benefit_sub", $("#benefit_sub").val() );
+  	    form.append( "benefit_date", $("#benefit_date").val() );
+  	    form.append( "benefit_tour", $("#benefit_tour").val() );
+  	    form.append( "benefit_type", $("#benefit_type").val() );
+  	    form.append( "benefit_money", $("#benefit_money").val() );
+  	    form.append( "benefit_content", $("#benefit_content").val() );
+  	    form.append( "fileName", $("#file_name")[0].files[0] );
+  	    
+  	  $.ajax({
+  	  	url : '<%= request.getContextPath() %>/mypage/benefit.do',
+  	    type : "POST",
+  	    processData : false,
+  	    contentType : false,
+  	    data: form,      // 폼 데이터를 전송
+  	    success: function(data){
+					console.log("등록에 성공했습니다.");
+						
+						let benefitType = "";
+						let benefitSub = "";
+						let requestApproveState1 = "";
+						let requestApproveState2 = "";
+						
+						if(data.benefit_type == 1){
+							benefitType = "결혼";
+						}else if(data.benefit_type == 2){
+							benefitType = "회갑";
+						}else if(data.benefit_type == 3){
+							benefitType = "칠순";
+						}else if(data.benefit_type == 4){
+							benefitType = "출산";
+						}else if(data.benefit_type == 5){
+							benefitType = "사망";
+						}else if(data.benefit_type == 0){
+							benefitType = "미선택";
+						}
+						
+						if(data.benefit_sub == 1){
+							benefitSub = "본인";
+						}else if(data.benefit_sub == 2){
+							benefitSub = "부";
+						}else if(data.benefit_sub == 3){
+							benefitSub = "모";
+						}else if(data.benefit_sub == 4){
+							benefitSub = "형제";
+						}else if(data.benefit_sub == 5){
+							benefitSub = "자매";
+						}else if(data.benefit_sub == 6){
+							benefitSub = "조부";
+						}else if(data.benefit_sub == 7){
+							benefitSub = "조모";
+						}else if(data.benefit_sub == 8){
+							benefitSub = "자녀";
+						}else if(data.benefit_sub == 9){
+							benefitSub = "배우자";
+						}else if(data.benefit_type == 0){
+							benefitType = "미선택";
+						}
+						
+						if(data.request_approve_state1 == 0){
+							requestApproveState1 = "대기";
+						}else if(data.request_approve_state1 == 1){
+							requestApproveState1 = "승인";
+						}else if(data.request_approve_state1 == 2){
+							requestApproveState1 = "거절";
+						}
+						
+						if(data.request_approve_state2 == 0){
+							requestApproveState2 = "대기";
+						}else if(data.request_approve_state2 == 1){
+							requestApproveState2 = "승인";
+						}else if(data.request_approve_state2 == 2){
+							requestApproveState2 = "거절";
+						}
+						
+						let html = "";
+						html += "<tr>";
+						html += "<td>"+data.request_no+"</td>";
+						html += "<td>"+benefitType+"</td>";
+						html += "<td>"+data.request_date+"</td>";
+						html += "<td>"+benefitSub+"</td>";
+						html += "<td>"+data.benefit_tour+"</td>";
+						html += "<td>"+data.benefit_money+"</td>";
+						html += "<td>"+requestApproveState1+"</td>";
+						html += "<td>"+requestApproveState2+"</td>";
+						html += "<td>"+data.request_repuse+"</td>";
+						html += "</tr>";
+						$("#benefit_check_table").append(html);
+				},
+  	    error: function (xml,error){ 
+  	      alert("등록에 실패했습니다. 다시시도하세요."); 
+  	    }
+  	  });
+  	}
+  </script> --%>
   <style>
     body{
       width: 80%;
@@ -55,6 +380,7 @@
       background-color: lightgray;
       font-size: medium;
       color: black;
+      cursor: pointer;
     }
     #mypage_benefit_mid{
       width: 100%;
@@ -84,76 +410,102 @@
     	<img id="logo_img" src="<%= request.getContextPath() %>/resources/img/logo.png" alt="회사로고" >
     </a>
     <div id = "login_info">
-      <a href="logout.do">로그아웃</a>
+      <a href="<%= request.getContextPath() %>/logout.do">로그아웃</a>
       |
       <a href="info.do">마이페이지</a>
     </div>
   </div>
   <hr>
-  <div id="mypage_list">
+ <div id="mypage_list">
     <a href="info.do">내 정보 수정</a>
     |
     <a href="benefit.do">경조금 신청</a>
     |
     <a href="medical.do">의료비 신청</a>
+    <c:if test="${vo.job_position_id >= 5 }">
     |
-    <a href="form.do">증명서 발급</a>
+    <a href="form.do">신청내용 확인</a>
+    </c:if>
   </div>
   <hr>
   <div id="mypage_benefit">
     <div id="mypage_benefit_top">
-      <form>
+      <form action="benefit.do" name="benefit" method="post" enctype="multipart/form-data">
         <br>
-        <input id="benefit_btn" type="button" value="신청">
+        <button type="submit" id="benefit_btn" >신청</button>
         <br>
         <br>
         <table id="benefit_table" border="1">
         	<tr>
-          	<th colspan="4" style="text-align: left;"> >경조금 신청정보</th>
+          	<th colspan="4" style="text-align: left;">
+          		>경조금 신청정보
+          	</th>
         	</tr>
         	<tr>
-          	<th style="width:150px">경조구분</th>
-          	<td colspan="3">
-            	<select style="width:150px">
-              	<option>결혼</option>
-              	<option>회갑</option>
-              	<option>칠순</option>
-              	<option>출산</option>
-              	<option>사망</option>
-            	</select>
-          	</td>
-        	</tr>
-        	<tr>
-          	<th>경조대상자</th>
+          	<th>
+          		<label for="benefit_sub">경조대상자</label>
+          		<input type="hidden" name="user_id" value="${vo.user_id}">
+          	</th>
           	<td>
-            	<select style="width:150px">
-              	<option>홍길자</option>
-              	<option>홍길연</option>
-              	<option>홍길우</option>
-              	<option>박선유</option>
-              	<option>홍길동</option>
+            	<select style="width:150px" name="benefit_sub" id="benefit_sub" onChange="benefitSelect(this);">
+            		<option value="0" selected="selected">선택
+              	<option value="1">본인</option>
+              	<option value="2">부</option>
+              	<option value="3">모</option>
+              	<option value="4">형제</option>
+              	<option value="5">자매</option>
+              	<option value="6">조부</option>
+              	<option value="7">조모</option>
+              	<option value="8">자녀</option>
+              	<option value="9">배우자</option>
             	</select>
           	</td>
           	<th style="width:150px; background-color: lightgray;">관계</th>
-          	<td>본인</td>
+          	<td style="width:200px;">
+          		<p id="btText"/>
+          	</td>
+        	</tr>
+        	<tr>
+          	<th style="width:150px"><label for="benefit_type">경조구분</label></th>
+          	<td colspan="3">
+            	<select style="width:150px" name="benefit_type" id="benefit_type" onChange="benefitSelect(this)">
+            	<option value="0" selected="selected">선택</option>
+              	<option value="1">결혼</option>
+              	<option value="2">회갑</option>
+              	<option value="3">칠순</option>
+              	<option value="4">출산</option>
+              	<option value="5">사망</option>
+            	</select>
+          	</td>
         	</tr>
         	<tr>
           	<th>경조일자</th>
-          	<td colspan="3"><input type="date" style="width:200px"></td>
+          	<td colspan="3">
+          		<input type="date" name="benefit_date" id="benefit_date" value="${benefit_date}" style="width:200px">
+          	</td>
         	</tr>
         	<tr>
           	<th>근속기준</th>
-          	<td>1년이상</td>
+          	<td>
+          		<input type="hidden" name="years" value="${vo.years}">
+          		<input type="text" name="benefit_tour" id="benefit_tour" value="${vo.years}" readonly="readonly" style="background:lightgray;">
+          	</td>
           	<th style="background-color: lightgray;">경조금신청금액</th>
-          	<td>1,000,000</td>
+          	<td>
+          		<input type="text" name="benefit_money" id="benefit_money" value="${benefit_money}">
+          	</td>
         	</tr>
         	<tr>
           	<th>첨부파일</th>
-          	<td colspan="3"><input type="file"></td>
+          	<td colspan="3">
+          		<input type="file" name="fileName" id="file_name" value="${file_name}" multiple>
+          	</td>
         	</tr>
         	<tr>
           	<th>요청사유</th>
-          	<td colspan="3"><input type="text" style="width:400px"></td>
+          	<td colspan="3">
+          		<input type="text" name="benefit_content" id="benefit_content" value="${benefit_content}" style="width:400px">
+          	</td>
         	</tr>
     		</table>
   		</form>
@@ -171,31 +523,66 @@
   	</div>
   	<div id="mypage_benefit_bottom">
     	<table id="benefit_check_table" border="1">
-      	<tr>
-        	<th colspan="9"style="text-align: left; background-color: lightgray;"> >경조금신청/진행현황</th>
-      	</tr>
-      	<tr style="background-color: lightgray;">
-        	<th>번호</th>
-        	<th>구분</th>
-        	<th>신청일자</th>
-        	<th>대상자</th>
-        	<th>근속기준</th>
-        	<th>신청금액</th>
-        	<th>1차결제</th>
-        	<th>2차결제</th>
-        	<th>비고</th>
-      	</tr>
-      	<tr>
-        	<td>1</td>
-        	<td>칠순</td>
-        	<td>2024-11-18</td>
-        	<td>홍길동</td>
-        	<td>1년이상</td>
-        	<td>50만원</td>
-        	<td>2024-12-18</td>
-        	<td>2024-12-19</td>
-        	<td style="width: 100px;"></td>
-      	</tr>
+      		<tr>
+        		<th colspan="9"style="text-align: left; background-color: lightgray;"> >경조금신청/진행현황</th>
+      		</tr>
+      		<tr style="background-color: lightgray;">
+        		<th style="width: 30px;">번호</th>
+        		<th style="width: 30px;">구분</th>
+        		<th style="width: 150px;">신청일자</th>
+        		<th style="width: 40px;">대상자</th>
+        		<th style="width: 50px;">근속기준</th>
+        		<th style="width: 80px;">신청금액</th>
+        		<th style="width: 100px;">1차결제</th>
+        		<th style="width: 100px;">2차결제</th>
+        		<th style="width: 80px;">비고</th>
+      		</tr>
+      	<c:forEach items="${list}" var="vo">
+      		<tr>
+      			<td>${vo.request_no}</td>
+      			<td>
+      				<c:choose>
+      					<c:when test="${vo.benefit_type eq 1}">결혼</c:when>
+      					<c:when test="${vo.benefit_type eq 2}">회갑</c:when>
+      					<c:when test="${vo.benefit_type eq 3}">칠순</c:when>
+      					<c:when test="${vo.benefit_type eq 4}">출산</c:when>
+      					<c:when test="${vo.benefit_type eq 5}">사망</c:when>
+      				</c:choose>
+      			</td>
+      			<td>${vo.benefit_date}</td>
+      			<td>
+      				<c:choose>
+      					<c:when test="${vo.benefit_sub eq 1}">본인</c:when>
+      					<c:when test="${vo.benefit_sub eq 2}">부</c:when>
+      					<c:when test="${vo.benefit_sub eq 3}">모</c:when>
+      					<c:when test="${vo.benefit_sub eq 4}">형제</c:when>
+      					<c:when test="${vo.benefit_sub eq 5}">자매</c:when>
+      					<c:when test="${vo.benefit_sub eq 6}">조부</c:when>
+      					<c:when test="${vo.benefit_sub eq 7}">조모</c:when>
+      					<c:when test="${vo.benefit_sub eq 8}">자녀</c:when>
+      					<c:when test="${vo.benefit_sub eq 9}">배우자</c:when>
+      				</c:choose>
+      			</td>
+      			<td>${vo.benefit_tour}</td>
+      			<td>${vo.benefit_money}</td>
+      			<td>
+      				<c:choose>
+      					<c:when test="${vo.request_approve_state1 eq 0}">대기</c:when>
+      					<c:when test="${vo.request_approve_state1 eq 1}">승인</c:when>
+      					<c:when test="${vo.request_approve_state1 eq 2}">거절</c:when>
+      				</c:choose>
+      			</td>
+      			<td>
+      				<c:choose>
+      					<c:when test="${vo.request_approve_state2 eq 0}">대기</c:when>
+      					<c:when test="${vo.request_approve_state2 eq 1}">승인</c:when>
+      					<c:when test="${vo.request_approve_state2 eq 2}">거절</c:when>
+      				</c:choose>
+      				
+      			</td>
+      			<td>${vo.request_repuse}</td>
+      		</tr>
+      	</c:forEach>
     	</table>
   	</div>
   </div>

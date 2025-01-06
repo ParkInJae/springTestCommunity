@@ -14,15 +14,11 @@ import com.springCommunity.vo.UserInfoVO;
 public class UserDAO {
 	
 	@Autowired
-	SqlSession sqlSession;
+	private SqlSession sqlSession;
 	
 	private final String name_space = "com.springCommunity.mapper.userMapper.";
 	
-	public int insertUsers(List<UserInfoVO> users) {
-		return sqlSession.insert(name_space+"insertUsers",users);
-	}
-	
 	public int insertUser(UserInfoVO userInfoVO) {
-		return sqlSession.insert(name_space+"insert",userInfoVO);
+		return sqlSession.insert(name_space+"insertUser",userInfoVO);
 	}
 }

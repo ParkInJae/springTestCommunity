@@ -15,10 +15,6 @@ public class UserServiceImpl implements UserService {
 	private UserDAO userDAO;
 
 	@Override
-	public int insertUsers(List<UserInfoVO> users) {
-		return userDAO.insertUsers(users);
-	}
-	@Override
 	public int insertUser(UserInfoVO userInfoVO) {
 		return userDAO.insertUser(userInfoVO);
 	}

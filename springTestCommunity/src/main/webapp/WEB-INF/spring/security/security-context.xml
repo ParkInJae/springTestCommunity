@@ -12,7 +12,8 @@
 		<security:intercept-url pattern="/user/**" access="hasAnyRole('ROLE_USER,ROLE_ADMIN')"  />
 		<security:intercept-url pattern="/chat/**" access="hasAnyRole('ROLE_USER,ROLE_ADMIN')"  />
 		<security:intercept-url pattern="/mypage/**" access="hasAnyRole('ROLE_USER,ROLE_ADMIN')"  />
-		<security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url pattern="/admin/**"
+        access="hasRole('ROLE_ADMIN') or authentication.principal.department_id == 2 and authentication.principal.job_position_id >= 5" />
 		<security:form-login login-page="/login.do"
 							 login-processing-url="/loginOk.do"
 							 authentication-success-handler-ref="userLoginSuccessHandler"

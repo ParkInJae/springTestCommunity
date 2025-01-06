@@ -11,12 +11,15 @@ public class UserInfoVO{
 	private String user_account;
 	private String user_authority;
 	private boolean user_enabled;
+	private int user_state; 
 	private int department_id; 
 	private int job_position_id;
 	private int bank_id;
 	private String user_address;
 	private String department_name;
 	private String job_position_name;
+	private String before_password; //비밀번호 암호화 전
+	
 	
 	public String getUser_id()           { return user_id;           }
 	public String getUser_password()     { return user_password;     }
@@ -27,12 +30,14 @@ public class UserInfoVO{
 	public String getUser_account()      { return user_account;      }
 	public String getUser_authority()    { return user_authority;    }
 	public boolean isUser_enabled()      { return user_enabled;      }
+	public int getUser_state()           { return user_state;        }
 	public int getDepartment_id()        { return department_id;     }
 	public int getJob_position_id()      { return job_position_id;   }
 	public int getBank_id()              { return bank_id;           }
 	public String getUser_address()      { return user_address;      }
 	public String getDepartment_name()   { return department_name;   }
 	public String getJob_position_name() { return job_position_name; }
+	public String getBefore_password()   { return before_password;   }
 	
 	public void setUser_id(String user_id)                     { this.user_id = user_id;                     }
 	public void setUser_password(String user_password)         { this.user_password = user_password;         }
@@ -43,11 +48,12 @@ public class UserInfoVO{
 	public void setUser_account(String user_account)           { this.user_account = user_account;           }
 	public void setUser_authority(String user_authority)       { this.user_authority = user_authority;       }
 	public void setUser_enabled(boolean user_enabled)          { this.user_enabled = user_enabled;           }
+	public void setUser_state(int user_state)                  { this.user_state = user_state;               }
 	public void setDepartment_id(int department_id)            { this.department_id = department_id;         }
 	public void setJob_position_id(int job_position_id)        { this.job_position_id = job_position_id;     }
 	public void setBank_id(int bank_id)                        { this.bank_id = bank_id;                     }
 	public void setUser_address(String user_address)           { this.user_address = user_address;           }
 	public void setDepartment_name(String department_name)     { this.department_name = department_name;     }
 	public void setJob_position_name(String job_position_name) { this.job_position_name = job_position_name; }
-	
+	public void setBefore_password(String before_password)     { this.before_password = before_password;     }
 }

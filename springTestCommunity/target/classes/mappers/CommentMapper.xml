@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springCommunity.mapper.commentMapper">
+	<select id="selectAll" parameterType="searchVO" resultType="commentVO">
+		SELECT COMMENT_CONTENT, u.USER_ID ,u.USER_NAME, POST_NO, COMMENT_NO, 
+		  DEPARTMENT_NAME, JOB_POSITION_NAME,
+		  DATE_FORMAT(COMMENT_DATE, '%Y.%m.%d %H:%i') AS COMMENT_DATE
+		  FROM COMMENT c, USER u
+		 INNER JOIN DEPARTMENT d ON u.DEPARTMENT_ID = d.DEPARTMENT_ID
+	     INNER JOIN JOB_POSITION j ON u.JOB_POSITION_ID = j.JOB_POSITION_ID
+		 WHERE c.USER_ID = u.USER_ID
+		   AND c.COMMENT_STATE != '0'
+		   AND POST_NO = #{post_no} 
+		 ORDER BY COMMENT_NO DESC 
+		 limit #{start},#{perPage}
+	</select>
+	
+	<select id="selectTotal" parameterType="searchVO" resultType="int">
+		SELECT count(*) as total
+		  FROM COMMENT c, USER u
+		 WHERE c.USER_ID = u.USER_ID
+		   AND c.COMMENT_STATE != '0'
+		   AND POST_NO = #{post_no} 
+	</select>
+	
+	<insert id="insert" parameterType="commentVO">
+		INSERT INTO COMMENT(
+			 COMMENT_CONTENT
+			,USER_ID
+			,POST_NO
+		) VALUES(
+			 #{comment_content}
+			,#{user_id}
+			,#{post_no} 
+		)
+	</insert>
+	
+	<select id="selectOne" parameterType="int" resultType="commentVO">
+		SELECT COMMENT_CONTENT,  
+		  u.USER_ID, u.USER_NAME, POST_NO, COMMENT_NO, 
+		  DEPARTMENT_NAME, JOB_POSITION_NAME,
+		  DATE_FORMAT(COMMENT_DATE, '%Y.%m.%d %H:%i') AS COMMENT_DATE  
+		  FROM COMMENT c, USER u
+		 INNER JOIN DEPARTMENT d ON u.DEPARTMENT_ID = d.DEPARTMENT_ID
+	     INNER JOIN JOB_POSITION j ON u.JOB_POSITION_ID = j.JOB_POSITION_ID
+		 WHERE c.USER_ID = u.USER_ID
+		   AND c.COMMENT_NO = #{comment_no}
+	</select>
+	
+    <update id="update" parameterType="commentVO">
+        UPDATE COMMENT
+        SET COMMENT_CONTENT = #{comment_content} 
+        WHERE COMMENT_NO = #{comment_no}
+    </update>
+	
+	<update id="changeState" parameterType="int">
+		UPDATE COMMENT
+		   SET COMMENT_STATE = 0
+		 WHERE COMMENT_NO = #{comment_no}
+	</update>
+</mapper>

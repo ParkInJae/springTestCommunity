@@ -48,7 +48,7 @@
       width: 800px;
       border: 1px none lightgray;
     }
-    th:nth-child(1){
+    th{
 			background-color: lightgray;
 		}
     #info_btn{
@@ -98,7 +98,7 @@
     	<img id="logo_img" src="<%= request.getContextPath() %>/resources/img/logo.png" alt="회사로고" >
     </a>
     <div id = "login_info">
-      <a href="logout.do">로그아웃</a>
+      <a href="<%= request.getContextPath() %>/logout.do">로그아웃</a>
       |
       <a href="info.do">마이페이지</a>
     </div>
@@ -110,8 +110,10 @@
     <a href="benefit.do">경조금 신청</a>
     |
     <a href="medical.do">의료비 신청</a>
+    <c:if test="${vo.job_position_id >= 5 }">
     |
-    <a href="form.do">증명서 발급</a>
+    <a href="form.do">신청내용 확인</a>
+    </c:if>
   </div>
   <hr>
   <div id="mypage_info">
@@ -122,15 +124,15 @@
       <br>
       <table id="info_table" border="1">
         <tr>
-          <th colspan="2">근무부서:고객지원팀&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 사번:417976&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 성명:홍길자</th>
+          <th colspan="2" style="text-align: left;"> >내 개인정보 수정</th>
         </tr>
         <tr>
           <th style="width: 150px;">성명 </th>
-        	<td>홍길자<input type="hidden" name="user_id"></td>
+        	<td><input type="text" name="user_id" value="${vo.user_name}" disabled="disabled"></td>
       	</tr>
       	<tr>
         	<th>입사일 </th>
-        	<td>2002년 03년 28일</td>
+        	<td><input type="text" name="user_join_date" value="${vo.user_join_date}" disabled="disabled"></td>
       	</tr>
       	<tr>
         	<th>전화번호 </th>
@@ -173,7 +175,7 @@
       	</tr>
       	<tr>
         	<th>상세주소 </th>
-        	<td><input type="text" id="sample4_detailAddress"></td>
+        	<td colspan="2"><input type="text" id="sample4_detailAddress"></td>
       	</tr>
       	<tr>
         	<th>이메일 </th>
@@ -187,40 +189,131 @@
   	</form>
   	<div id="pwChangeTable">
   		<div id="pwChangeDiv">비밀번호변경
-  			<button id="pwChangeBtn" onclick="pwChangeOk();">확인</button>
-  			<button id="pwCancelBtn" type="reset" onclick="closePwChangeTable();">취소</button>
+  		<script>
+  		let code = "";
+  	function sendMail(){	     	 
+  	   	 var userEmail = $('#user_email').val();
+  	   	 
+  	   	 if(userEmail == ''){
+  	   	console.log("userEmail:"+userEmail);
+  	   	 	alert("이메일을 입력해주세요.");
+  	   	 	return false;
+  	   	 }
+  	   	 
+  	   	 $.ajax({
+  				type : "POST",
+  				url : '<%= request.getContextPath() %>/mypage/info/sendMail.do',
+  				data : {userEmail : userEmail},
+  				success: function(data){
+  					console.log("userEmail:"+userEmail);
+  					alert("인증번호가 발송되었습니다.");
+  					code = data; //인증번호
+  				},
+  				error: function(data){
+  					alert("메일 발송에 실패했습니다.");
+  				}
+  			}); 
+  	}
+  	
+  	function codeCheck() {
+		const checkNum = $('#code').val(); 
+		const $resultMsg = $('#msg');
+		
+		if(checkNum === code){
+			$resultMsg.html('인증번호가 일치합니다.');
+			$resultMsg.css('color','green');
+			$('#user_email').attr('readonly',true);
+			}else{
+			$resultMsg.html('인증번호가 불일치 합니다. 다시 확인해주세요!.');
+			$resultMsg.css('color','red');
+		}
+	}
+  	</script>
+  		<button type="button" id="pwChangeBtn" onclick="closePwChangeTable();">확인</button>
+  		<input type="reset" id="pwCancelBtn" value="취소">
   		</div>
+  		<input type="hidden" name="user_id" id="pUid" value="user_id">
   		<table>
   			<tr>
   				<th>이메일 입력</th>
-  				<td><input type="text"></td>
-  				<td><button>발송</button></td>
+  				<td><input type="email" name="user_email" id="user_email"></td>
+  				<td><button type="button" id="userEmailBtn" onclick="sendMail();">발송</button></td>
   			</tr>
   			<tr>
   				<th>인증번호 입력</th>
-  				<td><input type="text"></td>
-  				<td><button>인증확인</button></td>
+  				<td><input type="text" id="code" name="code" placeholder="인증코드 확인" maxlength="6"></td>
+  				<td><button type="button" class="codeCheckBtn" id="codeCheckBtn" onclick="codeCheck();">인증하기</button></td>
   			</tr>
   			<tr>
-  				<th colspan="3">
-  				인증번호가 일치합니다.
-  				</th>
+  				<th colspan="3"><span id="msg"></span></th>
+  			</tr>
+  			<tr>
+  				<th>비밀번호 입력</th>
+  				<td colspan="2"><input type="password" name="upw" id="pUpw" placeholder="비밀번호"></td>
   			</tr>
   			<tr>
   				<th>변경할 비밀번호 입력</th>
-  				<td colspan="2"><input type="password"></td>
+  				<td><input type="password" name="pUpwCheck" id="pUpwcheck" placeholder="비밀번호확인"></td>
+  				<td><button type="button" class="userBtn" onclick="pwChange();">확인</button></td>
   			</tr>
   			<tr>
-  				<th>변경할 비밀번호 확인</th>
-  				<td><input type="text"></td>
-  				<td><button>확인</button></td>
-  			</tr>
-  			<tr>
-  				<th colspan="3">두 비밀번호가 일치합니다.</th>
+  				<th colspan="3"><span class="pwMsg"></span></th>
   			</tr>
   		</table>
   	</div>
   </div>
+  <script>
+  function pwChange(){
+	  
+		if($("#pUpw").val() == ""){ // PW 공란
+			$(".pwMsg").html("비밀번호를 입력해주세요.");
+			$("#pUpw").focus();
+			return false;
+		}
+		
+	    if ($("#pUpwcheck").val() == "") {  // 수정된 PW 공란
+	        $(".pwMsg").html("비밀번호를 입력해주세요.");
+	        $("#pUpwcheck").focus();
+	        return false;
+	    } else if ($("#pUpwcheck").val() != $("#pUpw").val()) {  // 수정된 PW 와  다를때
+	        $(".pwMsg").html("비밀번호가 일치하지 않습니다");
+	        $("#pUpwcheck").focus();
+	        return false;
+	    }else if ($("#pUpwcheck").val() == $("#pUpw").val()) {  // PW 수정 완
+	        $(".pwMsg").html("비밀번호 변경에 성공했습니다.");
+	        $(".pwMsg").css("color","green");
+	        $("#pUpwcheck").focus();
+	        return false;
+	    }
+	    
+	    $.ajax({
+	    	url:"<%= request.getContextPath() %>/mypage/info/pwChange.do",
+	    	type:"post",
+	    	data:{
+	    		user_id: $("#pUid").val(),
+	    		user_email: $("#pUemail").val(),
+	    		user_password: $("#pUpw").val()
+	    	},
+	    	success:function(result){
+	    						
+	    		result = result.trim();
+		        switch(result) {
+		            case "success":
+		            	openLoginModal();
+		                break;
+		            case "error":
+		                alert("비밀번호 재설정에 실패하셨습니다.");
+		                break;
+		            default :
+		           		alert("서버와의 연결에 실패했습니다. 나중에 다시 시도해 주세요.");
+	              		break;
+	       		 }
+	    	}
+	    	
+	    	
+	    });
+	}
+  </script>
 	<span id="guide" style="color:#999;display:none"></span>
 	<input type="hidden" id="sample4_detailAddress" placeholder="상세주소">
 	<input type="hidden" id="sample4_extraAddress" placeholder="참고항목"> 

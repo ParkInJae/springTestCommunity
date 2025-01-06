@@ -91,3 +91,36 @@ body{
 			width : 120px;
 			height: 150px;
 		}
+		
+.mainTable {
+    border-width: 1px;
+    border-style: solid;
+    border-color: lightgray;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    text-align: center; /* 텍스트 가운데 정렬 */
+    table-layout: fixed; /* 고정 레이아웃 */
+}
+
+.mainTable .existValue {
+    width: 33%; /* 각 열의 넓이를 동일하게 설정 */
+    color: black;
+}
+.existValue a:link {
+    color: black; /* 기본 상태에서 검정색 */
+    text-decoration: none; /* 밑줄 제거 */
+}
+
+.existValue a:visited {
+    color: black; /* 방문 후에도 검정색 유지 */
+}
+
+.existValue a:hover {
+    color: black; /* 마우스를 올릴 때 색상 변경 (옵션) */
+    text-decoration: underline; /* 호버 시 밑줄 추가 (옵션) */
+}
+
+.existValue a:active {
+    color: black; /* 클릭 시 색상 변경 (옵션) */
+}
