@@ -1,15 +1,69 @@
-1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리
+4. chat.js 사용해서 근무 시간을 그래프로 작성 <br/>
 
-4. chat.js 사용해서 근무 시간을 그래프로 작성 
+// 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
 
-// 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리
+// home.jsp <br/>
+<%@ page language="java" contentType="text/html; charset=UTF-8" 
+	pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ include file="./include/header.jsp" %>
+<link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/home.css" />
+	<hr>
+	<sec:authorize access="isAuthenticated()">
+		<div style="font-size:18px; text-decoration: none; color:black; font-weight: bold;">
+			<br>
+			<!-- 근무시간 나타내기  -->
+			 <div class="summaryContainer">
+			    <div>근무 관련 요약 </div>
+			    <div class="mainCalender">
+			        <span id="currentWeekDisplay">1주차</span>
+			    </div>
+			</div>
+		    <div class="diagramContainer">
+		        <div class="weekDiagram">
+		        <!-- 특정 값을 나중에 스크립트로 바꿔야함  -->
+		            <div >주간 근무 시간 </div> 
+		        </div>
+		        <div class="addWeekDiagram">
+		        <!-- 특정 값을 나중에 스크립트로 바꿔야함  -->
+		            <div>추가 근무 시간 </div>
+		        </div>
+		    </div>
+		    <!-- 주간 테이블 (연장 근무 시간을 포함한 총 근무 시간을 작성 ) -->
+				<hr>
+				<table class="workTable" border=1 style="tex-align">
+					<thead>
+				        <tr>
+				            <th>날짜</th>
+				            <th>근무 시간</th>
+				        </tr>
+				    </thead>
+					<tbody>
+					<c:forEach var="entry" items="${dailyWorkHours}"> <--! forEach 사용해서 반복문 돌림 --> 
+					    <fmt:formatNumber value="${entry.value/ 60}" type="number" var="hours" /> <--!이때, fmt를 사용해서 기본 값을 실수가 아닌 정수로 나타내도록 표시 -->
+					    <fmt:formatNumber value="${entry.value % 60}" type="number" var="minutes" />
+					    <fmt:formatNumber value="${hours - (hours % 1)}" type="number" var="roundedHours" />
+					 	<tr>
+					 	<!-- key > 날짜, value > 근무 시간  -->
+			                <td>${entry.key}</td>
+			                <td>${roundedHours}시간${minutes}분</td>
+			            </tr>
+					</c:forEach>
+					</tbody>
+		  	  </table>
+		</div>
+	</sec:authorize>
+</body>
+</html>
 
 
 
+<br/>   
+// 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
+// -------------------------------------------------------<br/>
 
-   
-// 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 
--------------------------------------------------------
 package com.springCommunity.service;
 
 import java.time.Duration;
