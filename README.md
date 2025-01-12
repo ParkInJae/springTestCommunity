@@ -1,14 +1,12 @@
-4. chat.js 사용해서 근무 시간을 그래프로 작성 <br/>
-
 // 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
 
 // home.jsp <br/>
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ include file="./include/header.jsp" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> <br/>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %><br/>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %><br/>
+<%@ include file="./include/header.jsp" %><br/>
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/home.css" />
 	<hr>
 	<sec:authorize access="isAuthenticated()">
@@ -262,6 +260,6 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
     }
 }
 
-
+4. fullCalender 내부의 ajax 의미 <br/>
 
 
