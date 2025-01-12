@@ -3,7 +3,7 @@
 // 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
 // 4. fullCalender 내부의 ajax 의미 <br/>
 
-// 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
+//📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
 // home.jsp <br/>
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>
@@ -63,7 +63,7 @@
 
 
 <br/>   
-// 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
+//📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
 // -------------------------------------------------------<br/>
 
 package com.springCommunity.service;
@@ -181,7 +181,7 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 
 
  // 출근 시간 계산 로직 
- // 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
+ //📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
  // -------------------------------------------------------
 	
 	@Override
@@ -264,7 +264,7 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
     }
 }
 
-4. fullCalender 내부의 ajax 의미 <br/>
+// 📗4. fullCalender 내부의 ajax 의미 <br/>
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>  <br/>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  <br/>
