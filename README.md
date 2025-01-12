@@ -1,10 +1,14 @@
 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리
 
-2. 일간 근무 시간, 주간 근무 시간 계산하는 로직 (List<map>의 형식으로 존재하는 이유 설명 )
+4. chat.js 사용해서 근무 시간을 그래프로 작성 
 
-3. 연장 근무 시간, 특별 근무 시간 작성
+// 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리
 
-4. chat.js 사용 
+
+
+
+   
+// 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 
 -------------------------------------------------------
 package com.springCommunity.service;
 
@@ -118,7 +122,11 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 
 		return dailyWorkTimeDAO.selectList(user_id);
 	}
- 
+
+
+ // 출근 시간 계산 로직 
+ // 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
+ // -------------------------------------------------------
 	
 	@Override
 	public Map<String, Object> calculateWorkTime(String user_id) {
@@ -198,7 +206,8 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
         // 초 단위로는 버림 
         //시간과 , 분은 버리지 않고 가져오게끔 설정
     }
-    
-    
-    
 }
+
+
+
+
