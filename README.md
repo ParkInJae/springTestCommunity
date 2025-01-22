@@ -185,7 +185,7 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 	}
 
 
- // 출근 시간 계산 로직 
+ // 출근 시간 계산 로직 <br/>
  //📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
  // -------------------------------------------------------
 	
@@ -270,11 +270,12 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 }
 
 // 📗4. fullCalender 내부의 ajax 의미 <br/>
+```
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
-	pageEncoding="UTF-8" %>  <br/>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  <br/>
-<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>  <br/>
-<%@ include file="../include/header.jsp" %>  <br/>
+	pageEncoding="UTF-8" %>  
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>  
+<%@ include file="../include/header.jsp" %>  
 <!DOCTYPE html><br/>
 <html><br/>
 <head><br/>
@@ -284,8 +285,8 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 <script src='<%= request.getContextPath()%>/resources/js/index.global.js'></script> <br/>
 <script src='<%= request.getContextPath()%>/resources/js/index.global.min.js'></script> <br/>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+<script> 
+document.addEventListener('DOMContentLoaded', function() { 
 	 var manager = "${vo.user_id}";  // EL 태그 사용
 	  console.log(manager);
     var calendarEl = document.getElementById('calendar');
@@ -534,7 +535,7 @@ function handleError(xhr) {
   <div id='calendar'></div>
 </body>
 </html>
-
+```
 
 
 📗 5. pom.xml 정리 
