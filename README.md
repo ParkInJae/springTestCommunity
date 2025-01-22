@@ -6,6 +6,7 @@
 // 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
 // 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
 // 4. fullCalender 내부의 ajax 의미 <br/>
+// 5. pom.xml 정리 
 
 //📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
 // home.jsp <br/>
@@ -534,3 +535,27 @@ function handleError(xhr) {
 </body>
 </html>
 
+
+
+📗 5. pom.xml 정리 
+
+// 기존의 코드 
+	<properties>
+		<java-version>11</java-version>
+		<org.springframework-version>4.3.3.RELEASE</org.springframework-version>
+		<spring.security.version>3.2.10.RELEASE</spring.security.version>
+		<org.aspectj-version>1.6.10</org.aspectj-version>
+		<org.slf4j-version>1.6.6</org.slf4j-version>
+	</properties>
+ 
+// 수정된 코드 
+	<properties>
+		<java-version>11</java-version>
+		<org.springframework-version>5.2.22.RELEASE</org.springframework-version>
+		<spring.security.version>3.2.10.RELEASE</spring.security.version>
+		<org.aspectj-version>1.6.10</org.aspectj-version>
+		<org.slf4j-version>1.6.6</org.slf4j-version>
+	</properties>
+ 
+위의 코드는 버전을 업그ㄹ
+ 
