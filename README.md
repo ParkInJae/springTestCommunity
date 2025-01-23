@@ -2,14 +2,15 @@
 
 -------------------------------------------------------------------------------------- <br/>
 
-// 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
-// 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
-// 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
-// 4. fullCalender 내부의 ajax 의미 <br/>
-// 5. pom.xml 정리 
+ 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
+ 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
+ 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
+ 4. fullCalender 내부의 ajax 의미 <br/>
+ 5. pom.xml 정리 
 
-//📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
-// home.jsp <br/>
+📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
+
+ home.jsp <br/>
 ```
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>
@@ -70,7 +71,7 @@
 
 <br/>
 
-//📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
+📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
 
 
 ➔ 위도 경도가 일치하는 경우 <br/>
@@ -97,9 +98,13 @@
 
 
 
+<br/> 
+아래는 비즈니스 로직 및 jsp의 ajax를 통해 나타낸 소스코드이다. <br/>
+<br/>
+*️⃣ serviceImpl (인터페이스 구현 객체 )<br/>
+<br/>
 
-
-```
+``` 
 package com.springCommunity.service;
 
 import java.time.Duration;
@@ -133,36 +138,65 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 	private SqlSession sqlSession;
 	public final String namespace = "com.springCommunity.mapper.DailyWorkTimeMapper.";
 	// 회사의 위도와 경도는 Service에서 관리
-	private final double COMPANY_LATITUDE = 35.8402587260868; // 예: 전주 이젠 위도
-	private final double COMPANY_LONGITUDE = 127.132499131298; // 예: 전주 이젠 경도
-	private final double CHECK_IN_DISTANCE_KM = 5.0; // 반경 1km
+	private final double COMPANY_LATITUDE  = 35.84218185982273 ; // 예: 전주 이젠 위도     위브 // 35.84218185982273   // 전주 이젠 35.8402587260868;
+	private final double COMPANY_LONGITUDE = 127.15232222091124; // 예: 전주 이젠 경도   위브 // 127.15232222091124  // 전주 이젠 127.132499131298;
+	
+	private final double CHECK_IN_DISTANCE_KM = 5.0; // 반경 5km
 
 	// 지구 반지름 
 	private static final double EARTH_RADIUS = 6371.0;
 	
-	
+	// 출근 결과를 알려주기 위한 변수들 
+/*
+ * 사용자의 현재 위치가 회사 위치 범위 안에 있는지 확인  아니면 OUTSIDE_RANGE 반환.
+오늘 이미 출근한 기록이 있는지 확인 → 있으면 ALREADY_CHECKED_IN 반환.
+위 두 조건에 해당하지 않을 경우, 출근 처리를 하고 SUCCESS 반환.
+
+ */
+	// enum 사용시 상태나 결과를 더 명확하고 직관적으로 표현할 수 있음 
+	   public enum CheckInResult {
+	        SUCCESS,           // 출근 성공
+	        ALREADY_CHECKED_IN, // 이미 출근함
+	        OUTSIDE_RANGE      // 범위 밖
+	    }
 	@Override
-	public boolean checkIn(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude) {
-		
-		int count = sqlSession.selectOne(namespace + "DailyCheckIn",dailyWorkTimeVO);
+	public CheckInResult  checkIn(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude) {
+
+		// 1. 유저의 위도 경도 
 		double userLat = Double.parseDouble(latitude); // 유저의 위도
 		double userLon = Double.parseDouble(longitude); // 유저의 경도
-
+		
+		// 2. 위치거리 계산 
 		double distance = calculateDistance(COMPANY_LATITUDE, COMPANY_LONGITUDE, userLat, userLon);
-		System.out.println("beford if문 distance=======================" + distance);
-		// 메소드 distance를 통해 얻은 경도가 상수의 반경보다 작을 경우 DAO에게 위도와 경도 값을 빼고 전달
-		if (distance <= CHECK_IN_DISTANCE_KM) {
-			System.out.println("distance=======================" + distance);
-			if(count == 0 ) {
-				dailyWorkTimeDAO.checkIn(dailyWorkTimeVO); // 거리 범위 내면 데이터 저장
-				return true;
-			}else {
-				System.out.println("이미 존재하는 출근 기록입니다.");
-			}
-		}
-		return false; // 거리 범위 밖이면 저장하지 않음
+		System.out.println("before if문 distance=======================" + distance);
+		
+ 
+		// 3. 위치 범위 체크 하여 범위 밖인지 확인 
+        if (distance > CHECK_IN_DISTANCE_KM) {
+        	System.out.println("정해진 범위 초과됨");
+            return CheckInResult.OUTSIDE_RANGE;
+        }
+		
+        // 4. 당일 출근 기록 확인
+        int count = sqlSession.selectOne(namespace + "DailyCheckIn", dailyWorkTimeVO);
+        if (count > 0) {
+            System.out.println("이전에 출근버튼 누름");
+            return CheckInResult.ALREADY_CHECKED_IN;
+        }
+        
+
+        // 5. 출근 처리
+        dailyWorkTimeDAO.checkIn(dailyWorkTimeVO);
+        return CheckInResult.SUCCESS;
+		
 	}
-	
+```
+
+<br/>
+*️⃣ 퇴근 메소드   <br/>
+<br/>
+
+```
 	@Override
 	public boolean checkOut(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude) {
 		double userLat = Double.parseDouble(latitude); // 유저의 위도
@@ -181,8 +215,14 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 			}
 		return false; // 거리 범위 밖이면 저장하지 않음
 	}
+```
 
-	// 거리 계산 메소드 
+<br/>
+*️⃣ 위도 경도를 이용한 거리 계산 메소드  <br/>
+<br/>
+
+```
+// 거리 계산 메소드 
     public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         // 위도와 경도를 라디안으로 변환
         double lat1Rad = Math.toRadians(lat1); 	// 회사 위도 
@@ -205,19 +245,180 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
         return distance;
     }
    
+```
 
-    // 해당 유저의 전체 출퇴근 시간을 가져오는 메소드 
-	@Override
-	public List<DailyWorkTimeVO> selectList (String user_id) {
+<br/>
+*️⃣ Controller화면   <br/>
+<br/>
 
-		return dailyWorkTimeDAO.selectList(user_id);
-	}
+```
+package com.springCommunity.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.springCommunity.service.DailyWorkTimeService;
+import com.springCommunity.service.DailyWorkTimeServiceImpl.CheckInResult;
+import com.springCommunity.vo.DailyWorkTimeVO;
+
+@Controller
+public class DailyWorkTimeController {
+
+    @Autowired
+    private DailyWorkTimeService dailyWorkTimeService;
+
+        @RequestMapping(value = "user/checkIn.do", method = RequestMethod.POST)
+        public ResponseEntity<String> checkIn(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
+       	 // VO에서 위도와 경도 가져오기
+        
+            String latitude = dailyWorkTimeVO.getLatitude();
+            String longitude = dailyWorkTimeVO.getLongitude(); 
+        
+        
+        
+            // 비즈니스 로직을 Service로 위임
+    		// service인터페이스에서는 메소드의 호출 및 처리는 실행할 수 없으므로 , String 타입으로 전송 후 비즈니스 로직을 처리하는 serviceImpl에서 형변환 시켜서 사용하면 됨  
+            CheckInResult result = dailyWorkTimeService.checkIn(dailyWorkTimeVO, latitude, longitude);
+            
+            switch (result) {
+                case SUCCESS:
+                    return ResponseEntity.ok("출근 성공.");
+                case ALREADY_CHECKED_IN:
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("이미 오늘 출근했습니다.");
+                case OUTSIDE_RANGE:
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("회사 위치에서 벗어났습니다.");
+                default:
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("시스템 오류가 발생했습니다.");
+            }
+            
+        }
+        
+	  @RequestMapping(value="user/checkOut.do", method = RequestMethod.POST) public
+	  ResponseEntity<String> checkOut(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
+		  // VO에서 위도와 경도 가져오기 
+		  String latitude = dailyWorkTimeVO.getLatitude();
+		  String longitude = dailyWorkTimeVO.getLongitude();
+		  
+		  boolean isWithinRange = dailyWorkTimeService.checkOut(dailyWorkTimeVO,latitude, longitude);
+		  if(isWithinRange) {
+			  return ResponseEntity.ok("수고하셨습니다. 퇴근하세요");
+		  }else {
+			  return ResponseEntity.status(HttpStatus.FORBIDDEN).body("시스템 오류로 퇴근 처리가 되지 않습니다.");
+		  }
+	  }
+}
+
+```
+
+<br/>
+*️⃣ jsp에 존재하는 , ajax 코드    <br/>
+<br/>
+
+```
+<script>
+function checkIn() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+
+                // AJAX 요청
+                $.ajax({
+                    url: "user/checkIn.do",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        latitude: latitude,         // 위도
+                        longitude: longitude,       // 경도
+                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
+                    }),
+                    success: function (data) {
+                    	console.log(data);
+                        alert('출근 완료!');
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 400) {
+                            alert('이미 오늘 출근했습니다.');
+                        } else if (xhr.status === 403) {
+                            alert('회사 위치에서 벗어났습니다.');
+                        } else {
+                            alert('출근 처리 중 오류가 발생했습니다.');
+                        }
+                    }
+                });
+            },
+            (error) => {
+                alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
+            },
+            {
+                enableHighAccuracy: true, // 정확도 우선 모드
+                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
+                maximumAge: 0             // 항상 최신 위치 정보 수집
+            }
+        );
+    } else {
+        alert("브라우저가 위치 서비스를 지원하지 않습니다.");
+    }
+}
+// 퇴근 함수 
+function checkOut() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+
+                // AJAX 요청
+                $.ajax({
+                    url: "user/checkOut.do",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        latitude: latitude,         // 위도
+                        longitude: longitude,       // 경도
+                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
+                    }),
+                    success: function (data) {
+                        alert('퇴근 완료! ');
+                    },
+                    error: function (xhr, status, error) {
+                        alert('퇴근 처리가 되지 않았습니다.');
+                       console.log(xhr.responseText);
+                    }
+                });
+            },
+            (error) => {
+                alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
+            },
+            {
+                enableHighAccuracy: true, // 정확도 우선 모드
+                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
+                maximumAge: 0             // 항상 최신 위치 정보 수집
+            }
+        );
+    } else {
+        alert("브라우저가 위치 서비스를 지원하지 않습니다.");
+    }
+}
+</script>
+
 ```
 
 
- // 출근 시간 계산 로직 <br/>
 
- //📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
+
+
+
+ 
+
+ 📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
 
 ```
 	@Override
