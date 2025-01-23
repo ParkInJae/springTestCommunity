@@ -76,7 +76,8 @@
 	  ![Image](https://github.com/user-attachments/assets/f14e16ef-e1ce-4f60-9587-63fd869164fc) <br/>
    
 	► 출근 버튼을 누른 후 한 번 더 눌렀을 때 <br/>
-	 ![Image](https://github.com/user-attachments/assets/f5d1d928-a753-41cf-ad5b-839cf58768fb) <br/>
+![Image](https://github.com/user-attachments/assets/5e11c3f2-5e0f-40a0-99d8-f4d9318fda94) <br/>
+   
    <br/><br/><br/><br/>
    
 ➔ 위도 경도가 일치하지 않는 경우 
