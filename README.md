@@ -81,13 +81,19 @@
 ▶ 출근 버튼을 누른 후 한 번 더 눌렀을 때 <br/>
 ![Image](https://github.com/user-attachments/assets/5e11c3f2-5e0f-40a0-99d8-f4d9318fda94) <br/>
 
+▶ 퇴근버튼을 눌렀을 때    <br/>
+![Image](https://github.com/user-attachments/assets/527d0831-d041-4a0d-9780-bb9fe33e4cc6) <bt/>
+
+
 <br/><br/>
+
 ➔ 위도 경도가 일치하지 않는 경우 <br/>
 
 ▶ 출근버튼을 눌렀을 때    <br/>
-![Image](https://github.com/user-attachments/assets/1595dcd1-2d13-485e-85a3-7f650ffb4671)
+![Image](https://github.com/user-attachments/assets/1595dcd1-2d13-485e-85a3-7f650ffb4671) <br/>
 
-
+▶ 퇴근버튼을 눌렀을 때    <br/>
+![Image](https://github.com/user-attachments/assets/5abd5cc9-b663-4e87-84dc-8dcde9298dd6) <br/>
 
 
 
