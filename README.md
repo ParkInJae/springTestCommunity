@@ -10,6 +10,7 @@
 
 //📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
 // home.jsp <br/>
+```
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> <br/>
@@ -64,10 +65,11 @@
 	</sec:authorize>
 </body>
 </html>
+```
 
 
+<br/>
 
-<br/>   
 //📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
 // -------------------------------------------------------<br/>
 
@@ -80,8 +82,9 @@
 ![Image](https://github.com/user-attachments/assets/5e11c3f2-5e0f-40a0-99d8-f4d9318fda94) <br/>
 
 <br/><br/>
-➔ 위도 경도가 일치하지 않는 경우 
-▶ 출근버튼을 눌렀을 때    
+➔ 위도 경도가 일치하지 않는 경우 <br/>
+
+▶ 출근버튼을 눌렀을 때    <br/>
 
 
 
@@ -90,7 +93,7 @@
 
 
 
-
+```
 package com.springCommunity.service;
 
 import java.time.Duration;
@@ -203,9 +206,11 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 
 		return dailyWorkTimeDAO.selectList(user_id);
 	}
+```
 
 
  // 출근 시간 계산 로직 <br/>
+
  //📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
  // -------------------------------------------------------
 	
