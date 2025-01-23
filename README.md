@@ -71,7 +71,7 @@
 <br/>
 
 //📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
-// -------------------------------------------------------<br/>
+
 
 ➔ 위도 경도가 일치하는 경우 <br/>
 
@@ -83,6 +83,7 @@
 
 <br/><br/>
 ➔ 위도 경도가 일치하지 않는 경우 <br/>
+	수정해야함</br/>
 
 ▶ 출근버튼을 눌렀을 때    <br/>
 
@@ -212,8 +213,8 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
  // 출근 시간 계산 로직 <br/>
 
  //📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
- // -------------------------------------------------------
-	```
+
+```
 	@Override
 	public Map<String, Object> calculateWorkTime(String user_id) {
 	    // 1. 해당 유저의 전체 출퇴근 시간을 가져옴
@@ -294,8 +295,10 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
     }
 }
 ```
-// 📗4. fullCalender 내부의 ajax 의미 <br/>
-
+<br/>
+📗4. fullCalender 내부의 ajax 의미 
+<br/>
+```
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>  <br/>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  <br/>
@@ -560,11 +563,12 @@ function handleError(xhr) {
   <div id='calendar'></div>
 </body>
 </html>
-
-
+```
+<br/>
 
 📗 5. pom.xml 정리 
-
+<br/>
+```
 // 기존의 코드 
 	<properties>
 		<java-version>11</java-version>
@@ -585,3 +589,4 @@ function handleError(xhr) {
  
 위의 코드는 버전을 업그ㄹ
  
+```
