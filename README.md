@@ -213,7 +213,7 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 
  //📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
  // -------------------------------------------------------
-	
+	```
 	@Override
 	public Map<String, Object> calculateWorkTime(String user_id) {
 	    // 1. 해당 유저의 전체 출퇴근 시간을 가져옴
@@ -293,8 +293,9 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
         //시간과 , 분은 버리지 않고 가져오게끔 설정
     }
 }
-
+```
 // 📗4. fullCalender 내부의 ajax 의미 <br/>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>  <br/>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  <br/>
