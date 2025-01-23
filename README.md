@@ -83,10 +83,9 @@
 
 <br/><br/>
 ➔ 위도 경도가 일치하지 않는 경우 <br/>
-	수정해야함</br/>
 
 ▶ 출근버튼을 눌렀을 때    <br/>
-
+![Image](https://github.com/user-attachments/assets/1595dcd1-2d13-485e-85a3-7f650ffb4671)
 
 
 
