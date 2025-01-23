@@ -72,18 +72,15 @@
 // -------------------------------------------------------<br/>
 
 ➔ 위도 경도가 일치하는 경우 <br/>
-	► 출근버튼을 눌렀을 때    
-	  ![Image](https://github.com/user-attachments/assets/f14e16ef-e1ce-4f60-9587-63fd869164fc) <br/>
-   
-	► 출근 버튼을 누른 후 한 번 더 눌렀을 때 <br/>
-![Image](https://github.com/user-attachments/assets/5e11c3f2-5e0f-40a0-99d8-f4d9318fda94) <br/>
-   
-   <br/><br/><br/><br/>
-   
+
+▶ 출근버튼을 눌렀을 때    
+![Image](https://github.com/user-attachments/assets/f14e16ef-e1ce-4f60-9587-63fd869164fc) 
+ <br/>
+▶ 출근 버튼을 누른 후 한 번 더 눌렀을 때 
+![Image](https://github.com/user-attachments/assets/5e11c3f2-5e0f-40a0-99d8-f4d9318fda94) 
+<br/><br/>
 ➔ 위도 경도가 일치하지 않는 경우 
-
-
-	► 출근버튼을 눌렀을 때    
+▶ 출근버튼을 눌렀을 때    
 
 
 
