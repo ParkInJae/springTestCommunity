@@ -418,89 +418,56 @@ function checkOut() {
 
  
 
- 📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 
+<br/>
+ 📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
+ 
+*️⃣주간 근무 시간 계산할 때 어려웠던 점 
+<br/>
+1) controller <br/>
+2) serviceImpl(구현 클래스) <br/>
+3) DAO <br/>
+4) Mapper <br/>
+
+
+startDate와 endDate는 VO(DailyWorkTimeVO)의 필드가 아니라, SQL 쿼리에서 사용되는 파라미터입니다.<br/>
+따라서 VO에 startDate와 endDate 필드가 없어도 코드는 정상적으로 동작함
+<br/>
+
+*️⃣ mapper
+```
+//Mapper
+
+<select id="selectDetailedListByWeek" resultType="dailyWorkTimeVO">   <!-- my batis에서 설정해놓아서 오류 없음-->
+    SELECT 
+        check_in_time, 
+        check_out_time
+    FROM 
+        daily_work_time
+    WHERE 
+        user_id = #{userId}
+        AND DATE(check_in_time) BETWEEN #{startDate} AND #{endDate}
+    ORDER BY 
+        check_in_time ASC
+</select>
+```
+➡️ startDate와 endDate는 VO의 필드가 아니라,dao에서 전송한  메서드의 매개변수로 전달됩니다.
+
+*️⃣ dao
+```
+// dao
+List<DailyWorkTimeVO> selectDetailedListByWeek(String userId, String startDate, String endDate);
 
 ```
-	@Override
-	public Map<String, Object> calculateWorkTime(String user_id) {
-	    // 1. 해당 유저의 전체 출퇴근 시간을 가져옴
-	    List<DailyWorkTimeVO> list = dailyWorkTimeDAO.selectList(user_id);
 
-	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-	    Map<String, Long> dailyWorkHours = new TreeMap<>(Comparator.reverseOrder()); // 내림차순 정렬
-	    Map<String, Long> weeklyWorkHours = new TreeMap<>(Comparator.reverseOrder()); // 주간 근무 시간
+<br/>
 
-	    // 1) 날짜별 근무시간 계산
-	    list.forEach(workTime -> {
-	        String checkInStr = workTime.getCheck_in_time(); // 출근 시간
-	        String checkOutStr = workTime.getCheck_out_time(); // 퇴근 시간
 
-	        if (checkInStr == null || checkOutStr == null) {
-	            System.out.println("출근 또는 퇴근 시간이 null입니다.");
-	            return; // null 데이터는 건너뜀
-	        }
 
-	        LocalDateTime checkIn = LocalDateTime.parse(checkInStr, formatter);
-	        LocalDateTime checkOut = LocalDateTime.parse(checkOutStr, formatter);
-	        LocalDate localDate = checkIn.toLocalDate();
- 
-	        // 하루 근무 시간 계산
-	        long dailyMinutes = Duration.between(checkIn, checkOut).toMinutes();
-	        dailyWorkHours.merge(localDate.toString(), dailyMinutes, Long::sum); // TreeMap이므로 자동으로 정렬
-	    });
 
-	    // 2) 주차별 근무시간 합산
-	    dailyWorkHours.keySet().forEach(dateStr -> {
-	        LocalDate date = LocalDate.parse(dateStr);
-	        int weekOfYear = date.get(WeekFields.ISO.weekOfYear());
-	        String weekKey = date.getYear() + "년 " + weekOfYear + "주차";
 
-	        // 해당 날짜의 근무시간 가져오기
-	        long dailyMinutes = dailyWorkHours.getOrDefault(dateStr, 0L);
 
-	        // 주간 데이터에 합산
-	        weeklyWorkHours.merge(weekKey, dailyMinutes, Long::sum);
-	    });
 
-	    // 3) 결과 출력 (디버깅용)
-	    System.out.println("=== 일간 근무시간 (정렬됨) ===");
-	    dailyWorkHours.forEach((date, minutes) -> {
-	        System.out.printf("Date: %s, Work Time: %d minutes\n", date, minutes);
-	    });
 
-	    System.out.println("=== 주간 근무시간 ===");
-	    weeklyWorkHours.forEach((week, minutes) -> {
-	        System.out.printf("Week: %s, Work Time: %d minutes\n", week, minutes);
-	    });
-
-	    // 결과 반환
-	    Map<String, Object> result = new HashMap<>();
-	    result.put("dailyWorkHours", dailyWorkHours); // 일간 근무 시간 (정렬된 TreeMap)
-	    result.put("weeklyWorkHours", weeklyWorkHours); // 주간 근무 시간
-
-	    return result;
-	}
-
-	// 유틸 메서드: 하루 근무시간 계산
-    private long calculateDailyHours(String checkInTime, String checkOutTime) {
-    	// 만약 출근 or 퇴근 시간 둘 중 하나라도 null이면 시간 계산을 할 수 없음 
-    	if (checkInTime == null || checkOutTime == null ) {
-    		System.out.println("둘 중 하나가 null이라서 시간 계산을 할 수 없음 ");
-    		return 0;
-    	}
-    	
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime  start = LocalDateTime .parse(checkInTime, formatter);
-        LocalDateTime  end = LocalDateTime .parse(checkOutTime, formatter);
-        
-        return Duration.between(start, end).toMinutes(); // 시간 단위로 반환 >> 버림처리 
- 
-        // 따라서 시간 ,분을 이용해서 반환하게끔 설정
-        // 초 단위로는 버림 
-        //시간과 , 분은 버리지 않고 가져오게끔 설정
-    }
-}
-```
 <br/>
 📗4. fullCalender 내부의 ajax 의미 
 <br/>
