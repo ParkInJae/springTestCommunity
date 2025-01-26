@@ -411,26 +411,21 @@ function checkOut() {
 
 ```
 
-
-
-
-
-
- 
-
 <br/>
  📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
+ <br/>
  
 *️⃣주간 근무 시간 계산할 때 어려웠던 점 
 <br/>
+mapper의 startDate와 endDate를 
+
 1) controller <br/>
 2) serviceImpl(구현 클래스) <br/>
 3) DAO <br/>
 4) Mapper <br/>
 
 
-startDate와 endDate는 VO(DailyWorkTimeVO)의 필드가 아니라, SQL 쿼리에서 사용되는 파라미터입니다.<br/>
-따라서 VO에 startDate와 endDate 필드가 없어도 코드는 정상적으로 동작함
+
 <br/>
 
 *️⃣ mapper
@@ -450,17 +445,55 @@ startDate와 endDate는 VO(DailyWorkTimeVO)의 필드가 아니라, SQL 쿼리�
         check_in_time ASC
 </select>
 ```
-➡️ startDate와 endDate는 VO의 필드가 아니라,dao에서 전송한  메서드의 매개변수로 전달됩니다.
+➡️ startDate와 endDate는 VO(DailyWorkTimeVO)의 필드가 아니라, SQL 쿼리에서 사용되는 파라미터임 <br/>
+따라서 VO에 startDate와 endDate 필드가 없어도 코드는 정상적으로 동작하며 VO 필드와는 무관함
+
+
 
 *️⃣ dao
+
 ```
+
 // dao
 List<DailyWorkTimeVO> selectDetailedListByWeek(String userId, String startDate, String endDate);
 
 ```
 
+➡️ userId, startDate, endDate를 매개변수로 사용하며, sql의 조건절에 매핑할 것 
+
 <br/>
 
+*️⃣ ServiceImpl(구현 클래스)
+
+```
+
+@Override
+public Map<String, Object> getWeeklyWorkTimeDetails(String userId, String startDate) {
+// 현재 주차는 월요일부터 일요일까지로 설정
+/*
+만약 월요일부터 금요일까지 원한다면
+LocalDate endOfWeek = currentDate.with(TemppraAdjusters.nextOrSame(DayOfWeek.FRIDAY));로 설정하면 된다. 
+*/
+    // 주차 계산
+    LocalDate currentDate = startDate != null ? LocalDate.parse(startDate) : LocalDate.now();
+    LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // 주의 시작일 (월요일)
+    LocalDate endOfWeek = currentDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));       // 주의 종료일 (일요일)
+
+    // DAO 호출
+// DAO의 startDate와 endDate는 사실상 startOfWeek.toString(), endOfWeek.toString()으로 볼 수 있다. 
+    List<DailyWorkTimeVO> workTimes = dailyWorkTimeDAO.selectDetailedListByWeek(userId, startOfWeek.toString(), endOfWeek.toString());
+
+}
+
+```
+
+➡️ 매개변수 startDate를 받고, startDate를 계산하여  currentDate에 담는다. 
+
+➡️ startOfWeek: currendDate를 계산하여 startOfWeek에 담는다.
+
+➡️ endOfWeek :  currendDate를 계산하여 endOfWeek에 담는다.
+
+startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용된다.
 
 
 
