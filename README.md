@@ -504,6 +504,7 @@ startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용�
 <br/>
 📗4. fullCalender 내부의 ajax 의미 
 <br/>
+
 ```
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>  <br/>
@@ -769,13 +770,17 @@ function handleError(xhr) {
   <div id='calendar'></div>
 </body>
 </html>
+
 ```
+
 <br/>
 
 📗 5. pom.xml 정리 
 <br/>
+
+*️⃣기존의 코드 
+
 ```
-// 기존의 코드 
 	<properties>
 		<java-version>11</java-version>
 		<org.springframework-version>4.3.3.RELEASE</org.springframework-version>
@@ -784,7 +789,12 @@ function handleError(xhr) {
 		<org.slf4j-version>1.6.6</org.slf4j-version>
 	</properties>
  
-// 수정된 코드 
+```
+
+*️⃣ 수정된 코드 
+
+```
+
 	<properties>
 		<java-version>11</java-version>
 		<org.springframework-version>5.2.22.RELEASE</org.springframework-version>
@@ -792,7 +802,10 @@ function handleError(xhr) {
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.6.6</org.slf4j-version>
 	</properties>
- 
-위의 코드는 버전을 업그ㄹ
- 
+
 ```
+ <br/>
+위의 코드는 버전을 <org.springframework-version>4.3.3.RELEASE</org.springframework-version> 에서<org.springframework-version>5.2.22.RELEASE</org.springframework-version>로 업그레이드 하였다. <br/>
+<org.springframework-version> 의 버전을 업그레이드 하지 않는 경우에는 spring security가 적용이 되지 않아서, Run on Server를 작동시켜도 웹 페이지가 나오지 않으며, 자바 오류가 발생하기 때문에 spring security를 
+사용하기 위해서라면 반드시 버전을 업그레이드 해야한다. 
+ 
