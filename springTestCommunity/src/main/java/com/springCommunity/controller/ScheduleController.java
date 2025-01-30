@@ -8,18 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.springCommunity.service.MyDepartmentService;
 import com.springCommunity.service.ScheduleService;
 import com.springCommunity.vo.ScheduleVO;
-import com.springCommunity.vo.SearchVO;
 
 @RestController
 public class ScheduleController {
@@ -33,10 +30,10 @@ public class ScheduleController {
     // 전체 일정 조회 (GET)
     // ModelAttribute 바인딩하여 URL에서 파라미터로 전달되는 값들을 SearchVO 객체로 묶어서 처리할 수 있습니다.
 	@GetMapping("/api/schedule.do")
-	public ResponseEntity<Map<String, Object>> getSchedule(@ModelAttribute SearchVO searchVO) {
+	public ResponseEntity<Map<String, Object>> getSchedule(@RequestParam int department_id) {
 	    Map<String, Object> response = new HashMap<>();
 	    try {
-	        List<ScheduleVO> schedules = scheduleService.selectAllSchedule();
+	    	 List<ScheduleVO> schedules = scheduleService.selectSchedulesByDepartment(department_id);
 	        response.put("status", "success");
 	        response.put("data", schedules);
 	        return ResponseEntity.ok(response);
@@ -46,6 +43,7 @@ public class ScheduleController {
 	        return ResponseEntity.badRequest().body(response);
 	    }
 	}
+	/*
     // 특정 부서의 일정만 조회하는 것 
     @GetMapping("/api/schedule/department.do")
     public ResponseEntity<Map<String, Object>> selectSchedulesByDepartment(ScheduleVO scheduleVO) {
@@ -61,7 +59,7 @@ public class ScheduleController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-
+*/
     //일정 삽입
     @PostMapping("/api/scheduleInsert.do")
     public ResponseEntity<Map<String, Object>> insertSchedule(@RequestBody ScheduleVO scheduleVO) {
