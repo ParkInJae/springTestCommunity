@@ -532,7 +532,10 @@ LocalDate endOfWeek = currentDate.with(TemppraAdjusters.nextOrSame(DayOfWeek.FRI
 
 startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용된다.
 
-
+checkIn만 하고 다른 페이지로 이동하면 나타나는 오류 
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is java.lang.NullPointerException: text
+<br/>
+원인 ::  check_out_time이 null인 경우에 해당 오류가 발생함 
 
 
 
@@ -540,6 +543,34 @@ startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용�
 
 <br/>
 📗4. fullCalender 내부의 ajax 의미 
+
+
+일정 수정 및 삭제 선택 
+
+존재하는 일정을 클릭 후 문자열을 입력하여 수정 및 삭제를 할 수 있다. 
+
+![image](https://github.com/user-attachments/assets/e0083729-113d-4ed0-bb09-8d966c25f49b)
+
+잘못된 문자열을 입력한다면, 아래의 알림창이 뜸 
+
+![image](https://github.com/user-attachments/assets/f1ee8c85-b041-472b-9835-55f1daadd7fa)
+
+
+수정 전 일정 
+![image](https://github.com/user-attachments/assets/bb7a1368-d40b-4a3c-8018-23b1cb382849)
+
+수정 후 일정 
+![image](https://github.com/user-attachments/assets/25483010-5828-41b6-9e48-ec18a029c8d3)
+
+
+삭제 전 일정 
+![image](https://github.com/user-attachments/assets/04b76312-d225-4410-b6ce-47a000c4829c)
+
+삭제 후 일정
+![image](https://github.com/user-attachments/assets/a33a9226-52b7-41c8-8c1c-c86f3fb358de)
+
+
+
 <br/>
 
 ```
