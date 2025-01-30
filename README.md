@@ -547,27 +547,27 @@ org.springframework.web.util.NestedServletException: Request processing failed; 
 
 일정 수정 및 삭제 선택 
 
-존재하는 일정을 클릭 후 문자열을 입력하여 수정 및 삭제를 할 수 있다. 
+존재하는 일정을 클릭 후 문자열을 입력하여 수정 및 삭제를 할 수 있다. <br/>
 
-![image](https://github.com/user-attachments/assets/e0083729-113d-4ed0-bb09-8d966c25f49b)
+![image](https://github.com/user-attachments/assets/e0083729-113d-4ed0-bb09-8d966c25f49b) <br/>
 
-잘못된 문자열을 입력한다면, 아래의 알림창이 뜸 
+잘못된 문자열을 입력한다면, 아래의 알림창이 뜸 <br/>
 
-![image](https://github.com/user-attachments/assets/f1ee8c85-b041-472b-9835-55f1daadd7fa)
-
-
-수정 전 일정 
-![image](https://github.com/user-attachments/assets/bb7a1368-d40b-4a3c-8018-23b1cb382849)
-
-수정 후 일정 
-![image](https://github.com/user-attachments/assets/25483010-5828-41b6-9e48-ec18a029c8d3)
+![image](https://github.com/user-attachments/assets/f1ee8c85-b041-472b-9835-55f1daadd7fa) <br/>
 
 
-삭제 전 일정 
-![image](https://github.com/user-attachments/assets/04b76312-d225-4410-b6ce-47a000c4829c)
+수정 전 일정 <br/>
+![image](https://github.com/user-attachments/assets/bb7a1368-d40b-4a3c-8018-23b1cb382849) <br/>
 
-삭제 후 일정
-![image](https://github.com/user-attachments/assets/a33a9226-52b7-41c8-8c1c-c86f3fb358de)
+수정 후 일정 <br/>
+![image](https://github.com/user-attachments/assets/25483010-5828-41b6-9e48-ec18a029c8d3) <br/>
+
+
+삭제 전 일정 <br/>
+![image](https://github.com/user-attachments/assets/04b76312-d225-4410-b6ce-47a000c4829c) <br/>
+
+삭제 후 일정 <br/>
+![image](https://github.com/user-attachments/assets/a33a9226-52b7-41c8-8c1c-c86f3fb358de) <br/>
 
 
 
