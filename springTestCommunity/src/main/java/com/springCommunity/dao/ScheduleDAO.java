@@ -9,19 +9,17 @@ import org.springframework.stereotype.Repository;
 import com.springCommunity.vo.ScheduleVO;
 
 @Repository
-public class ScheduleServiceDAO {
+public class ScheduleDAO {
 	
 	@Autowired
 	private SqlSession sqlSession;
 	
-	String namespace="com.springCommunity.mapper.ScheduleServiceMapper.";
-	public List<ScheduleVO> selectAllSchedule() {
-        return sqlSession.selectList(namespace + "selectAllSchedule");
-    }
+	static final String namespace="com.springCommunity.mapper.ScheduleMapper.";
+	
 
     // 부서에 맞는 내용만 조회
-    public List<ScheduleVO> selectSchedulesByDepartment(ScheduleVO scheduleVO) {
-        return sqlSession.selectList(namespace + "selectSchedulesByDepartment", scheduleVO);
+    public List<ScheduleVO> selectSchedulesByDepartment(int department_id) {
+        return sqlSession.selectList(namespace + "selectSchedulesByDepartment", department_id);
     }
 
     // 일정 추가
