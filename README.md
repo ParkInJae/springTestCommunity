@@ -97,6 +97,39 @@
 ![Image](https://github.com/user-attachments/assets/5abd5cc9-b663-4e87-84dc-8dcde9298dd6) <br/>
 
 
+▶ 내부 소스코드에 오류가 있을 경우     <br/>
+![image](https://github.com/user-attachments/assets/ea37aa9d-0c50-4a01-aa41-2a711e668456)
+
+▶ 오류 내용 <br/>
+
+```
+
+java.lang.IllegalArgumentException: Mapped Statements collection does not contain value for com.springCommunity.mapper.DailyWorkTimeMapper.DailyCheckIn
+
+```
+
+✔️ 해결 방법 
+
+DAO에 존재하는 namespace의 문자열을 잘못 작성해서 발생한 오류였다 .
+
+```
+
+// 오류 발생 코드 
+// 상수 선언 
+	public final String namespace = "com.springCommunity.mapper.DailyWorkTimeMapper.";
+
+// 오류 수정 코드 
+// 상수 선언 
+	public final String namespace = "com.springCommunity.mapper.CheckInCheckOutMapper.";
+
+
+```
+
+
+
+
+
+
 
 <br/> 
 아래는 비즈니스 로직 및 jsp의 ajax를 통해 나타낸 소스코드이다. <br/>
