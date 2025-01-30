@@ -7,24 +7,28 @@
 <html>
 <head>
 <script src='<%= request.getContextPath()%>/resources/js/jquery-3.7.1.js'></script>
+<!-- CDN > 해당 링크에서 그대로 가져옴 -->
 <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script><!-- moment.js 추가  -->
 <script src='<%= request.getContextPath()%>/resources/js/index.global.js'></script>
 <script src='<%= request.getContextPath()%>/resources/js/index.global.min.js'></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-	 var manager = "${vo.user_id}";  // EL 태그 사용
-	  console.log(manager);
-    var calendarEl = document.getElementById('calendar');
+	 var manager = "${vo.user_id}";  // 현재 로그인한 사용자 id 
+	  console.log(manager); // 디버깅용 
+    var calendarEl = document.getElementById('calendar'); 
+ 	// FullCalendar 초기화
     var calendar = new FullCalendar.Calendar(calendarEl, {
         headerToolbar: {
             left: 'prevYear,prev,next,nextYear today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
+        // 기본 설정 
         initialDate: new Date(),
         navLinks: true,
-        editable: true,
+        // 직급 5이상만 일정 수정 가능 
+        editable: parseInt('${vo.job_position_id}') >=5 ,
         dayMaxEvents: true,
         selectable: true,
         
@@ -37,34 +41,35 @@ document.addEventListener('DOMContentLoaded', function() {
             minute: '2-digit',
             hour12: false
         },
-
-        events: function(info, successCallback, failureCallback) {
-            $.ajax({
-                url: '<c:url value="/api/schedule.do" />',
-                method: 'GET',
-                success: function(response) {
-                    if (response.status === 'success' && response.data) {
-                        const events = response.data.map(event => ({
-                            id: event.schedule_no,
-                            title: event.schedule_name,
-                            start: event.schedule_start_date,
-                            end: event.schedule_end_date,
-                            allDay: false
-                        }));
-                        successCallback(events);
-                    } else {
-                        failureCallback(response.message || '일정을 불러오는데 실패했습니다.');
-                    }
-                },
-                error: function(xhr) {
-                    failureCallback('일정을 불러오는데 실패했습니다.');
-                    handleError(xhr);
-                }
-            });
-        },
-
+		// 일정 데이터 로드 
+       events: function(info, successCallback, failureCallback) {
+		    const department_id = parseInt('${vo.department_id}'); // 현재 사용자의 부서 ID
+		    $.ajax({
+		        url: '<c:url value="/api/schedule.do" />',
+		        method: 'GET',
+		        data: { department_id: department_id }, // 부서 ID를 파라미터로 전달
+		        success: function(response) {
+		            if (response.status === 'success' && response.data) {
+		                const events = response.data.map(event => ({
+		                    id: event.schedule_no,
+		                    title: event.schedule_name,
+		                    start: event.schedule_start_date,
+		                    end: event.schedule_end_date,
+		                    allDay: false
+		                }));
+		                successCallback(events);
+		            } else {
+		                failureCallback(response.message || '일정을 불러오는데 실패했습니다.');
+		            }
+		        },
+		        error: function(xhr) {
+		            failureCallback('일정을 불러오는데 실패했습니다.');
+		            handleError(xhr);
+		        }
+		    });
+		},
         select: function(info) {
-            if (parseInt('${vo.job_position_id}') < 3) {
+            if (parseInt('${vo.job_position_id}') < 5) {
                 alert('일정 생성 권한이 없습니다.');
                 return;
             }
@@ -72,23 +77,32 @@ document.addEventListener('DOMContentLoaded', function() {
             const title = prompt('일정 제목을 입력하세요:');
             if (!title) return;
 
+            // 시작 시간 입력 (기본값: 선택한 시간)
             const startTime = prompt('시작 시간을 입력하세요 (HH:MM):', 
                 info.start.getHours().toString().padStart(2, '0') + ':' + 
                 info.start.getMinutes().toString().padStart(2, '0'));
 
+            // 종료 시간 입력 (기본값: 시작 시간 + 1시간)
+            const defaultEndTime = new Date(info.start);
+            defaultEndTime.setHours(defaultEndTime.getHours() + 1); // 시작 시간 + 1시간
             const endTime = prompt('종료 시간을 입력하세요 (HH:MM):', 
-                info.end.getHours().toString().padStart(2, '0') + ':' + 
-                info.end.getMinutes().toString().padStart(2, '0'));
+                defaultEndTime.getHours().toString().padStart(2, '0') + ':' + 
+                defaultEndTime.getMinutes().toString().padStart(2, '0'));
 
+            // 날짜와 시간 조합 
+            const startDate = formatDateTime(info.start, startTime);
+            const endDate = formatDateTime(info.start, endTime);  // info.start를 기준으로 종료 시간 설정 
+            
             const event = {
-                schedule_name: title,
-                schedule_start_date: formatDateTime(info.start, startTime),
-                schedule_end_date: formatDateTime(info.end, endTime),
-                schedule_state: '0',
-                department_id: parseInt('${vo.department_id}'),
-                job_position_id: parseInt('${vo.job_position_id}'),
-                user_id: manager,  // manager를 사용
-                schedule_no: null // 새로 생성될 일정에 대해 no 값은 null (후에 서버에서 처리)
+            		   schedule_name: title,
+            	        schedule_start_date: startDate,
+            	        schedule_end_date: endDate,
+            	        schedule_state: '0',
+            	        department_id: parseInt('${vo.department_id}'),
+            	        job_position_id: parseInt('${vo.job_position_id}'),
+/* JavaScript에서는 EL 태그를 직접 사용할 수 없으므로, JSP에서 미리 변수로 설정한 후 JavaScript에서 사용 */
+            	        user_id: manager, // 위에서  var manager = "${vo.user_id}";로 설정함
+            	        schedule_no: null
             };
 
             $.ajax({
@@ -114,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         },
         eventClick: function(info) {
-            if (parseInt('${vo.job_position_id}') < 3) {
+            if (parseInt('${vo.job_position_id}') < 5) {
                 alert('일정 수정 권한이 없습니다.');
                 return;
             }
@@ -194,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     calendar.render();
+    console.log('FullCalendar initialized successfully!');
 });
 
 function updateEvent(event, calendar) {
@@ -229,18 +244,26 @@ function updateEvent(event, calendar) {
 
 function formatDateTime(date, timeStr = null) {
     if (!date) return null;
-    const d = new Date(date);
+
+    // 날짜 객체 복사 (원본 수정 방지)
+    const d = new Date(date.getTime());
+
     if (timeStr) {
+        // 시간 설정
         const [hours, minutes] = timeStr.split(':').map(Number);
-        d.setHours(hours, minutes, 0);
+        d.setHours(hours);
+        d.setMinutes(minutes);
+        d.setSeconds(0);
+        d.setMilliseconds(0);
     }
-    return moment(d).format('YYYY-MM-DD HH:mm:ss');  // moment.js를 사용하여 날짜 포맷팅
+
+    return moment(d).format('YYYY-MM-DD HH:mm:ss');
 }
 
 function handleError(xhr) {
     console.error('API Error:', xhr);
     if (xhr.status === 403) {
-        alert('권한이 없습니다.');
+        alert('권한이 없습니다.'); 
     } else if (xhr.status === 400) {
         alert('잘못된 일정 데이터입니다: ' + (xhr.responseJSON?.message || xhr.responseText));
     } else {
