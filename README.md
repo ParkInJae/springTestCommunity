@@ -111,6 +111,9 @@ java.lang.IllegalArgumentException: Mapped Statements collection does not contai
 ✔️ 해결 방법 
 
 DAO에 존재하는 namespace의 문자열을 잘못 작성해서 발생한 오류였다 .
+해당 블로그를 참고해서 오류가 발생할 부분을 찾아보았다.
+링크 :: https://blog.naver.com/javaking75/220315971085
+
 
 ```
 
