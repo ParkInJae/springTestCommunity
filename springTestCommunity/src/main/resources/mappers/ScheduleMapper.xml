@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.springCommunity.mapper.ScheduleServiceMapper">
+<mapper namespace="com.springCommunity.mapper.ScheduleMapper">
 
 <select id="selectAllSchedule"  resultType="scheduleVO">
 	select * from SCHEDULE 
 </select>
 
-<select id="selectSchedulesByDepartment" parameterType="ScheduleVO" resultType="ScheduleVO">
-        SELECT * FROM schedule 
-        WHERE department_id = #{department_id}
+<select id="selectSchedulesByDepartment" parameterType="int" resultType="ScheduleVO">
+       SELECT s.*
+    FROM SCHEDULE s
+    INNER JOIN USER u ON s.USER_ID = u.USER_ID
+    WHERE u.DEPARTMENT_ID = #{department_id}
+    ORDER BY s.SCHEDULE_START_DATE ASC
 </select>
 
 <insert id="insertSchedule" parameterType="ScheduleVO">
