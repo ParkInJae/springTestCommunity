@@ -1040,24 +1040,26 @@ function checkIn() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-
-                // AJAX 요청
                 $.ajax({
                     url: "user/checkIn.do",
                     method: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
-                        latitude: latitude,         // 위도
-                        longitude: longitude,       // 경도
-                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
+                        latitude: latitude,
+                        longitude: longitude,
+                        user_id: user_id  // 세션의 사용자 ID
                     }),
                     success: function (data) {
-                    	console.log(data);
                         alert('출근 완료!');
                     },
-                    error: function (xhr, status, error) {
-                        alert('출근 실패! 이미 존재하는 출근 기록입니다.');
-                       console.log(xhr.responseText);
+                    error: function (xhr) {
+                        if (xhr.status === 400) {
+                            alert('이미 오늘 출근했습니다.');
+                        } else if (xhr.status === 403) {
+                            alert('회사 위치에서 벗어났습니다.');
+                        } else {
+                            alert('출근 처리 중 오류가 발생했습니다.');
+                        }
                     }
                 });
             },
@@ -1065,9 +1067,9 @@ function checkIn() {
                 alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
             },
             {
-                enableHighAccuracy: true, // 정확도 우선 모드
-                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
-                maximumAge: 0             // 항상 최신 위치 정보 수집
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
     } else {
@@ -1122,7 +1124,7 @@ function checkOut() {
             <img src="<%= request.getContextPath() %>/resources/img/메인.jpg" alt="메인 이미지" 
             style="width: 100%; height: 820px;">
             <div class="log_Info" style="font-size: 18px; text-decoration: none; color: white; font-weight: bold; margin-top: 20px;">
-                <a href="join.do" style="color:white;">회원가입</a>  
+                <!-- <a href="join.do" style="color:white;">회원가입</a> | --> 
                 <a id="loginBtn" style="color:white;">로그인</a><br>
             </div>
         </div>
@@ -1176,8 +1178,10 @@ function checkOut() {
 					<div id="working_info">근태정보</div><br>
 					<button onclick="checkIn()">출근 </button> &nbsp;&nbsp;&nbsp;&nbsp;
 					<button onclick="checkOut()">퇴근</button>
-					<div id="working_info">2024-12-05 11:51</div><br>
-					<div id="alarm"><img id="alarm_icon" src="<%= request.getContextPath() %>/resources/img/icon/alarm.png" alt="알림"></div>
+				<!--<div id="working_info">2024-12-05 11:51</div><br>
+					<div id="working_info">출근시각 : </div><br>
+					<div id="working_info">퇴근시각 : </div> -->
+					<%-- <div id="alarm"><img id="alarm_icon" src="<%= request.getContextPath() %>/resources/img/icon/alarm.png" alt="알림"></div> --%>
 				</div>
 				<div id="menu_bar">
 					<div id="menu"><img id="menu_icon" src="<%= request.getContextPath() %>/resources/img/icon/groups.png" alt="조직도"></div>

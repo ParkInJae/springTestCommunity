@@ -1,196 +1,150 @@
 package com.springCommunity.service;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.springCommunity.dao.DailyWorkTimeDAO;
 import com.springCommunity.vo.DailyWorkTimeVO;
-import com.springCommunity.vo.WeeklyWorkTimeVO;
 
 @Service
 public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 
 	@Autowired
-	private DailyWorkTimeDAO dailyWorkTimeDAO;
-	//sqlSession >> 쿼리를 실행하는 객체
-	//세션과 해당 쿼리의 값을 가져오기 위해 세션과 정적변수 선언 
-	@Autowired
-	private SqlSession sqlSession;
-	public final String namespace = "com.springCommunity.mapper.DailyWorkTimeMapper.";
-	// 회사의 위도와 경도는 Service에서 관리
-	private final double COMPANY_LATITUDE = 35.8402587260868; // 예: 전주 이젠 위도
-	private final double COMPANY_LONGITUDE = 127.132499131298; // 예: 전주 이젠 경도
-	private final double CHECK_IN_DISTANCE_KM = 5.0; // 반경 1km
-
-	// 지구 반지름 
-	private static final double EARTH_RADIUS = 6371.0;
+	DailyWorkTimeDAO dailyWorkTimeDAO ;
 	
-	
-	@Override
-	public boolean checkIn(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude) {
-		
-		int count = sqlSession.selectOne(namespace + "DailyCheckIn",dailyWorkTimeVO);
-		double userLat = Double.parseDouble(latitude); // 유저의 위도
-		double userLon = Double.parseDouble(longitude); // 유저의 경도
-
-		double distance = calculateDistance(COMPANY_LATITUDE, COMPANY_LONGITUDE, userLat, userLon);
-		System.out.println("beford if문 distance=======================" + distance);
-		// 메소드 distance를 통해 얻은 경도가 상수의 반경보다 작을 경우 DAO에게 위도와 경도 값을 빼고 전달
-		if (distance <= CHECK_IN_DISTANCE_KM) {
-			System.out.println("distance=======================" + distance);
-			if(count == 0 ) {
-				dailyWorkTimeDAO.checkIn(dailyWorkTimeVO); // 거리 범위 내면 데이터 저장
-				return true;
-			}else {
-				System.out.println("이미 존재하는 출근 기록입니다.");
-			}
-		}
-		return false; // 거리 범위 밖이면 저장하지 않음
-	}
-	
-	@Override
-	public boolean checkOut(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude) {
-		double userLat = Double.parseDouble(latitude); // 유저의 위도
-		double userLon = Double.parseDouble(longitude); // 유저의 경도
-
-		double distance = calculateDistance(COMPANY_LATITUDE, COMPANY_LONGITUDE, userLat, userLon);
-		System.out.println("beford if문 distance=======================" + distance);
-		// 메소드 distance를 통해 얻은 경도가 상수의 반경보다 작을 경우 DAO에게 위도와 경도 값을 빼고 전달
-		if (distance <= CHECK_IN_DISTANCE_KM) {
-			System.out.println("distance=======================" + distance);
-			dailyWorkTimeDAO.checkOut(dailyWorkTimeVO);
-				 // 거리 범위 이내이면 , 퇴근 정보 저장 
-				return true;
-			}else {
-				System.out.println("거리를 벗어났습니다.");
-			}
-		return false; // 거리 범위 밖이면 저장하지 않음
-	}
-
-	// 거리 계산 메소드 
-    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        // 위도와 경도를 라디안으로 변환
-        double lat1Rad = Math.toRadians(lat1); 	// 회사 위도 
-        double lon1Rad = Math.toRadians(lon1); 	// 회사 경도
-        double lat2Rad = Math.toRadians(lat2);	// 사용자 위도 
-        double lon2Rad = Math.toRadians(lon2);	// 사용자 경도
-
-        // 위도 및 경도 차이 계산
-        double deltaLat = lat2Rad - lat1Rad;
-        double deltaLon = lon2Rad - lon1Rad;
-
-        // Haversine 공식을 사용하여 거리 계산
-        double a = Math.pow(Math.sin(deltaLat / 2), 2) +
-                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                Math.pow(Math.sin(deltaLon / 2), 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // 거리 계산 (단위: km)
-        double distance = EARTH_RADIUS * c;
-        return distance;
-    }
-   
-
     // 해당 유저의 전체 출퇴근 시간을 가져오는 메소드 
 	@Override
 	public List<DailyWorkTimeVO> selectList (String user_id) {
 
 		return dailyWorkTimeDAO.selectList(user_id);
 	}
- 
+
+
+// 전체 근무 시간 및 일간 근무 시간 코드 
+	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+	 @Override
+	    public Map<String, Object> getWeeklyWorkTimeDetails(String user_id, String startDate) {
+		 
+	        // 현재 날짜 기준으로 주차 계산
+	        LocalDate currentDate = startDate != null ? LocalDate.parse(startDate) : LocalDate.now();
+	        
+	        // 1. 주의 시작일과 종료일을 계산 (월요일~ 일요일)
+	        LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // 주의 시작일 (월요일)
+	        LocalDate endOfWeek = startOfWeek.plusDays(6); // 월요일부터 6일 추가  // 주의 종료일 (일요일)
+
+	        // 2. DAO를 통해 해당 주차의 근무 시간 목록을 조회
+	        List<DailyWorkTimeVO> dbWorkTimes = dailyWorkTimeDAO.selectDetailedListByWeek(user_id, startOfWeek.toString(), endOfWeek.toString());
 	
-	@Override
-	public Map<String, Object> calculateWorkTime(String user_id) {
-	    // 1. 해당 유저의 전체 출퇴근 시간을 가져옴
-	    List<DailyWorkTimeVO> list = dailyWorkTimeDAO.selectList(user_id);
-
-	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-	    Map<String, Long> dailyWorkHours = new TreeMap<>(Comparator.reverseOrder()); // 내림차순 정렬
-	    Map<String, Long> weeklyWorkHours = new TreeMap<>(Comparator.reverseOrder()); // 주간 근무 시간
-
-	    // 1) 날짜별 근무시간 계산
-	    list.forEach(workTime -> {
-	        String checkInStr = workTime.getCheck_in_time(); // 출근 시간
-	        String checkOutStr = workTime.getCheck_out_time(); // 퇴근 시간
-
-	        if (checkInStr == null || checkOutStr == null) {
-	            System.out.println("출근 또는 퇴근 시간이 null입니다.");
-	            return; // null 데이터는 건너뜀
+	        
+	        // 디버깅 
+	        if(dbWorkTimes == null || dbWorkTimes.isEmpty()) {
+	        	System.out.println("workTimes의 값이 비어있음");
+	        }else {
+	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>" + dbWorkTimes.get(0).getCheck_in_time());
+	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>"  + dbWorkTimes.get(0).getCheck_out_time());
+	        }
+	        //3 [핵심 로직]  jsp화면에서 chart.js를 사용하기 때문에  데이터와 레이블의 동기화가 필요함 (데이터베이스에 없는 날짜는 결과에 포함되지 않아 chart.js에 누락될 수 있기 때문에 레이블과 데이터의 동기화가 잘 되지 않을 수 있음) 
+	        // 만약 chart.js를 이용하지 않고 근무 시간만 보여준다면 굳이 작성할 필요가 없음 
+	        // 결국 데이터와 레이블의 동기화를 위해 필요한 로직임 
+	        
+	        // 7일간의 데이터 구조 생성 (월~일)
+	        List<Map<String, Object>> workTimeDetails = new ArrayList<>();
+	        for (int i = 0; i < 7; i++) {
+	            LocalDate currentDay = startOfWeek.plusDays(i);
+	            Map<String, Object> dayData = createDayData(currentDay, dbWorkTimes); // dayData에 createDayData를 메소드를 활용한 값을 집어 넣음 
+	            workTimeDetails.add(dayData);
 	        }
 
-	        LocalDateTime checkIn = LocalDateTime.parse(checkInStr, formatter);
-	        LocalDateTime checkOut = LocalDateTime.parse(checkOutStr, formatter);
-	        LocalDate localDate = checkIn.toLocalDate();
+	        // 결과 맵 구성
+	        Map<String, Object> result = new HashMap<>();
+	        result.put("workTimeDetails", workTimeDetails);
+	        result.put("startOfWeek", startOfWeek);
+	        result.put("endOfWeek", endOfWeek);
+	        return result;
+	    }
+	        
+	        
+	        
+	 private Map<String, Object> createDayData(LocalDate date, List<DailyWorkTimeVO> dbWorkTimes) {
+		 
+ /*
+  .stream 	 ::  dbWorkTimes는 DB에서 조회한 유저의 근무 시간, 이때 , stream()을 사용하여 , 반복을 돌림
+  
+  .filter()  :: .stream()에서 각 요소에 대한 조건을 검사함
+  
+  w 		 :: .stream()을통한 요소들  즉 , dbWorkTimes.stream()의 타입이 DailyWorkTimeVO 이고, 
+  				 w는 스트림의 요소이기 때문에 , w의 타입은 DailyWorkTimeVO 이다.
+  				 
+.findFirst   ::  위의 .filter의 조건에 만족하는 첫 번재 요소가 없는 경우 Optional.empty()를 반환함
  
-	        // 하루 근무 시간 계산
-	        long dailyMinutes = Duration.between(checkIn, checkOut).toMinutes();
-	        dailyWorkHours.merge(localDate.toString(), dailyMinutes, Long::sum); // TreeMap이므로 자동으로 정렬
-	    });
+.orElse(null):: Optional에서 값이 없을 때 , 명시적으로 null을 반환하게 하는 방법 
 
-	    // 2) 주차별 근무시간 합산
-	    dailyWorkHours.keySet().forEach(dateStr -> {
-	        LocalDate date = LocalDate.parse(dateStr);
-	        int weekOfYear = date.get(WeekFields.ISO.weekOfYear());
-	        String weekKey = date.getYear() + "년 " + weekOfYear + "주차";
+ *Optional  >> null을 직접 다루지 않고 안전하게 값 유무를 관리하기 위한 도구이며, 자바8이상부터 사용가능함 
+  				  
+  */
+		 //4. DB에서 해당 날짜 데이터 찾기 
+		    Map<String, Object> dayData = new HashMap<>();
+		    DailyWorkTimeVO workTime = dbWorkTimes.stream() // dbWorkTimes는 유저의 근무 시간, .stream()을 돌려서 근무시간을 반복
+		    		.filter(w -> date.equals(LocalDate.parse(w.getCheck_in_time().split(" ")[0])))   // 날짜만 추출하고 , 추출한 날짜를 LocalDate로 변환 
+		    		.findFirst() 
+		    		.orElse(null);
+		    
+		    
+/*
+ 출근 시간이 존재하나, 퇴근시간이 없으면 NullPointException 오류 발생  따라서 출근 시간, 퇴근 시간 둘 다 null인 경우도 생각해서 유효성 검사를 해야함
+  */
+		    
+		    // 출근 시간 ,퇴근 시간, 근무 시간 유효성 검사  
+		    // 5. 근무 시간에 대한 데이터가 존재시 , 데이터를 map에 키와 값으로 저장
+		    if (workTime != null) {
+		        // 출근 시간이 null인 경우 처리
+		    	//null이 아닌 경우, fomatter 형식으로 변환 null인 경우 null
+		        LocalDateTime checkIn = (workTime.getCheck_in_time() != null) ? LocalDateTime.parse(workTime.getCheck_in_time(), formatter) : null;
 
-	        // 해당 날짜의 근무시간 가져오기
-	        long dailyMinutes = dailyWorkHours.getOrDefault(dateStr, 0L);
+		        // 퇴근 시간이 null인 경우 처리
+		        LocalDateTime checkOut = (workTime.getCheck_out_time() != null) ? LocalDateTime.parse(workTime.getCheck_out_time(), formatter) : null;
 
-	        // 주간 데이터에 합산
-	        weeklyWorkHours.merge(weekKey, dailyMinutes, Long::sum);
-	    });
+		        // 근무 시간 계산 (출근 또는 퇴근 시간이 null이면 0분)
+		        long minutes = (checkIn != null && checkOut != null) ? Duration.between(checkIn, checkOut).toMinutes() : 0L;
+		        dayData.put("date", date.toString());
+		        dayData.put("checkInTime", workTime.getCheck_in_time());
+		        dayData.put("checkOutTime", workTime.getCheck_out_time());
+		        dayData.put("workDuration", minutes);
+		    } else {
+		    	// 데이터가 존재하지 않는다면, 근무일자는 해당 일자 .  출근 시간, 퇴근 시간은 null , 근무 시간을 0을 map에 대입  
+		        dayData.put("date", date.toString());
+		        dayData.put("checkInTime", "null");
+		        dayData.put("checkOutTime", "null");
+		        dayData.put("workDuration", 0L);
+		    }
+		    return dayData;
+	    }
+	 
 
-	    // 3) 결과 출력 (디버깅용)
-	    System.out.println("=== 일간 근무시간 (정렬됨) ===");
-	    dailyWorkHours.forEach((date, minutes) -> {
-	        System.out.printf("Date: %s, Work Time: %d minutes\n", date, minutes);
-	    });
-
-	    System.out.println("=== 주간 근무시간 ===");
-	    weeklyWorkHours.forEach((week, minutes) -> {
-	        System.out.printf("Week: %s, Work Time: %d minutes\n", week, minutes);
-	    });
-
-	    // 결과 반환
-	    Map<String, Object> result = new HashMap<>();
-	    result.put("dailyWorkHours", dailyWorkHours); // 일간 근무 시간 (정렬된 TreeMap)
-	    result.put("weeklyWorkHours", weeklyWorkHours); // 주간 근무 시간
-
-	    return result;
-	}
-
-	// 유틸 메서드: 하루 근무시간 계산
-    private long calculateDailyHours(String checkInTime, String checkOutTime) {
-    	// 만약 출근 or 퇴근 시간 둘 중 하나라도 null이면 시간 계산을 할 수 없음 
-    	if (checkInTime == null || checkOutTime == null ) {
-    		System.out.println("둘 중 하나가 null이라서 시간 계산을 할 수 없음 ");
-    		return 0;
-    	}
-    	
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime  start = LocalDateTime .parse(checkInTime, formatter);
-        LocalDateTime  end = LocalDateTime .parse(checkOutTime, formatter);
-        
-        return Duration.between(start, end).toMinutes(); // 시간 단위로 반환 >> 버림처리 
- 
-        // 따라서 시간 ,분을 이용해서 반환하게끔 설정
-        // 초 단위로는 버림 
-        //시간과 , 분은 버리지 않고 가져오게끔 설정
-    }
-    
-    
-    
+/*		    
+유효성 검사 전  코드 
+		    if (workTime != null) {
+		        LocalDateTime checkIn = LocalDateTime.parse(workTime.getCheck_in_time(), formatter);
+		        LocalDateTime checkOut = LocalDateTime.parse(workTime.getCheck_out_time(), formatter);
+		        // Duration.between(a,b).toMinutes() :: 두 시간 객체 사이에서 지속 시간을 나타내며, 분으로 표현함
+		        long minutes = Duration.between(checkIn, checkOut).toMinutes();  
+*/
+	 
+	 
+	 
 }
+
+

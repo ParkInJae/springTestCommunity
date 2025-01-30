@@ -24,10 +24,7 @@ public class MyDepartmentDAO {
 	}
 	
 	// 부서 업무 조회 
-	public List<ScheduleVO> selectSchedulesByDepartment(int departmentId) {
-		
-		return sqlSession.selectList(namespace + "selectAllSchedule",departmentId);
-	}
+
 	
 	
 	// 글 작성 
@@ -35,5 +32,12 @@ public class MyDepartmentDAO {
 		
 		return sqlSession.insert(namespace + "insert" ,scheduleVO);
 	}
+	
+	
+	public List<ScheduleVO> selectSchedulesByDepartment(int department_id) {
+		
+		return sqlSession.selectList(namespace + "selectSchedulesByDepartment",department_id);
+	}
+	
 	
 }

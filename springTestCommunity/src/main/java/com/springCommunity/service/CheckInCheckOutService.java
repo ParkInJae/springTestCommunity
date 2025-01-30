@@ -1,11 +1,12 @@
 package com.springCommunity.service;
 
 import java.util.List;
-import java.util.Map;
 
+import com.springCommunity.service.CheckInCheckOutServiceImpl.CheckInResult;
+import com.springCommunity.vo.CheckInCheckOutVO;
 import com.springCommunity.vo.DailyWorkTimeVO;
 
-public interface DailyWorkTimeService {
+public interface CheckInCheckOutService {
 	/*
 //	public boolean checkIn(DailyWorkTimeVO dailyWorkTimeVO, Double.parseDouble(latitude), Double.parseDouble(longitude));에서 오류가 발생하는 이유 '
   	
@@ -16,16 +17,15 @@ public interface DailyWorkTimeService {
 	 * 인터페이스는 **메서드의 시그니처(이름, 반환 타입, 매개변수)**만 정의해야 합니다. 매개변수에는 데이터 타입과 변수 이름만 작성해야
 	 * 하며, 메서드 구현은 인터페이스에 포함될 수 없습니다.
 	 */
+	
+	
+		public CheckInResult checkIn(CheckInCheckOutVO checkInCheckOutVO, String latitude, String longitude);
 		
-		public List<DailyWorkTimeVO> selectList (String user_id);
+		public boolean checkOut(CheckInCheckOutVO checkInCheckOutVO, String latitude, String longitude);
 		
-		
-		public Map<String, Object> getWeeklyWorkTimeDetails(String user_id, String startDate);
-		
-/*
- * 해당 코드는 로직 오류가 있음		
-  public Map<String, Object> calculateWorkTime(String user_id);
-*/
+		public List<CheckInCheckOutVO> selectList (String user_id);
+	
+	
 		
 }
 

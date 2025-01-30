@@ -22,10 +22,12 @@ public class MyDepartmentServiceImpl implements MyDepartmentService{
 	public UserInfoVO selectUser(String user_id) {
 		return myDepartmentDAO.selectUser(user_id);
 	}
+	
+	
 	// 전체 조회 
 	@Override
-	public List<ScheduleVO> selectSchedulesByDepartment( int departmentId) {
-		return myDepartmentDAO.selectSchedulesByDepartment(departmentId);
+	public List<ScheduleVO> selectSchedulesByDepartment( int department_id) {
+		return myDepartmentDAO.selectSchedulesByDepartment(department_id);
 		
 	}
 
@@ -34,12 +36,27 @@ public class MyDepartmentServiceImpl implements MyDepartmentService{
 	@Override
 	public int insert(ScheduleVO scheduleVO) {
 		// 팀장 이상이면 캘린더에 삽입이 가능하게 설정
-		
+		if (!hasSchedulePermission(scheduleVO.getUser_id())) {
+            return 0;
+        }
 		// 이상이면 DAO로 연결 아니면 return 으로 종료 
 //		if()
-		
-		
 		return 0;
+	}
+	
+	// 아이디와 부서 확인 
+	@Override
+	public boolean validateUserDepartment(String user_id, int department_id) {
+		
+		UserInfoVO user = selectUser(user_id);
+		return user != null && user.getDepartment_id() == department_id;
+	}
+	
+	// 권한에 대한 직책 확인
+	@Override
+	public boolean hasSchedulePermission(String user_id) {
+		UserInfoVO user = selectUser(user_id);
+        return user != null && user.getJob_position_id() >= 5;
 	}
 	
 	

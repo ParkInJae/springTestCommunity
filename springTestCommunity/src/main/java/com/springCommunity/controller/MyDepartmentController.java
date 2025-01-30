@@ -22,6 +22,7 @@ import com.springCommunity.vo.TaskVO;
 import com.springCommunity.vo.UserInfoVO;
  
 @Controller  // component로 작성하면 서버가 찾지 못함 
+
 @RequestMapping("/user")
 public class MyDepartmentController {
 	@Autowired
@@ -44,8 +45,13 @@ public class MyDepartmentController {
 		 각 부서의 업무만 볼 수 있도록 제한할 수 있습니다.
 		특정 부서에 속한 팀장만 특정 권한을 가지도록 처리할 수 있습니다.
 		따라서, 이 코드는 부서별로 일정 데이터를 분리하고 조회하는 로직을 추가하기 위한 것입니다.*/
-		int departmentId = vo.getDepartment_id();
-		List<ScheduleVO> ScheduleList =  myDepartmentService.selectSchedulesByDepartment(departmentId);
+		int department_id = vo.getDepartment_id();
+		
+		List<ScheduleVO> ScheduleList =  myDepartmentService.selectSchedulesByDepartment(department_id);
+		System.out.println("가져온 정보 중 첫번째 일정의 name : "+ ScheduleList.get(0).getSchedule_name());
+		
+		
+		
 		// 담아온 부서 정보를 list에 담기 
 	    model.addAttribute("ScheduleList", ScheduleList);
 	    model.addAttribute("vo", vo);

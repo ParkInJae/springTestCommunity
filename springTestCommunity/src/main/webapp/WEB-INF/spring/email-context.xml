@@ -23,6 +23,7 @@
             </props>
       </property>
       </bean>
+      
    <!-- 네이버 이메일 인증 관련 빈 추가 -->
    <bean id="naverMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
       <property name="host" value="smtp.naver.com" />

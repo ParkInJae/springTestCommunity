@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springCommunity.mapper.CheckInCheckOutMapper">
+
+<insert id="CheckIn" parameterType="checkInCheckOutVO" >
+	insert into DAILY_WORK_TIME(USER_ID, CHECK_IN_TIME)
+	values(#{user_id}, now())
+</insert>
+
+<!-- CURDATE() >> 날짜만 추출 따라서  DATE(CHECK_IN_TIME) = CURDATE()는 조건에 부합한다.-->
+<select id="DailyCheckIn" parameterType="checkInCheckOutVO" resultType="int">
+SELECT count(*) FROM  DAILY_WORK_TIME
+WHERE USER_ID = #{user_id} AND DATE(CHECK_IN_TIME) = CURDATE()  
+</select>
+
+
+<update id="checkOut" parameterType="checkInCheckOutVO">
+  update DAILY_WORK_TIME 
+    set CHECK_OUT_TIME = now()
+    where DATE_FORMAT(WORK_DATE, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')
+    and USER_ID = #{user_id}
+ </update>
+ 
+<!-- 유저 아이디가 매개변수로 들어오고, 반환은   dailyWorkTimeVO로 설정 함 -->
+<select id="selectList" parameterType="checkInCheckOutVO" resultType="checkInCheckOutVO">
+SELECT * 
+FROM DAILY_WORK_TIME
+WHERE USER_ID = #{user_id} and date_format(NOW(),'%Y-%m-%d')
+    BETWEEN
+        (SELECT ADDDATE(CURDATE(), - WEEKDAY(CURDATE()) + 0 ))
+    AND
+        (SELECT ADDDATE(CURDATE(), - WEEKDAY(CURDATE()) + 6 ));
+</select>
+
+<select id="selectDetailedListByWeek" parameterType="map" resultType="checkInCheckOutVO">
+    SELECT CHECK_IN_TIME, CHECK_OUT_TIME
+    FROM DAILY_WORK_TIME
+    WHERE USER_ID = #{userId} AND DATE(check_in_time) BETWEEN #{startDate} AND #{endDate}
+    ORDER BY CHECK_IN_TIME ASC
+</select>
+
+
+</mapper>
