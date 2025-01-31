@@ -1,12 +1,22 @@
--------------------------------------------------------------------------------------- <br/>
+ 1. home.jsp에서 chart.js 정리  <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
 
--------------------------------------------------------------------------------------- <br/>
+ 3. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
+ 
+ 4. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
+ 
+ 5. fullCalender 내부의 ajax 의미 <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
 
- 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
- 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
- 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
- 4. fullCalender 내부의 ajax 의미 <br/>
- 5. pom.xml 정리 
+ 
+ 7. pom.xml 정리 
+
 
 📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
 
@@ -14,10 +24,15 @@
 ```
 <%@ page language="java" contentType="text/html; charset=UTF-8" 
 	pageEncoding="UTF-8" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> <br/>
-<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %><br/>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %><br/>
-<%@ include file="./include/header.jsp" %><br/>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ include file="./include/header.jsp" %>
+<%@ page isELIgnored="false" %>
+<!-- Chart.js CDN  >> Chart.js라이브러리를 CDN으로 가져오겠다는 의미 -->
+<!-- 이때, CDN을 사용하면 서버에서 직접 다운로드하지 않고, 직접 가져와서 사용할 수 있음  -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/resources/css/home.css" />
 	<hr>
 	<sec:authorize access="isAuthenticated()">
@@ -25,47 +40,121 @@
 			<br>
 			<!-- 근무시간 나타내기  -->
 			 <div class="summaryContainer">
-			    <div>근무 관련 요약 </div>
+			    <div>현재 주차 </div>
 			    <div class="mainCalender">
-			        <span id="currentWeekDisplay">1주차</span>
+		            <a href="?startDate=${startOfWeek.minusWeeks(1)}">&lt;</a>
+			        <span id="currentWeekDisplay">${startOfWeek}~${endOfWeek}</span>
+			        <a href="?startDate=${startOfWeek.plusWeeks(1)}"> &gt;</a>
 			    </div>
 			</div>
+			<!-- 월요일부터 일요일까지 근무 시간 나타내기  -->
 		    <div class="diagramContainer">
-		        <div class="weekDiagram">
-		        <!-- 특정 값을 나중에 스크립트로 바꿔야함  -->
-		            <div >주간 근무 시간 </div> 
-		        </div>
-		        <div class="addWeekDiagram">
-		        <!-- 특정 값을 나중에 스크립트로 바꿔야함  -->
-		            <div>추가 근무 시간 </div>
-		        </div>
+		    	<canvas class="chart" id="workChart"  style="height: 400px;"<%-- width="400" height="200" --%>></canvas>
 		    </div>
+		    
+
+  
+<%-- var workTimes = [
+    <c:forEach var="workTime" items="${workTimeDetails}" varStatus="status">
+        Math.round(${workTime.workDuration}),  // minutes 단위로 변환하지 않고 그대로 사용
+        <c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+]; --%>
+
+ 
+<script>
+
+//차트 데이터 구성
+var chartData = {
+	    labels: ['월', '화', '수', '목', '금', '토', '일'],
+	    datasets: [{
+	        label: '일일 근무 시간',
+	        data: [
+	            <c:forEach items="${workTimeDetails}" var="day" varStatus="loop">
+	                ${day.workDuration}<c:if test="${!loop.last}">,</c:if>
+	            </c:forEach>
+	        ],
+	        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+	        borderColor: 'rgba(54, 162, 235, 1)',
+	        borderWidth: 1
+	    }]
+	};
+//차트 옵션
+var chartOptions = {
+    maintainAspectRatio: false,
+    scales: {
+        y: {
+            beginAtZero: true,
+            min: 0,  // 세로축 최소값
+            max: 540, // 세로축 최대값 (예시: 12시간)
+            ticks: {
+                stepSize: 60, // 1시간(60분) 단위로 눈금 표시
+                callback: function(value) {
+                    return Math.floor(value / 60) + "h " + (value % 60) + "m";
+                }
+            }
+        }
+    },
+    plugins: {
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    var label = context.dataset.label || '';
+                    if (label) label += ': ';
+                    if (context.parsed.y !== null) {
+                        label += Math.floor(context.parsed.y / 60) + "시간 " + (context.parsed.y % 60) + "분";
+                    }
+                    return label;
+                }
+            }
+        }
+    }
+};
+
+// 차트 생성
+var ctx = document.getElementById('workChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: chartOptions
+});
+</script>	    
+		    
+		    
+		    
+		    
 		    <!-- 주간 테이블 (연장 근무 시간을 포함한 총 근무 시간을 작성 ) -->
 				<hr>
 				<table class="workTable" border=1 style="tex-align">
 					<thead>
 				        <tr>
 				            <th>날짜</th>
+				            <th>출근 시간</th>
+				            <th>퇴근 시간</th>
 				            <th>근무 시간</th>
+				            
 				        </tr>
 				    </thead>
 					<tbody>
-					<c:forEach var="entry" items="${dailyWorkHours}"> <--! forEach 사용해서 반복문 돌림 --> 
-					    <fmt:formatNumber value="${entry.value/ 60}" type="number" var="hours" /> <--!이때, fmt를 사용해서 기본 값을 실수가 아닌 정수로 나타내도록 표시 -->
-					    <fmt:formatNumber value="${entry.value % 60}" type="number" var="minutes" />
-					    <fmt:formatNumber value="${hours - (hours % 1)}" type="number" var="roundedHours" />
-					 	<tr>
-					 	<!-- key > 날짜, value > 근무 시간  -->
-			                <td>${entry.key}</td>
-			                <td>${roundedHours}시간${minutes}분</td>
-			            </tr>
-					</c:forEach>
+					 <c:forEach var="workTime" items="${workTimeDetails}" >
+					    <fmt:formatNumber value="${workTime.workDuration / 60}" type="number" var="hours" /> 
+					    <fmt:formatNumber value="${workTime.workDuration  % 60}" type="number" var="minutes" />
+					    <fmt:formatNumber value="${hours - (hours % 1)}" type="number" var="roundedHours" /> 
+		                <tr>
+		                <!-- 점표기법, key가 고정일 때 해당 키의 값을 화면에 보여줌-->
+		                   <td>${workTime.date}</td>    
+						   <td>${workTime.checkInTime}</td>  
+						   <td>${workTime.checkOutTime}</td>
+						   <td>${roundedHours}시간${minutes}분</td>
+		                </tr>
+		            </c:forEach>
 					</tbody>
 		  	  </table>
 		</div>
 	</sec:authorize>
 </body>
 </html>
+
 ```
 
 
@@ -144,107 +233,79 @@ DAO에 존재하는 namespace의 문자열을 잘못 작성해서 발생한 오�
 ``` 
 package com.springCommunity.service;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.springCommunity.dao.DailyWorkTimeDAO;
+import com.springCommunity.dao.CheckInCheckOutDAO;
+import com.springCommunity.vo.CheckInCheckOutVO;
 import com.springCommunity.vo.DailyWorkTimeVO;
-import com.springCommunity.vo.WeeklyWorkTimeVO;
 
 @Service
-public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
+public class CheckInCheckOutServiceImpl implements CheckInCheckOutService{
 
 	@Autowired
-	private DailyWorkTimeDAO dailyWorkTimeDAO;
+	private CheckInCheckOutDAO checkInCheckOutDAO;
 	//sqlSession >> 쿼리를 실행하는 객체
 	//세션과 해당 쿼리의 값을 가져오기 위해 세션과 정적변수 선언 
-	@Autowired
-	private SqlSession sqlSession;
-	public final String namespace = "com.springCommunity.mapper.DailyWorkTimeMapper.";
-	// 회사의 위도와 경도는 Service에서 관리
-	private final double COMPANY_LATITUDE  = 35.84218185982273 ; // 예: 전주 이젠 위도     위브 // 35.84218185982273   // 전주 이젠 35.8402587260868;
-	private final double COMPANY_LONGITUDE = 127.15232222091124; // 예: 전주 이젠 경도   위브 // 127.15232222091124  // 전주 이젠 127.132499131298;
 	
-	private final double CHECK_IN_DISTANCE_KM = 5.0; // 반경 5km
+	// 회사의 위도와 경도는 Service에서 관리
+	private final double COMPANY_LATITUDE =  35.8399616515785;// 예: 전주 이젠 위도      35.8402587260868; // 전주 위브 위도 35.8399616515785
+	private final double COMPANY_LONGITUDE = 127.155041406919;// 예: 전주 이젠 경도     127.132499131298;  // 전주 위브 경도  127.155041406919
+	private final double CHECK_IN_DISTANCE_KM = 5.0; // 반경 1km
 
 	// 지구 반지름 
 	private static final double EARTH_RADIUS = 6371.0;
 	
-	// 출근 결과를 알려주기 위한 변수들 
-/*
- * 사용자의 현재 위치가 회사 위치 범위 안에 있는지 확인  아니면 OUTSIDE_RANGE 반환.
-오늘 이미 출근한 기록이 있는지 확인 → 있으면 ALREADY_CHECKED_IN 반환.
-위 두 조건에 해당하지 않을 경우, 출근 처리를 하고 SUCCESS 반환.
+	
+	   // 출근 결과를 위한 열거형 추가
+    public enum CheckInResult {
+        SUCCESS,           // 출근 성공
+        ALREADY_CHECKED_IN, // 이미 출근함
+        OUTSIDE_RANGE      // 범위 밖
+    }
 
- */
-	// enum 사용시 상태나 결과를 더 명확하고 직관적으로 표현할 수 있음 
-	   public enum CheckInResult {
-	        SUCCESS,           // 출근 성공
-	        ALREADY_CHECKED_IN, // 이미 출근함
-	        OUTSIDE_RANGE      // 범위 밖
-	    }
-	@Override
-	public CheckInResult  checkIn(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude) {
+    @Override
+    public CheckInResult checkIn(CheckInCheckOutVO checkInCheckOutVO, String latitude, String longitude) {
+        // 1. 위도, 경도 파싱
+        double userLat = Double.parseDouble(latitude);
+        double userLon = Double.parseDouble(longitude);
 
-		// 1. 유저의 위도 경도 
-		double userLat = Double.parseDouble(latitude); // 유저의 위도
-		double userLon = Double.parseDouble(longitude); // 유저의 경도
-		
-		// 2. 위치거리 계산 
-		double distance = calculateDistance(COMPANY_LATITUDE, COMPANY_LONGITUDE, userLat, userLon);
-		System.out.println("before if문 distance=======================" + distance);
-		
- 
-		// 3. 위치 범위 체크 하여 범위 밖인지 확인 
+        // 2. 위치 거리 계산
+        double distance = calculateDistance(COMPANY_LATITUDE, COMPANY_LONGITUDE, userLat, userLon);
+        
+        // 3. 위치 범위 벗어남 체크
         if (distance > CHECK_IN_DISTANCE_KM) {
-        	System.out.println("정해진 범위 초과됨");
             return CheckInResult.OUTSIDE_RANGE;
         }
-		
+
         // 4. 당일 출근 기록 확인
-        int count = sqlSession.selectOne(namespace + "DailyCheckIn", dailyWorkTimeVO);
+        int count = checkInCheckOutDAO.DailyCheckIn(checkInCheckOutVO);
+        
         if (count > 0) {
-            System.out.println("이전에 출근버튼 누름");
             return CheckInResult.ALREADY_CHECKED_IN;
         }
-        
 
         // 5. 출근 처리
-        dailyWorkTimeDAO.checkIn(dailyWorkTimeVO);
+        checkInCheckOutDAO.checkIn(checkInCheckOutVO);
         return CheckInResult.SUCCESS;
-		
-	}
-```
-
-<br/>
-*️⃣ 퇴근 메소드   <br/>
-<br/>
-
-```
+    }
+	
 	@Override
-	public boolean checkOut(DailyWorkTimeVO dailyWorkTimeVO, String latitude, String longitude) {
+	public boolean checkOut(CheckInCheckOutVO checkInCheckOutVO, String latitude, String longitude) {
 		double userLat = Double.parseDouble(latitude); // 유저의 위도
 		double userLon = Double.parseDouble(longitude); // 유저의 경도
 
 		double distance = calculateDistance(COMPANY_LATITUDE, COMPANY_LONGITUDE, userLat, userLon);
 		System.out.println("beford if문 distance=======================" + distance);
+		
 		// 메소드 distance를 통해 얻은 경도가 상수의 반경보다 작을 경우 DAO에게 위도와 경도 값을 빼고 전달
 		if (distance <= CHECK_IN_DISTANCE_KM) {
 			System.out.println("distance=======================" + distance);
-			dailyWorkTimeDAO.checkOut(dailyWorkTimeVO);
+			
+			checkInCheckOutDAO.checkOut(checkInCheckOutVO);
 				 // 거리 범위 이내이면 , 퇴근 정보 저장 
 				return true;
 			}else {
@@ -252,10 +313,49 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 			}
 		return false; // 거리 범위 밖이면 저장하지 않음
 	}
+	 	
+	
+	
+
+	// 거리 계산 메소드 
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        // 위도와 경도를 라디안으로 변환
+        double lat1Rad = Math.toRadians(lat1); 	// 회사 위도 
+        double lon1Rad = Math.toRadians(lon1); 	// 회사 경도
+        double lat2Rad = Math.toRadians(lat2);	// 사용자 위도 
+        double lon2Rad = Math.toRadians(lon2);	// 사용자 경도
+
+        // 위도 및 경도 차이 계산
+        double deltaLat = lat2Rad - lat1Rad;
+        double deltaLon = lon2Rad - lon1Rad;
+
+        // Haversine 공식을 사용하여 거리 계산
+        double a = Math.pow(Math.sin(deltaLat / 2), 2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                Math.pow(Math.sin(deltaLon / 2), 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        // 거리 계산 (단위: km)
+        double distance = EARTH_RADIUS * c;
+        return distance;
+    }
+   
+
+    // 해당 유저의 전체 출퇴근 시간을 가져오는 메소드 
+	@Override
+	public List<CheckInCheckOutVO> selectList (String user_id) {
+
+		return checkInCheckOutDAO.selectList(user_id);
+	}
+
+}
+
 ```
 
+
+
 <br/>
-*️⃣ 위도 경도를 이용한 거리 계산 메소드  <br/>
+*️⃣ API 대신 사용한 위도 경도를 이용한 거리 계산 메소드  <br/>
 <br/>
 
 ```
@@ -299,58 +399,58 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.springCommunity.service.DailyWorkTimeService;
-import com.springCommunity.service.DailyWorkTimeServiceImpl.CheckInResult;
+import com.springCommunity.service.CheckInCheckOutService;
+import com.springCommunity.service.CheckInCheckOutServiceImpl.CheckInResult;
+import com.springCommunity.vo.CheckInCheckOutVO;
 import com.springCommunity.vo.DailyWorkTimeVO;
 
 @Controller
-public class DailyWorkTimeController {
+public class CheckInCheckOutController {
 
     @Autowired
-    private DailyWorkTimeService dailyWorkTimeService;
+    CheckInCheckOutService checkInCheckOutService;
 
-        @RequestMapping(value = "user/checkIn.do", method = RequestMethod.POST)
-        public ResponseEntity<String> checkIn(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
-       	 // VO에서 위도와 경도 가져오기
+    
+
+    @RequestMapping(value = "user/checkIn.do", method = RequestMethod.POST)
+    public ResponseEntity<String> checkIn(@RequestBody CheckInCheckOutVO checkInCheckOutVO) {
+        String latitude = checkInCheckOutVO.getLatitude();
+        String longitude = checkInCheckOutVO.getLongitude();
         
-            String latitude = dailyWorkTimeVO.getLatitude();
-            String longitude = dailyWorkTimeVO.getLongitude(); 
+        CheckInResult result = checkInCheckOutService.checkIn(checkInCheckOutVO, latitude, longitude); 
         
-        
-        
-            // 비즈니스 로직을 Service로 위임
-    		// service인터페이스에서는 메소드의 호출 및 처리는 실행할 수 없으므로 , String 타입으로 전송 후 비즈니스 로직을 처리하는 serviceImpl에서 형변환 시켜서 사용하면 됨  
-            CheckInResult result = dailyWorkTimeService.checkIn(dailyWorkTimeVO, latitude, longitude);
-            
-            switch (result) {
-                case SUCCESS:
-                    return ResponseEntity.ok("출근 성공.");
-                case ALREADY_CHECKED_IN:
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("이미 오늘 출근했습니다.");
-                case OUTSIDE_RANGE:
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("회사 위치에서 벗어났습니다.");
-                default:
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("시스템 오류가 발생했습니다.");
-            }
-            
+        switch (result) {
+            case SUCCESS:
+                return ResponseEntity.ok("출근 성공.");
+            case ALREADY_CHECKED_IN:
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("이미 오늘 출근했습니다.");
+            case OUTSIDE_RANGE:
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("회사 위치에서 벗어났습니다.");
+            default:
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("시스템 오류가 발생했습니다.");
         }
+    }
+    
+        @RequestMapping(value="user/checkOut.do", method = RequestMethod.POST)
+        public ResponseEntity<String> checkOut(@RequestBody CheckInCheckOutVO checkInCheckOutVO) {
+            String latitude = checkInCheckOutVO.getLatitude();
+            String longitude = checkInCheckOutVO.getLongitude();
+            
+            boolean isWithinRange = checkInCheckOutService.checkOut(checkInCheckOutVO, latitude, longitude);
+            if (isWithinRange) {
+                return ResponseEntity.ok("수고하셨습니다. 퇴근하세요");
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("시스템 오류로 퇴근 처리가 되지 않습니다.");
+            }
+        }
+    
         
-	  @RequestMapping(value="user/checkOut.do", method = RequestMethod.POST) public
-	  ResponseEntity<String> checkOut(@RequestBody DailyWorkTimeVO dailyWorkTimeVO) {
-		  // VO에서 위도와 경도 가져오기 
-		  String latitude = dailyWorkTimeVO.getLatitude();
-		  String longitude = dailyWorkTimeVO.getLongitude();
-		  
-		  boolean isWithinRange = dailyWorkTimeService.checkOut(dailyWorkTimeVO,latitude, longitude);
-		  if(isWithinRange) {
-			  return ResponseEntity.ok("수고하셨습니다. 퇴근하세요");
-		  }else {
-			  return ResponseEntity.status(HttpStatus.FORBIDDEN).body("시스템 오류로 퇴근 처리가 되지 않습니다.");
-		  }
-	  }
+        
+        
 }
 
 ```
@@ -366,19 +466,16 @@ function checkIn() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-
-                // AJAX 요청
                 $.ajax({
                     url: "user/checkIn.do",
                     method: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
-                        latitude: latitude,         // 위도
-                        longitude: longitude,       // 경도
-                        user_id: user_id  // 사용자 ID (VO의 필드와 동일해야함)
+                        latitude: latitude,
+                        longitude: longitude,
+                        user_id: user_id  // 세션의 사용자 ID
                     }),
                     success: function (data) {
-                    	console.log(data);
                         alert('출근 완료!');
                     },
                     error: function (xhr) {
@@ -396,9 +493,9 @@ function checkIn() {
                 alert(`위치 정보를 가져올 수 없습니다: ${error.message}`);
             },
             {
-                enableHighAccuracy: true, // 정확도 우선 모드
-                timeout: 10000,           // 10초 이내 응답 없으면 에러 발생
-                maximumAge: 0             // 항상 최신 위치 정보 수집
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
     } else {
@@ -453,35 +550,25 @@ function checkOut() {
  <br/>
  
 *️⃣주간 근무 시간 계산할 때 어려웠던 점 
-<br/>
-mapper의 startDate와 endDate를 
-
-1) controller <br/>
-2) serviceImpl(구현 클래스) <br/>
-3) DAO <br/>
-4) Mapper <br/>
-
-
 
 <br/>
+serviceImple에서 로직을 설계할 때 논리적 오류로 인해서 잘못된 로직을 생성하여 , 주간 근무 시간을 계산하지 못했음 <br/>
 
 *️⃣ mapper
 ```
+
 //Mapper
 
-<select id="selectDetailedListByWeek" resultType="dailyWorkTimeVO">   <!-- my batis에서 설정해놓아서 오류 없음-->
-    SELECT 
-        check_in_time, 
-        check_out_time
-    FROM 
-        daily_work_time
-    WHERE 
-        user_id = #{userId}
-        AND DATE(check_in_time) BETWEEN #{startDate} AND #{endDate}
-    ORDER BY 
-        check_in_time ASC
+<select id="selectDetailedListByWeek" parameterType="map" resultType="dailyWorkTimeVO">
+    SELECT CHECK_IN_TIME, CHECK_OUT_TIME
+    FROM DAILY_WORK_TIME
+    WHERE USER_ID = #{user_id} AND DATE(check_in_time) BETWEEN #{startDate} AND #{endDate}
+    ORDER BY CHECK_IN_TIME ASC
 </select>
+
+
 ```
+
 ➡️ startDate와 endDate는 VO(DailyWorkTimeVO)의 필드가 아니라, SQL 쿼리에서 사용되는 파라미터임 <br/>
 따라서 VO에 startDate와 endDate 필드가 없어도 코드는 정상적으로 동작하며 VO 필드와는 무관함
 
@@ -491,38 +578,166 @@ mapper의 startDate와 endDate를
 
 ```
 
-// dao
-List<DailyWorkTimeVO> selectDetailedListByWeek(String userId, String startDate, String endDate);
+public List<DailyWorkTimeVO> selectDetailedListByWeek(String user_id, String startDate, String endDate){
+		
+		Map<String, Object> details = new HashMap<>();
+		details.put("user_id", user_id);
+		details.put("startDate", startDate);
+		details.put("endDate", endDate);
+		
+		return sqlSession.selectList(namespace + "selectDetailedListByWeek", details );
 
+	}
 ```
 
-➡️ userId, startDate, endDate를 매개변수로 사용하며, sql의 조건절에 매핑할 것 
+➡️ userId, startDate, endDate를 매개변수로 받았으나 selectList에는 받은 매개 변수를 1개 밖에 넣을 수 없기 때문에 , map에 매개변수를 담아서, sqlSession에 map을 전달한다.
 
 <br/>
 
 *️⃣ ServiceImpl(구현 클래스)
 
 ```
+package com.springCommunity.service;
 
-@Override
-public Map<String, Object> getWeeklyWorkTimeDetails(String userId, String startDate) {
-// 현재 주차는 월요일부터 일요일까지로 설정
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.springCommunity.dao.DailyWorkTimeDAO;
+import com.springCommunity.vo.DailyWorkTimeVO;
+
+@Service
+public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
+
+//3 [핵심 로직]  jsp화면에서 chart.js를 사용하기 때문에  데이터와 레이블의 동기화가 필요함 (데이터베이스에 없는 날짜는 결과에 포함되지 않아 chart.js에 누락될 수 있기 때문에 레이블과 데이터의 동기화가 잘 되지 않을 수 있음) 
+// 만약 chart.js를 이용하지 않고 근무 시간만 보여준다면 굳이 작성할 필요가 없음 
+// 결국 데이터와 레이블의 동기화를 위해 필요한 로직임 
+	        
+	@Autowired
+	DailyWorkTimeDAO dailyWorkTimeDAO ;
+	
+    // 해당 유저의 전체 출퇴근 시간을 가져오는 메소드 
+	@Override
+	public List<DailyWorkTimeVO> selectList (String user_id) {
+
+		return dailyWorkTimeDAO.selectList(user_id);
+	}
+
+
+// 전체 근무 시간 및 일간 근무 시간 코드 
+	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+	 @Override
+	    public Map<String, Object> getWeeklyWorkTimeDetails(String user_id, String startDate) {
+		 
+	        // 현재 날짜 기준으로 주차 계산
+	        LocalDate currentDate = startDate != null ? LocalDate.parse(startDate) : LocalDate.now();
+	        
+	        // 1. 주의 시작일과 종료일을 계산 (월요일~ 일요일)
+	        LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // 주의 시작일 (월요일)
+	        LocalDate endOfWeek = startOfWeek.plusDays(6); // 월요일부터 6일 추가  // 주의 종료일 (일요일)
+
+	        // 2. DAO를 통해 해당 주차의 근무 시간 목록을 조회
+	        List<DailyWorkTimeVO> dbWorkTimes = dailyWorkTimeDAO.selectDetailedListByWeek(user_id, startOfWeek.toString(), endOfWeek.toString());
+	
+	        
+	        // 디버깅 
+	        if(dbWorkTimes == null || dbWorkTimes.isEmpty()) {
+	        	System.out.println("workTimes의 값이 비어있음");
+	        }else {
+	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>" + dbWorkTimes.get(0).getCheck_in_time());
+	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>"  + dbWorkTimes.get(0).getCheck_out_time());
+	        }
+	        // 7일간의 데이터 구조 생성 (월~일)
+	        List<Map<String, Object>> workTimeDetails = new ArrayList<>();
+	        for (int i = 0; i < 7; i++) {
+	            LocalDate currentDay = startOfWeek.plusDays(i);
+	            Map<String, Object> dayData = createDayData(currentDay, dbWorkTimes); // dayData에 createDayData를 메소드를 활용한 값을 집어 넣음 
+	            workTimeDetails.add(dayData);
+	        }
+
+	        // 결과 맵 구성
+	        Map<String, Object> result = new HashMap<>();
+	        result.put("workTimeDetails", workTimeDetails);
+	        result.put("startOfWeek", startOfWeek);
+	        result.put("endOfWeek", endOfWeek);
+	        return result;
+	    }
+	        
+	        
+	        
+	 private Map<String, Object> createDayData(LocalDate date, List<DailyWorkTimeVO> dbWorkTimes) {
+		 
+ /*
+  .stream 	 ::  dbWorkTimes는 DB에서 조회한 유저의 근무 시간, 이때 , stream()을 사용하여 , 반복을 돌림
+  
+  .filter()  :: .stream()에서 각 요소에 대한 조건을 검사함
+  
+  w 		 :: .stream()을통한 요소들  즉 , dbWorkTimes.stream()의 타입이 DailyWorkTimeVO 이고, 
+  				 w는 스트림의 요소이기 때문에 , w의 타입은 DailyWorkTimeVO 이다.
+  				 
+.findFirst   ::  위의 .filter의 조건에 만족하는 첫 번재 요소가 없는 경우 Optional.empty()를 반환함
+ 
+.orElse(null):: Optional에서 값이 없을 때 , 명시적으로 null을 반환하게 하는 방법 
+
+ *Optional  >> null을 직접 다루지 않고 안전하게 값 유무를 관리하기 위한 도구이며, 자바8이상부터 사용가능함 
+  				  
+  */
+		 //4. DB에서 해당 날짜 데이터 찾기 
+		    Map<String, Object> dayData = new HashMap<>();
+		    DailyWorkTimeVO workTime = dbWorkTimes.stream() // dbWorkTimes는 유저의 근무 시간, .stream()을 돌려서 근무시간을 반복
+		    		.filter(w -> date.equals(LocalDate.parse(w.getCheck_in_time().split(" ")[0])))   // 날짜만 추출하고 , 추출한 날짜를 LocalDate로 변환 
+		    		.findFirst() 
+		    		.orElse(null);
+		    
+		    
 /*
-만약 월요일부터 금요일까지 원한다면
-LocalDate endOfWeek = currentDate.with(TemppraAdjusters.nextOrSame(DayOfWeek.FRIDAY));로 설정하면 된다. 
-*/
-    // 주차 계산
-    LocalDate currentDate = startDate != null ? LocalDate.parse(startDate) : LocalDate.now();
-    LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // 주의 시작일 (월요일)
-    LocalDate endOfWeek = currentDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));       // 주의 종료일 (일요일)
+ 출근 시간이 존재하나, 퇴근시간이 없으면 NullPointException 오류 발생  따라서 출근 시간, 퇴근 시간 둘 다 null인 경우도 생각해서 유효성 검사를 해야함
+  */
+		    
+		    // 출근 시간 ,퇴근 시간, 근무 시간 유효성 검사  
+		    // 5. 근무 시간에 대한 데이터가 존재시 , 데이터를 map에 키와 값으로 저장
+		    if (workTime != null) {
+		        // 출근 시간이 null인 경우 처리
+		    	//null이 아닌 경우, fomatter 형식으로 변환 null인 경우 null
+		        LocalDateTime checkIn = (workTime.getCheck_in_time() != null) ? LocalDateTime.parse(workTime.getCheck_in_time(), formatter) : null;
 
-    // DAO 호출
-// DAO의 startDate와 endDate는 사실상 startOfWeek.toString(), endOfWeek.toString()으로 볼 수 있다. 
-    List<DailyWorkTimeVO> workTimes = dailyWorkTimeDAO.selectDetailedListByWeek(userId, startOfWeek.toString(), endOfWeek.toString());
+		        // 퇴근 시간이 null인 경우 처리
+		        LocalDateTime checkOut = (workTime.getCheck_out_time() != null) ? LocalDateTime.parse(workTime.getCheck_out_time(), formatter) : null;
 
+		        // 근무 시간 계산 (출근 또는 퇴근 시간이 null이면 0분)
+		        long minutes = (checkIn != null && checkOut != null) ? Duration.between(checkIn, checkOut).toMinutes() : 0L;
+		        dayData.put("date", date.toString());
+		        dayData.put("checkInTime", workTime.getCheck_in_time());
+		        dayData.put("checkOutTime", workTime.getCheck_out_time());
+		        dayData.put("workDuration", minutes);
+		    } else {
+		    	// 데이터가 존재하지 않는다면, 근무일자는 해당 일자 .  출근 시간, 퇴근 시간은 null , 근무 시간을 0을 map에 대입  
+		        dayData.put("date", date.toString());
+		        dayData.put("checkInTime", "null");
+		        dayData.put("checkOutTime", "null");
+		        dayData.put("workDuration", 0L);
+		    }
+		    return dayData;
+	    }
 }
 
+
+
+
 ```
+
 
 ➡️ 매개변수 startDate를 받고, startDate를 계산하여  currentDate에 담는다. 
 
@@ -530,12 +745,46 @@ LocalDate endOfWeek = currentDate.with(TemppraAdjusters.nextOrSame(DayOfWeek.FRI
 
 ➡️ endOfWeek :  currendDate를 계산하여 endOfWeek에 담는다.
 
-startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용된다.
+➡️ startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용된다.
 
-checkIn만 하고 다른 페이지로 이동하면 나타나는 오류 
+❌ 오류 내용 <br/>
+checkIn만 하고 다른 페이지로 이동하면 나타나는 오류 <br/>
+
 org.springframework.web.util.NestedServletException: Request processing failed; nested exception is java.lang.NullPointerException: text
+
 <br/>
-원인 ::  check_out_time이 null인 경우에 해당 오류가 발생함 
+
+*️⃣ 원인 ::  check_out_time이 null인 경우에 해당 오류가 발생함 
+<br/>
+
+✔️해결 방법 
+
+```
+ if (workTime != null) {
+		        // 출근 시간이 null인 경우 처리
+		    	//null이 아닌 경우, fomatter 형식으로 변환 null인 경우 null
+		        LocalDateTime checkIn = (workTime.getCheck_in_time() != null) ? LocalDateTime.parse(workTime.getCheck_in_time(), formatter) : null;
+
+		        // 퇴근 시간이 null인 경우 처리
+		        LocalDateTime checkOut = (workTime.getCheck_out_time() != null) ? LocalDateTime.parse(workTime.getCheck_out_time(), formatter) : null;
+
+		        // 근무 시간 계산 (출근 또는 퇴근 시간이 null이면 0분)
+		        long minutes = (checkIn != null && checkOut != null) ? Duration.between(checkIn, checkOut).toMinutes() : 0L;
+		        dayData.put("date", date.toString());
+		        dayData.put("checkInTime", workTime.getCheck_in_time());
+		        dayData.put("checkOutTime", workTime.getCheck_out_time());
+		        dayData.put("workDuration", minutes);
+		    } else {
+		    	// 데이터가 존재하지 않는다면, 근무일자는 해당 일자 .  출근 시간, 퇴근 시간은 null , 근무 시간을 0을 map에 대입  
+		        dayData.put("date", date.toString());
+		        dayData.put("checkInTime", "null");
+		        dayData.put("checkOutTime", "null");
+		        dayData.put("workDuration", 0L);
+		    }
+```
+코드를 이용해서 유효성 검사를 추가했음 
+
+
 
 
 
