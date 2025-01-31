@@ -157,6 +157,17 @@ new Chart(ctx, {
 
 ```
 
+<br/>
+❌ 오류 내용 <br/>
+
+
+
+
+✔️ 해결 방법 <br/>
+
+
+
+
 
 <br/>
 
@@ -354,35 +365,6 @@ public class CheckInCheckOutServiceImpl implements CheckInCheckOutService{
 
 
 
-<br/>
-*️⃣ API 대신 사용한 위도 경도를 이용한 거리 계산 메소드  <br/>
-<br/>
-
-```
-// 거리 계산 메소드 
-    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        // 위도와 경도를 라디안으로 변환
-        double lat1Rad = Math.toRadians(lat1); 	// 회사 위도 
-        double lon1Rad = Math.toRadians(lon1); 	// 회사 경도
-        double lat2Rad = Math.toRadians(lat2);	// 사용자 위도 
-        double lon2Rad = Math.toRadians(lon2);	// 사용자 경도
-
-        // 위도 및 경도 차이 계산
-        double deltaLat = lat2Rad - lat1Rad;
-        double deltaLon = lon2Rad - lon1Rad;
-
-        // Haversine 공식을 사용하여 거리 계산
-        double a = Math.pow(Math.sin(deltaLat / 2), 2) +
-                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                Math.pow(Math.sin(deltaLon / 2), 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // 거리 계산 (단위: km)
-        double distance = EARTH_RADIUS * c;
-        return distance;
-    }
-   
-```
 
 <br/>
 *️⃣ Controller화면   <br/>
@@ -544,6 +526,48 @@ function checkOut() {
 </script>
 
 ```
+
+<br/>
+❌ 오류 내용 <br/>
+처음에 거리 계산 API를 사용하여 테스트 하였을 때 거리계산이 되지 않는 문제점이 있었다. <br/>
+
+<br/>
+
+✔️ 해결 방법 <br/>
+오류 내용을 읽고, 검색 등 해결 방법을 찾아보았다. <br/>
+해결방법은 API키를 사용하지 않고, 지구 반지름과 사용자의 위도, 경도, 회사의 위도, 경도를 계산하는 메소드를 생성 후 해당 메소드를 이용하여 오차 범위를 정한 후 오차 범위를 활용하여 계산시, 거리계산 오류를 해결할 수 있었다. <br/>
+
+
+<br/>
+*️⃣ API 대신 사용한 위도 경도를 이용한 거리 계산 메소드  <br/>
+<br/>
+
+```
+// 거리 계산 메소드 
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        // 위도와 경도를 라디안으로 변환
+        double lat1Rad = Math.toRadians(lat1); 	// 회사 위도 
+        double lon1Rad = Math.toRadians(lon1); 	// 회사 경도
+        double lat2Rad = Math.toRadians(lat2);	// 사용자 위도 
+        double lon2Rad = Math.toRadians(lon2);	// 사용자 경도
+
+        // 위도 및 경도 차이 계산
+        double deltaLat = lat2Rad - lat1Rad;
+        double deltaLon = lon2Rad - lon1Rad;
+
+        // Haversine 공식을 사용하여 거리 계산
+        double a = Math.pow(Math.sin(deltaLat / 2), 2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                Math.pow(Math.sin(deltaLon / 2), 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        // 거리 계산 (단위: km)
+        double distance = EARTH_RADIUS * c;
+        return distance;
+    }
+   
+```
+
 
 <br/>
  📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
