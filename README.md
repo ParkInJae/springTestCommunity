@@ -1,3 +1,5 @@
+
+ <hr>
  1. home.jsp에서 chart.js 정리  <br/>
  	❌ 오류 내용 <br/>
 	✔️ 해결 방법 <br/>
