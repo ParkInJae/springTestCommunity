@@ -1,27 +1,31 @@
+ 목차 
+ <hr>
+📗 1. home.jsp에서 chart.js 정리  <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
+📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
+
+
+
+📗 3. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
+ 
+📗 4. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
+ 
+📗 5. fullCalender 내부의 ajax 의미 <br/>
+ 	❌ 오류 내용 <br/>
+	✔️ 해결 방법 <br/>
+
+ 
+📗 6. pom.xml 정리 
 
  <hr>
- 1. home.jsp에서 chart.js 정리  <br/>
- 	❌ 오류 내용 <br/>
-	✔️ 해결 방법 <br/>
 
- 3. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
- 	❌ 오류 내용 <br/>
-	✔️ 해결 방법 <br/>
- 
- 4. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
- 	❌ 오류 내용 <br/>
-	✔️ 해결 방법 <br/>
- 
- 5. fullCalender 내부의 ajax 의미 <br/>
- 	❌ 오류 내용 <br/>
-	✔️ 해결 방법 <br/>
 
- 
- 7. pom.xml 정리 
-
- <hr>
-
-📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
+📗 1. home.jsp에서  chart.js와의 연관 
 
  home.jsp <br/>
 ```
@@ -163,17 +167,73 @@ new Chart(ctx, {
 <br/>
 ❌ 오류 내용 <br/>
 
+```
+<%-- var workTimes = [
+    <c:forEach var="workTime" items="${workTimeDetails}" varStatus="status">
+        Math.round(${workTime.workDuration}),  // minutes 단위로 변환하지 않고 그대로 사용
+        <c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+]; --%>
 
+```
 
+해당 코드는 초기의 home.jsp에서 workTimeDetails의 데이터가 7일 모두 존재하지 않는다는 가정을 하지 않았고 , 이로 인해서 레이블과 데이터의 동기화가 잘 발생하지 않았다. <br/>
+ex) 월요일 데이터 존재, 화요일~목요일 데이터 x , 금요일 데이터 존재할 시 
+레이블과 데이터의 동기화가 적용되지 않아서, 화요일 레이블에 금요일 데이터가 나왔었음 
 
+<br/>
+<br/>
 ✔️ 해결 방법 <br/>
+ controller와 service의 부분을 수정했음
+ 우선 service에서 반복문을 통해, 데이터를 담는 월요일부터 일요일까지 배열을 통해서 구조를 생성했다. 
+```
+
+// 1. 주의 시작일과 종료일을 계산 (월요일~ 일요일)
+	        LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // 주의 시작일 (월요일)
+	        LocalDate endOfWeek = startOfWeek.plusDays(6); // 월요일부터 6일 추가  // 주의 종료일 (일요일)
+
+	        // 2. DAO를 통해 해당 주차의 근무 시간 목록을 조회
+	        List<DailyWorkTimeVO> dbWorkTimes = dailyWorkTimeDAO.selectDetailedListByWeek(user_id, startOfWeek.toString(), endOfWeek.toString());
+	
+	        
+	        // 디버깅 
+	        if(dbWorkTimes == null || dbWorkTimes.isEmpty()) {
+	        	System.out.println("workTimes의 값이 비어있음");
+	        }else {
+	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>" + dbWorkTimes.get(0).getCheck_in_time());
+	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>"  + dbWorkTimes.get(0).getCheck_out_time());
+	        }
+	        //3 [핵심 로직]  jsp화면에서 chart.js를 사용하기 때문에  데이터와 레이블의 동기화가 필요함 (데이터베이스에 없는 날짜는 결과에 포함되지 않아 chart.js에 누락될 수 있기 때문에 레이블과 데이터의 동기화가 잘 되지 않을 수 있음) 
+	        // 만약 chart.js를 이용하지 않고 근무 시간만 보여준다면 굳이 작성할 필요가 없음 
+	        // 결국 데이터와 레이블의 동기화를 위해 필요한 로직임 
+	        
+	        // 7일간의 데이터 구조 생성 (월~일)
+	        List<Map<String, Object>> workTimeDetails = new ArrayList<>();
+	        for (int i = 0; i < 7; i++) {
+	            LocalDate currentDay = startOfWeek.plusDays(i);
+	            Map<String, Object> dayData = createDayData(currentDay, dbWorkTimes); // dayData에 createDayData를 메소드를 활용한 값을 집어 넣음 
+	            workTimeDetails.add(dayData);
+	        }
+
+	        // 결과 맵 구성
+	        Map<String, Object> result = new HashMap<>();
+	        result.put("workTimeDetails", workTimeDetails);
+	        result.put("startOfWeek", startOfWeek);
+	        result.put("endOfWeek", endOfWeek);
+	        return result;
+	    }
+	        
+
+
+```
 
 
 
-
- <hr>
 <br/>
 
+ <hr>
+
+<br/>
 📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
 
 
@@ -571,6 +631,7 @@ function checkOut() {
    
 ```
 
+<br/>
  <hr>
 <br/>
  📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
@@ -811,7 +872,7 @@ org.springframework.web.util.NestedServletException: Request processing failed; 
 ```
 코드를 이용해서 유효성 검사를 추가했음 
 
-
+<br/>
 
 
 
@@ -1122,6 +1183,7 @@ function handleError(xhr) {
 
 
  <hr>
+ <br/>
 📗 5. pom.xml 정리 
 <br/>
 
