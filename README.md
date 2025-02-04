@@ -19,6 +19,7 @@
  
  7. pom.xml 정리 
 
+ <hr>
 
 📗 1. home.jsp에서  jstl 사용할 때 <c:set > 사용하지 않고 <fnt: >사용한 이유 정리<br/>
 
@@ -170,7 +171,7 @@ new Chart(ctx, {
 
 
 
-
+ <hr>
 <br/>
 
 📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
@@ -570,7 +571,7 @@ function checkOut() {
    
 ```
 
-
+ <hr>
 <br/>
  📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
  <br/>
@@ -815,6 +816,7 @@ org.springframework.web.util.NestedServletException: Request processing failed; 
 
 
 
+ <hr>
 
 <br/>
 📗4. fullCalender 내부의 ajax 의미 
@@ -1118,6 +1120,8 @@ function handleError(xhr) {
 
 <br/>
 
+
+ <hr>
 📗 5. pom.xml 정리 
 <br/>
 
