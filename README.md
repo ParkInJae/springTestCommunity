@@ -1,6 +1,6 @@
  목차 
  <hr>
-📗 **1. home.jsp에서 chart.js **정리  <br/>
+📗 1. home.jsp에서 chart.js정리  <br/>
  	❌ 오류 내용 <br/>
 	✔️ 해결 방법 <br/>
  
@@ -598,7 +598,7 @@ function checkOut() {
 ✔️ 해결 방법 <br/>
 오류 내용을 읽고, 검색 등 해결 방법을 찾아보았다. <br/>
 **원인은 API키의 부재였다**. <br/>
-해결방법은 API키를 사용하지 않고, 지구 반지름과 사용자의 위도, 경도, 회사의 위도, 경도를 계산하는 메소드를 생성 후 해당 메소드를 이용하여 오차 범위를 정한 후 오차 범위를 활용하여 계산시, 거리계산 오류를 해결할 수 있었다. <br/>
+API키가 없기 때문에 다른 해결방법을 찾아 보았고,  API키를 사용하지 않고, 지구 반지름과 사용자의 위도, 경도, 회사의 위도, 경도를 계산하는 메소드를 생성 후 해당 메소드를 이용하여 오차 범위를 정한 후 오차 범위를 활용하여 계산시, 거리계산 오류를 해결할 수 있었다. <br/>
 
 
 <br/>
@@ -633,6 +633,7 @@ function checkOut() {
 
 <br/>
  <hr>
+ 
 <br/>
  📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
  <br/>
@@ -836,9 +837,22 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 ➡️ startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용된다.
 
 ❌ 오류 내용 <br/>
-checkIn만 하고 다른 페이지로 이동하면 나타나는 오류 <br/>
+1. 출근 버튼을 누르고 퇴근 버튼을 누르지 않은 상태에서 다른 페이지로 이동하면 나타나는 오류 <br/>
 
 org.springframework.web.util.NestedServletException: Request processing failed; nested exception is java.lang.NullPointerException: text
+
+2. dao부분에서,sqlSession.selectList 메소드를 사용할 때, 보내야하는 인자가 3개인데, map에 담아야 한다는 생각을 하지 못하고 전체 인자를 전송하여 아래에 해당하는 오류가 발생하였다.<br/>
+<br/>
+
+java.lang.Error: Unresolved compilation problem: 
+	The method selectList(String, Object, RowBounds) in the type SqlSession is not applicable for the arguments (String, String, String, String)
+<br/><br/>
+
+
+
+
+➡️ userId, startDate, endDate를 매개변수로 받았으나 selectList에는 받은 매개 변수를 1개 밖에 넣을 수 없기 때문에 , map에 매개변수를 담아서, sqlSession에 map을 전달한다.
+
 
 <br/>
 
@@ -846,6 +860,10 @@ org.springframework.web.util.NestedServletException: Request processing failed; 
 <br/>
 
 ✔️해결 방법 
+
+1. NullPointerException이 왜 발생하는지에 다시 한 번 곰곰히 생각하였다.
+ 우선 NullPointerException 이란 찾아가야할 주소가 null이라는 의미인데, 이말은 곧 객체의 주소가 없으며, 이러한 원인으로 발생이 된다고 알고 있는 정보가 맞는지 확인하였다. <br/>
+알고 있는 정보를 다시 확인 후, 현재 존재하는 출근에 대한 객체는 있으나 퇴근에 대한 객체는 없기 때문에, 퇴근 때문에 발생하는 문제임을 알았고, 해당 출근과 퇴근에 따른 값을 넣는 로직에 if문을 사용하여 로직을 추가하였다. 
 
 ```
  if (workTime != null) {
@@ -870,18 +888,36 @@ org.springframework.web.util.NestedServletException: Request processing failed; 
 		        dayData.put("workDuration", 0L);
 		    }
 ```
+
+<br/>
 코드를 이용해서 유효성 검사를 추가했음 
 
 <br/>
 
+2. 근본 원인을 통해서  SqlSession의 selectList 메서드를 호출할 때 매개변수가 맞지 않다는 것을 알게 되었다. <br/>
+
+그런 후 ** SqlSession에서 selectList의 메서드에 들어가는 매개 변수를 확인 후, mapper에 작성한 sql구문은 데이터의 순서가 상관 없기 때문에 map에 담아서 매개변수로 전송한다면 어떨까? 라는 생각을 갖게 되었고, 매개변수를 map에 담아서 전송하여 오류를 해결하였다. **
 
 
+```
+
+public List<DailyWorkTimeVO> selectDetailedListByWeek(String user_id, String startDate, String endDate){
+		
+		Map<String, Object> details = new HashMap<>();
+		details.put("user_id", user_id);
+		details.put("startDate", startDate);
+		details.put("endDate", endDate);
+		
+		return sqlSession.selectList(namespace + "selectDetailedListByWeek", details );
+
+	}
+```
 
  <hr>
 
 <br/>
 📗4. fullCalender 내부의 ajax 의미 
-
+<br/>
 
 일정 수정 및 삭제 선택 
 
