@@ -8,21 +8,20 @@
 📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
 	❌ 오류 내용 <br/>
 	✔️ 해결 방법 <br/>
- 
+ <br/>
 📗 3. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
  	❌ 오류 내용 <br/>
 	✔️ 해결 방법 <br/>
- 
+ <br/>
 📗 4. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
  	❌ 오류 내용 <br/>
 	✔️ 해결 방법 <br/>
- 
+ <br/>
 📗 5. fullCalender 내부의 ajax 의미 <br/>
  	❌ 오류 내용 <br/>
 	✔️ 해결 방법 <br/>
-
- 
-📗 6. pom.xml 정리 
+<br/>
+ 📗 6. pom.xml 정리 
 
  <hr>
 
@@ -896,9 +895,7 @@ java.lang.Error: Unresolved compilation problem:
 <br/>
 
 2. 근본 원인을 통해서  SqlSession의 selectList 메서드를 호출할 때 매개변수가 맞지 않다는 것을 알게 되었다. <br/>
-
-그런 후 ** SqlSession에서 selectList의 메서드에 들어가는 매개 변수를 확인 후, mapper에 작성한 sql구문은 데이터의 순서가 상관 없기 때문에 map에 담아서 매개변수로 전송한다면 어떨까? 라는 생각을 갖게 되었고, 매개변수를 map에 담아서 전송하여 오류를 해결하였다. **
-
+**SqlSession에서 selectList의 메서드에 들어가는 매개 변수를 확인 후, mapper에 작성한 sql구문은 데이터의 순서가 상관 없기 때문에 map에 담아서 매개변수로 전송한다면 어떨까? 라는 생각을 갖게 되었고, 매개변수를 map에 담아서 전송하여 오류를 해결하였다.** <br/>
 
 ```
 
@@ -965,95 +962,101 @@ public List<DailyWorkTimeVO> selectDetailedListByWeek(String user_id, String sta
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-	 var manager = "${vo.user_id}";  // EL 태그 사용
-	  console.log(manager);
-    var calendarEl = document.getElementById('calendar');
+	 var manager = "${vo.user_id}";  // 현재 로그인한 사용자 id 
+	  console.log(manager); // 디버깅용 
+    var calendarEl = document.getElementById('calendar'); 
+ 	// FullCalendar 초기화
     var calendar = new FullCalendar.Calendar(calendarEl, {
         headerToolbar: {
             left: 'prevYear,prev,next,nextYear today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
+        // 기본 설정 
         initialDate: new Date(),
-        navLinks: true, 	// 날짜 선택시 , day캘린더나 week 캘린더로 링크
-        editable: true, 	// 수정 가능 여부 설정
-        dayMaxEvents: true,     // 특정 이벤트의 개수가 일정 개수 이상일 경우에 +n개 형식으로 나타남 
-        selectable: true,	// 달력 일자 드래그 설정 가능 
+        navLinks: true,
+        // 직급 5이상만 일정 수정 가능 
+        editable: parseInt('${vo.job_position_id}') >=5 ,
+        dayMaxEvents: true,
+        selectable: true,
         
-        slotMinTime: '00:00:00', // 시작 시간을 의미
-        slotMaxTime: '24:00:00', // 종료 시간을 의미
-        slotDuration: '00:30:00',// 시간 간격을 의미 
+        slotMinTime: '00:00:00',
+        slotMaxTime: '24:00:00',
+        slotDuration: '00:30:00',
         
-      eventTimeFormat: {
-	    hour: '2-digit',   // 시간을 2자리 형식으로 표시 (예: 01시, 13시)
-	    minute: '2-digit', // 분을 2자리 형식으로 표시 (예: 05분, 30분)
-	    hour12: false      // 시간을 표시할 때 ,  24시간 형식으로 표시(01시, 13시)
-	},
-
-        events: function(info, successCallback, failureCallback) {
-            $.ajax({
-                url: '<c:url value="/api/schedule.do" />', // request.getContextPath()/api/schedule.do와 같은 경로(절대 경로) 
-                method: 'GET',
-                success: function(response) {
-                    if (response.status === 'success' && response.data) {
-                        const events = response.data.map(event => ({
-                            id: event.schedule_no,  			// 일정 ID
-                            title: event.schedule_name,  		// 일정 제목
-                            start: event.schedule_start_date,		// 일정 시작 날짜
-                            end: event.schedule_end_date,		// 일정 종료 날짜
-                            allDay: false				// 하루 종일 이벤트인지 여부 (false로 설정)
-                        }));
-                        successCallback(events);			// 성공적으로 받은 이벤트 데이터를 FullCalendar로 전달
-                    } else {
-                        failureCallback(response.message || '일정을 불러오는데 실패했습니다.');
-                    }
-                },
-                error: function(xhr) {
-                    failureCallback('일정을 불러오는데 실패했습니다.');
-                    handleError(xhr);
-                }
-            });
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
         },
-/*
-info 객체는 fullCalendar의 select 이벤트가 발생할 때 , 제공되는 객체
-이 info 객체를 통해서 start 및 end를 설정할 수 있다 .
-*/
+		// 일정 데이터 로드 
+       events: function(info, successCallback, failureCallback) {
+		    const department_id = parseInt('${vo.department_id}'); // 현재 사용자의 부서 ID
+		    $.ajax({
+		        url: '<c:url value="/api/schedule.do" />',
+		        method: 'GET',
+		        data: { department_id: department_id }, // 부서 ID를 파라미터로 전달
+		        success: function(response) {
+		            if (response.status === 'success' && response.data) {
+		                const events = response.data.map(event => ({
+		                    id: event.schedule_no,
+		                    title: event.schedule_name,
+		                    start: event.schedule_start_date,
+		                    end: event.schedule_end_date,
+		                    allDay: false
+		                }));
+		                successCallback(events);
+		            } else {
+		                failureCallback(response.message || '일정을 불러오는데 실패했습니다.');
+		            }
+		        },
+		        error: function(xhr) {
+		            failureCallback('일정을 불러오는데 실패했습니다.');
+		            handleError(xhr);
+		        }
+		    });
+		},
         select: function(info) {
-            if (parseInt('${vo.job_position_id}') < 3) {   // 특정 직책 미만은 작성할 수 없게 권한을 생성 
+            if (parseInt('${vo.job_position_id}') < 5) {
                 alert('일정 생성 권한이 없습니다.');
                 return;
-            } 
+            }
 
             const title = prompt('일정 제목을 입력하세요:');
             if (!title) return;
 
+            // 시작 시간 입력 (기본값: 선택한 시간)
             const startTime = prompt('시작 시간을 입력하세요 (HH:MM):', 
                 info.start.getHours().toString().padStart(2, '0') + ':' + 
                 info.start.getMinutes().toString().padStart(2, '0'));
 
+            // 종료 시간 입력 (기본값: 시작 시간 + 1시간)
+            const defaultEndTime = new Date(info.start);
+            defaultEndTime.setHours(defaultEndTime.getHours() + 1); // 시작 시간 + 1시간
             const endTime = prompt('종료 시간을 입력하세요 (HH:MM):', 
-                info.end.getHours().toString().padStart(2, '0') + ':' + 
-                info.end.getMinutes().toString().padStart(2, '0'));
+                defaultEndTime.getHours().toString().padStart(2, '0') + ':' + 
+                defaultEndTime.getMinutes().toString().padStart(2, '0'));
 
+            // 날짜와 시간 조합 
+            const startDate = formatDateTime(info.start, startTime);
+            const endDate = formatDateTime(info.start, endTime);  // info.start를 기준으로 종료 시간 설정 
+            
             const event = {
-                schedule_name: title,
-                schedule_start_date: formatDateTime(info.start, startTime),
-                schedule_end_date: formatDateTime(info.end, endTime),
-                schedule_state: '0',
-                department_id: parseInt('${vo.department_id}'),
-                job_position_id: parseInt('${vo.job_position_id}'),
-                user_id: ${vo.user_id},  // vo에서 user_id 값 사용
-                schedule_no: null // 새로 생성될 일정에 대해 no 값은 null (후에 서버에서 처리)
+            		   schedule_name: title,
+            	        schedule_start_date: startDate,
+            	        schedule_end_date: endDate,
+            	        schedule_state: '0',
+            	        department_id: parseInt('${vo.department_id}'),
+            	        job_position_id: parseInt('${vo.job_position_id}'),
+/* JavaScript에서는 EL 태그를 직접 사용할 수 없으므로, JSP에서 미리 변수로 설정한 후 JavaScript에서 사용 */
+            	        user_id: manager, // 위에서  var manager = "${vo.user_id}";로 설정함
+            	        schedule_no: null
             };
 
-/*
-	JSON.stringify() >> JSON문자열로 변환 
-  	user_id: ${vo.user_id},  // vo에서 user_id 값 사용 >>   "user_id": "${vo.user_id}"의 형태를 이루고 있음
-*/
             $.ajax({
-                url: '<c:url value="/api/scheduleInsert.do" />', // 절대 경로 설정  						// ex)http://localhost:8080/controller/api/schedule.do의 값으로 구성(controller는 contextPath()라고 볼 수 있음)
+                url: '<c:url value="/api/scheduleInsert.do" />',
                 method: 'POST',
-                data: JSON.stringify(event), // event객체를 JSON 문자열로 변환하여 서버에 전송 
+                data: JSON.stringify(event),
                 contentType: 'application/json',
                 success: function(response) {
                     if (response.status === 'success') {
@@ -1073,16 +1076,15 @@ info 객체는 fullCalendar의 select 이벤트가 발생할 때 , 제공되는 
             });
         },
         eventClick: function(info) {
-            if (parseInt('${vo.job_position_id}') < 3) {
+            if (parseInt('${vo.job_position_id}') < 5) {
                 alert('일정 수정 권한이 없습니다.');
                 return;
             }
 
             // 사용자에게 수정 또는 삭제 선택을 묻는 팝업
-            const action = prompt('수정하려면 "edit"을, 삭제하려면 "delete"를 입력하세요:', 'edit'); 
-		// 클릭했을 때 수정 및 삭제 선택
-		
-            if (action === 'edit') { // 수정할 때  
+            const action = prompt('수정하려면 "edit"을, 삭제하려면 "delete"를 입력하세요:', 'edit');
+
+            if (action === 'edit') {
                 // 수정하는 로직
                 const newTitle = prompt('일정 제목을 수정하세요:', info.event.title);
                 if (!newTitle) return;
@@ -1102,13 +1104,13 @@ info 객체는 fullCalendar의 select 이벤트가 발생할 때 , 제공되는 
                     schedule_end_date: formatDateTime(info.event.end, endTime),
                     department_id: parseInt('${vo.department_id}'),
                     job_position_id: parseInt('${vo.job_position_id}'),
-                    user_id:  ${vo.user_id}
+                    user_id: manager
                 };
                 console.log("-----------------------------------");
                 console.log(info.event);
 
                 $.ajax({
-                    url: '<c:url value="/api/scheduleUpdate.do" />', // controller에 연결 
+                    url: '<c:url value="/api/scheduleUpdate.do" />',
                     method: 'PUT',
                     data: JSON.stringify(updateData),
                     contentType: 'application/json',
@@ -1132,7 +1134,7 @@ info 객체는 fullCalendar의 select 이벤트가 발생할 때 , 제공되는 
                     };
 
                     $.ajax({
-                        url: '<c:url value="/api/scheduleDelete.do" />', // controller에 연결 
+                        url: '<c:url value="/api/scheduleDelete.do" />',
                         method: 'DELETE',
                         data: JSON.stringify(deleteData),
                         contentType: 'application/json',
@@ -1154,6 +1156,7 @@ info 객체는 fullCalendar의 select 이벤트가 발생할 때 , 제공되는 
     });
     
     calendar.render();
+    console.log('FullCalendar initialized successfully!');
 });
 
 function updateEvent(event, calendar) {
@@ -1164,7 +1167,7 @@ function updateEvent(event, calendar) {
         schedule_end_date: formatDateTime(event.end),
         department_id: parseInt('${vo.department_id}'),
         job_position_id: parseInt('${vo.job_position_id}'),
-        user_id:  ${vo.user_id}
+        user_id: manager
     };
     
     $.ajax({
@@ -1189,18 +1192,26 @@ function updateEvent(event, calendar) {
 
 function formatDateTime(date, timeStr = null) {
     if (!date) return null;
-    const d = new Date(date);
+
+    // 날짜 객체 복사 (원본 수정 방지)
+    const d = new Date(date.getTime());
+
     if (timeStr) {
+        // 시간 설정
         const [hours, minutes] = timeStr.split(':').map(Number);
-        d.setHours(hours, minutes, 0);
+        d.setHours(hours);
+        d.setMinutes(minutes);
+        d.setSeconds(0);
+        d.setMilliseconds(0);
     }
-    return moment(d).format('YYYY-MM-DD HH:mm:ss');  // moment.js를 사용하여 날짜 포맷팅
+
+    return moment(d).format('YYYY-MM-DD HH:mm:ss');
 }
 
 function handleError(xhr) {
     console.error('API Error:', xhr);
     if (xhr.status === 403) {
-        alert('권한이 없습니다.');
+        alert('권한이 없습니다.'); 
     } else if (xhr.status === 400) {
         alert('잘못된 일정 데이터입니다: ' + (xhr.responseJSON?.message || xhr.responseText));
     } else {
@@ -1217,6 +1228,64 @@ function handleError(xhr) {
 ```
 
 <br/>
+❌ 오류 내용 <br/>
+1. fullCalendar를 처음 사용하기 때문에 script를 선언하는 순서에 따라서 fullCalendar의 화면이 나타나는지 나타나지 않는지에 대해 몰랐어서 화면에 나오지 않는 문제가 있었다. <br/>
+
+2. 일정을 등록할 경우 날짜를 클릭 후 시간 설정 페이지에서 해당일의 오전부터 오후까지 일정을 등록할 때는 정상적으로 등록이 되었는데, 날짜의 백그라운드를 클릭 후 해당일의 오전부터 오후까지 일정을 등록할 때 해당일의 오전부터 다음날의 오후까지 등록되는 문제가 있었다.
+
+
+<br/><br/>
+
+
+✔️ 해결 방법 <br/>
+1. **아래 4개의 스크립트가 순서가 뒤섞이지 않고 순서대로 선언되어 있어야, fullCalendar가 제대로 화면에 나오게 되었다.** <br/>
+<script src='<%= request.getContextPath()%>/resources/js/jquery-3.7.1.js'></script> <br/>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script><!-- moment.js 추가  --> <br/>
+<script src='<%= request.getContextPath()%>/resources/js/index.global.js'></script> <br/>
+<script src='<%= request.getContextPath()%>/resources/js/index.global.min.js'></script> <br/>
+
+<br/><br/>
+2. FullCalender의 기본 원리를 잘 파악하지 못해서 발생한 문제였다. <br/>
+또한 FullCalender의 .start와 .end를 잘 알지 못해서 발생한 문제였다. <br/>
+
+<br/>
+* 기존의 코드
+<br/>
+
+```
+const event = {
+    schedule_name: title,
+    schedule_start_date: formatDateTime(info.start, startTime),
+    schedule_end_date: formatDateTime(info.end, endTime), // info.end를 사용
+    // ...
+};
+
+```
+
+<br/>
+* 수정된 코드 
+<br/>
+
+```
+// 날짜와 시간 조합 
+const startDate = formatDateTime(info.start, startTime);
+const endDate = formatDateTime(info.start, endTime);  // info.start를 기준으로 종료 시간 설정
+            
+const event = {
+    schedule_name: title,
+    schedule_start_date: startDate,
+    schedule_end_date: endDate,
+    // ...
+};
+```
+
+<br/>
+
+이처럼 상수 ebdDate를 info.end가 아닌 info.start로 수정하니 문제를 해결할 수 있었다. <br/>
+가능했던 이유는 FullCalendar의 기본 동작은 하루를 선택했을 때, 기본 동작으로 인해 종료 시점이 다음 날 00시로 설정이 되기 때문에,
+내가 원한 당일 일정 설정을 원할 경우에는 종료 일정을 기존 코드의info.end 부분을 info.start로 수정하면 문제를 해결할 수있다. <br/>
+<br/>
+
 
 
  <hr>
