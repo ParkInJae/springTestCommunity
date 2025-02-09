@@ -1025,21 +1025,42 @@ document.addEventListener('DOMContentLoaded', function() {
             const title = prompt('일정 제목을 입력하세요:');
             if (!title) return;
 
-            // 시작 시간 입력 (기본값: 선택한 시간)
-            const startTime = prompt('시작 시간을 입력하세요 (HH:MM):', 
-                info.start.getHours().toString().padStart(2, '0') + ':' + 
-                info.start.getMinutes().toString().padStart(2, '0'));
-
-            // 종료 시간 입력 (기본값: 시작 시간 + 1시간)
-            const defaultEndTime = new Date(info.start);
-            defaultEndTime.setHours(defaultEndTime.getHours() + 1); // 시작 시간 + 1시간
-            const endTime = prompt('종료 시간을 입력하세요 (HH:MM):', 
-                defaultEndTime.getHours().toString().padStart(2, '0') + ':' + 
-                defaultEndTime.getMinutes().toString().padStart(2, '0'));
-
-            // 날짜와 시간 조합 
-            const startDate = formatDateTime(info.start, startTime);
-            const endDate = formatDateTime(info.start, endTime);  // info.start를 기준으로 종료 시간 설정 
+            // 시작 시간 기본값: info.start의 시간 사용
+            const defaultStartTime = info.start.getHours().toString().padStart(2, '0') + ':' +
+                                     info.start.getMinutes().toString().padStart(2, '0');
+            const startTime = prompt('시작 시간을 입력하세요 (HH:MM):', defaultStartTime); // 사용자가 입력한 시간
+            
+            // 종료 시간 기본값: 기본적으로 info.end의 시간을 사용
+            // 단, 단일 날짜 선택 시 info.end는 다음 날 00:00이므로 보정 필요
+            let adjustedEndDate = info.end;
+            // moment(info.end) >> Date 객체인 info.end를 Moments.js 객체로 변환 이때 , Moments.js는 날짜/시간 계산을 도와주는 라이브러리이다. 
+            // .diff(info.start,'days') >> 변환한, mement(info.end)와 moment(info.start)사이의 차이를 일간 단위로 계산함  즉 몇 일이 차이나는지 정수 값으로 변환 
+            	// 끝나는 날과 ,시작하는 날의 차이가  하루일 경우에  
+            if (moment(info.end).diff(info.start, 'days') === 1) { 
+              // info.end가 다음 날 00:00이라면 1밀리초 빼서 당일의 마지막 시점을 구함
+              adjustedEndDate = new Date(info.end.getTime() - 1); 
+            // 당일 일정을 구할시 ,FullCalender의 경우에는 info.end가 다음 날 00시00분으로 자동 설정되기에, 1을 만족하고 
+            // 1을 만족시 if문 내부의 info.end.getTime()을 통해 밀리초로 변환 후 1밀리초를 뺌.
+              
+            }
+            /* padStart (2,'0')2글자 범위에 00이 들어가게 표시 */
+            const defaultEndTime = adjustedEndDate.getHours().toString().padStart(2, '0') + ':' + /* 시간의 2글자 범위에 00이 들어가게 표시 */
+                                   adjustedEndDate.getMinutes().toString().padStart(2, '0'); 	  /* 분의 2글자 범위에 00이 들어가게 표시 */
+            const endTime = prompt('종료 시간을 입력하세요 (HH:MM):', defaultEndTime);
+            
+            // 날짜와 시간 조합: 시작 날짜는 info.start, 종료 날짜는 보정된 adjustedEndDate 사용
+            /*
+            1. 2025-02-09일에 당일 일정 추가한 경우 
+            	위에서 adjustedEndDate라는 변수에 보정을 적용했기 때문에 
+            startDate는 "2025-02-09 09:00:00"
+            endDate는 "2025-02-09 18:00:00"
+            
+            2. 여러 날짜를 선택했을 때, 
+            info.start → 2025-02-09 00:00:00
+            info.end → 2025-02-11 00:00:00
+            */
+            const startDate = formatDateTime(info.start, startTime);  // 사용자가 입력한 시간을 info.start로 사용
+            const endDate = formatDateTime(adjustedEndDate, endTime); // 사용자가 작성한 종료 시간을 endTime으로 사용
             
             const event = {
             		   schedule_name: title,
@@ -1233,6 +1254,9 @@ function handleError(xhr) {
 
 2. 일정을 등록할 경우 날짜를 클릭 후 시간 설정 페이지에서 해당일의 오전부터 오후까지 일정을 등록할 때는 정상적으로 등록이 되었는데, 날짜의 백그라운드를 클릭 후 해당일의 오전부터 오후까지 일정을 등록할 때 해당일의 오전부터 다음날의 오후까지 등록되는 문제가 있었다.
 
+3. 2번의 방법으로 수정 후 드래그를 통해 일정을 추가해도 info.start에 의해서 여러일정이 아닌 당일 일정만 추가되는 문제가 발생하였다.
+
+
 
 <br/><br/>
 
@@ -1281,11 +1305,73 @@ const event = {
 
 <br/>
 
-이처럼 상수 ebdDate를 info.end가 아닌 info.start로 수정하니 문제를 해결할 수 있었다. <br/>
+**이처럼 상수 ebdDate를 info.end가 아닌 info.start로 수정하니 당일 일정 추가를 할 수 있게 되어, 문제를 해결할 수 있었다.**
+<br/>
 가능했던 이유는 FullCalendar의 기본 동작은 하루를 선택했을 때, 기본 동작으로 인해 종료 시점이 다음 날 00시로 설정이 되기 때문에,
 내가 원한 당일 일정 설정을 원할 경우에는 종료 일정을 기존 코드의info.end 부분을 info.start로 수정하면 문제를 해결할 수있다. <br/>
 <br/>
 
+
+
+3. 당일 일정을 해결했지만, 드래그를 통해 여러 일정을 추가해도 당일 일정만 추가되는 것에 대해서, info.end를 다시 작성해야할지 말아야할지 고민을 오랜 시간 가졌다.
+하지만 기존 코드에서 info.start로 수정한 부분을 info.end로 바꾼다면, 1과 같은 문제가 발생하기에 고민한 결과 , if문을 사용해서 조건을 걸면 되겠다는 생각을 하였고 기존의 코드에서 조건을 넣고 보정을 준 adjustedEndDate 변수를 생성하게 되었다. 
+
+
+* 해결방법 2의 코드
+  
+```
+// 날짜와 시간 조합 
+const startDate = formatDateTime(info.start, startTime);
+const endDate = formatDateTime(info.start, endTime);  // info.start를 기준으로 종료 시간 설정
+            
+const event = {
+    schedule_name: title,
+    schedule_start_date: startDate,
+    schedule_end_date: endDate,
+    // ...
+};
+```
+
+
+* 수정된 코드
+  ```
+   // 시작 시간 기본값: info.start의 시간 사용
+            const defaultStartTime = info.start.getHours().toString().padStart(2, '0') + ':' +
+                                     info.start.getMinutes().toString().padStart(2, '0');
+            const startTime = prompt('시작 시간을 입력하세요 (HH:MM):', defaultStartTime); // 사용자가 입력한 시간
+            
+            // 종료 시간 기본값: 기본적으로 info.end의 시간을 사용
+            // 단, 단일 날짜 선택 시 info.end는 다음 날 00:00이므로 보정 필요
+            let adjustedEndDate = info.end;
+            // moment(info.end) >> Date 객체인 info.end를 Moments.js 객체로 변환 이때 , Moments.js는 날짜/시간 계산을 도와주는 라이브러리이다. 
+            // .diff(info.start,'days') >> 변환한, mement(info.end)와 moment(info.start)사이의 차이를 일간 단위로 계산함  즉 몇 일이 차이나는지 정수 값으로 변환 
+            	// 끝나는 날과 ,시작하는 날의 차이가  하루일 경우에  
+            if (moment(info.end).diff(info.start, 'days') === 1) { 
+              // info.end가 다음 날 00:00이라면 1밀리초 빼서 당일의 마지막 시점을 구함
+              adjustedEndDate = new Date(info.end.getTime() - 1); 
+            // 당일 일정을 구할시 ,FullCalender의 경우에는 info.end가 다음 날 00시00분으로 자동 설정되기에, 1을 만족하고 
+            // 1을 만족시 if문 내부의 info.end.getTime()을 통해 밀리초로 변환 후 1밀리초를 뺌.
+              
+            }
+            /* padStart (2,'0')2글자 범위에 00이 들어가게 표시 */
+            const defaultEndTime = adjustedEndDate.getHours().toString().padStart(2, '0') + ':' + /* 시간의 2글자 범위에 00이 들어가게 표시 */
+                                   adjustedEndDate.getMinutes().toString().padStart(2, '0'); 	  /* 분의 2글자 범위에 00이 들어가게 표시 */
+            const endTime = prompt('종료 시간을 입력하세요 (HH:MM):', defaultEndTime);
+            
+            // 날짜와 시간 조합: 시작 날짜는 info.start, 종료 날짜는 보정된 adjustedEndDate 사용
+            /*
+            1. 2025-02-09일에 당일 일정 추가한 경우 
+            	위에서 adjustedEndDate라는 변수에 보정을 적용했기 때문에 
+            startDate는 "2025-02-09 09:00:00"
+            endDate는 "2025-02-09 18:00:00"
+            
+            2. 여러 날짜를 선택했을 때, 
+            info.start → 2025-02-09 00:00:00
+            info.end → 2025-02-11 00:00:00
+            */
+            const startDate = formatDateTime(info.start, startTime);  // 사용자가 입력한 시간을 info.start로 사용
+            const endDate = formatDateTime(adjustedEndDate, endTime); // 사용자가 작성한 종료 시간을 endTime으로 사용
+  ```
 
 
  <hr>
