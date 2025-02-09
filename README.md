@@ -1262,6 +1262,7 @@ function handleError(xhr) {
 
 
 ✔️ 해결 방법 <br/>
+<br/>
 1. **아래 4개의 스크립트가 순서가 뒤섞이지 않고 순서대로 선언되어 있어야, fullCalendar가 제대로 화면에 나오게 되었다.** <br/>
 <script src='<%= request.getContextPath()%>/resources/js/jquery-3.7.1.js'></script> <br/>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script><!-- moment.js 추가  --> <br/>
@@ -1312,8 +1313,7 @@ const event = {
 <br/>
 
 
-
-3. 당일 일정을 해결했지만, 드래그를 통해 여러 일정을 추가해도 당일 일정만 추가되는 것에 대해서, info.end를 다시 작성해야할지 말아야할지 고민을 오랜 시간 가졌다. <br/>
+3.당일 일정을 해결했지만, 드래그를 통해 여러 일정을 추가해도 당일 일정만 추가되는 것에 대해서, info.end를 다시 작성해야할지 말아야할지 고민을 오랜 시간 가졌다. <br/>
 하지만 기존 코드에서 info.start로 수정한 부분을 info.end로 바꾼다면, 1과 같은 문제가 발생하기에 고민한 결과 , if문을 사용해서 조건 을 걸면 되겠다는 생각을 하였고 기존의 코드에서 조건을 넣고 보정을 준 adjustedEndDate 변수를 생성하게 되었다. 
 
 <br/>
