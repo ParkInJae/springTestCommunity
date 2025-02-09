@@ -258,7 +258,7 @@ function updateEvent(event, calendar) {
             }
         },
         error: function(xhr) {
-            event.revert();
+            event.revert(); 
             handleError(xhr);
         }
     });
