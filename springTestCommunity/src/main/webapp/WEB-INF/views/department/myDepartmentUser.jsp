@@ -233,38 +233,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('FullCalendar initialized successfully!');
 });
 
-function updateEvent(event, calendar) {
-    const updateData = {
-        schedule_id: parseInt(event.id),
-        schedule_name: event.title,
-        schedule_start_date: formatDateTime(event.start),
-        schedule_end_date: formatDateTime(event.end),
-        department_id: parseInt('${vo.department_id}'),
-        job_position_id: parseInt('${vo.job_position_id}'),
-        user_id: manager
-    };
-    
-    $.ajax({
-        url: '<c:url value="/api/scheduleUpdate.do" />',
-        method: 'PUT',
-        data: JSON.stringify(updateData),
-        contentType: 'application/json',
-        success: function(response) {
-            if (response.status === 'success') {
-                alert('일정이 수정되었습니다.');
-            } else {
-                event.revert();
-                alert(response.message || '일정 수정에 실패했습니다.');
-            }
-        },
-        error: function(xhr) {
-            event.revert(); 
-            handleError(xhr);
-        }
-    });
-}
 
-function formatDateTime(date, timeStr = null) {
+
+function  formatDateTime(date, timeStr = null) {
     if (!date) return null;
 
     // 날짜 객체 복사 (원본 수정 방지)
@@ -292,7 +263,7 @@ function handleError(xhr) {
         alert('서버 오류가 발생했습니다. 개발자 도구의 콘솔을 확인해주세요.');
     }
 }
-</script>
+</script> 
 </head>
 <body>
   <div id='calendar'></div>
