@@ -233,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('FullCalendar initialized successfully!');
 });
 
+<<<<<<< HEAD
 function updateEvent(event, calendar) {
     const updateData = {
         schedule_id: parseInt(event.id),
@@ -263,8 +264,11 @@ function updateEvent(event, calendar) {
         }
     });
 }
+=======
+>>>>>>> branch 'main' of https://github.com/ParkInJae/springTestCommunity.git
 
-function formatDateTime(date, timeStr = null) {
+
+function  formatDateTime(date, timeStr = null) {
     if (!date) return null;
 
     // 날짜 객체 복사 (원본 수정 방지)
@@ -292,7 +296,7 @@ function handleError(xhr) {
         alert('서버 오류가 발생했습니다. 개발자 도구의 콘솔을 확인해주세요.');
     }
 }
-</script>
+</script> 
 </head>
 <body>
   <div id='calendar'></div>
