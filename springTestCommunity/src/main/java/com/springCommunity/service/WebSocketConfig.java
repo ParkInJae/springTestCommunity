@@ -11,7 +11,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ChatWebSocketHandler(), "/chat")
+    	// endPoint > 하나의 긴 통신선이 있다고 가정하면 양 끝 지점을 endPoint라고 함  
+        registry.addHandler(new ChatWebSocketHandler(), "/chat") //end 포인트를 /chat으로 설정함 
                 .setAllowedOrigins("*");
     }
 }
