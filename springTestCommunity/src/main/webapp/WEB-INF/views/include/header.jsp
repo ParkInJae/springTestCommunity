@@ -13,17 +13,23 @@
 <script src="<%= request.getContextPath() %>/resources/js/jquery-3.7.1.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"><!-- jQuery UI CSS -->
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script><!-- jQuery UI JavaScript -->
+
 <script>
 let user_name = "";
 let user_id = "";
 let openChats = []; // 열린 채팅방 번호를 저장하는 배열
 const chatRoomList = $("#chatRoomList");
+// 페이지 로드 시 초기화 
 window.onload = function(){
+	// 세션에서 사용자 정보 가져오기 jsp의 EL 사용 
 	user_name = "${sessionScope.SPRING_SECURITY_CONTEXT.authentication.principal.user_name}";
 	user_id = "${sessionScope.SPRING_SECURITY_CONTEXT.authentication.principal.user_id}";
+	
+	// 디버깅 
 	console.log("user_name :" + user_name);
 	console.log("user_id :" + user_id);
 	
+	// 채팅방 목록 초기화( 초기엔 숨김)
 	$("#chatRoomList").css("display","none");
 	
 	
@@ -39,11 +45,13 @@ window.onload = function(){
 		}
 	});
 	
-	$(document).ready(function () {
-        const loginError = '<%= session.getAttribute("loginError") %>';
+// 서버 세션에 저장된 loginError 값을 가져와서 에러 있을 대 로그인 모달을 띄우고 에러메시지를 표시한 뒤 세션에서 해당 속성 제거
+	$(document).ready(function () { 
+		// 아래 html에 loginError 존재 
+        const loginError = '<%= session.getAttribute("loginError") %>'; 
         if(loginError !== 'null') {
-            $('#loginModal').fadeIn(); // 모달 표시
-            $('#loginError').text(loginError).show(); // 에러 메시지 표시
+            $('#loginModal').fadeIn(); 					// 모달 표시
+            $('#loginError').text(loginError).show();   // 에러 메시지 표시
         }
         <% session.removeAttribute("loginError"); %> <!-- 에러 메시지 제거 -->
     });
@@ -77,8 +85,8 @@ window.onload = function(){
 	},5000);
 }
 
+// 채팅방 목록 업데이트 함수 
 let chatInterval;
-
 function startChatInterval() {
     chatInterval = setInterval(function(){
         $.ajax({
@@ -91,16 +99,18 @@ function startChatInterval() {
                     html += `<li><div class="no-result">\${data.message}</div></li>`;
                 }else {
 		        	for(item of data.list){
+		        		/*  chatRoomView > 채팅방 번호와 이름을 나타냄*/
 						html += `
-						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');">
+						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');"> // 이스케이프 문을 사용해서 번호 값과 이름 값을 넣음 
 							<div class="chat_item">
 								<div class="message_wrapper">
 					           	 <div class="chat_name">
 						           	<!-- 상단 고정 아이콘 -->
+						           	<!--삼상 연산자 이용  --> 
 		                            <i class="\${item.chat_users_top === 1 ? 'fas fa-solid fa-thumbtack' : 'fas fa-regular fa-thumbtack'}" 
 		                               onclick="updateChatTop(event, \${item.chat_no});" 
 		                               style="margin-right: 8px; cursor: pointer; color: \${item.chat_users_top === 1 ? '#ff6347' : '#ccc'};">
-		                            </i>
+		                            </i> 
 						           	\${item.chat_users_name}`;
 			           	if(item.user_count > 2) {   	
 		           		html += `   <span class="user_count">\${item.user_count}</span>`;
@@ -122,14 +132,14 @@ function startChatInterval() {
 			            }
 			            html += `</div>
 			            		<div class="last_message_wrapper">
-					                <div class="last_message">\${item.chat_message_content || ""}</div>
+					                <div class="last_message">\${item.chat_message_content || ""}</div>  // null과 NaN뿐만 아닌 undefined등일 경우 ""(빈 문자열)로 나타냄 
 					                <div class="last_message_time">\${item.chat_message_time || ""}</div>
 					            </div>
 					        </div>
 						</li>`;
 					}
                 }
-	            $("#chatRoomList").html(html);
+	            $("#chatRoomList").html(html); // 검색 결과를 업데이트
             }
         });
     }, 1000);
@@ -140,7 +150,7 @@ function stopChatInterval() {
 }
 
 function startChatSearchInterval(searchValue) {
-    chatInterval = setInterval(function(){
+    chatInterval = setInterval(function(){ 
         $.ajax({
             url: "<%= request.getContextPath() %>/chat/chat.do",
             type: "GET",
@@ -151,17 +161,20 @@ function startChatSearchInterval(searchValue) {
                     // 리스트가 비어있으면 메시지를 출력
                     html += `<li><div class="no-result">\${data.message}</div></li>`;
                 }else {
-		        	for(item of data.list){
+                	// 반복문 사용 
+		        	for(item of data.list){  // data는 controller에서 보내는 응답 데이터, Map타입, list는 Map안에 담겨진 List를 의미함
+		        		// 백틱 사용
 						html += `
-						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');">
+/*li > list item*/			<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');"> // 이스케이프 문을 사용해서 번호 값과 이름 값을 넣음
 							<div class="chat_item">
 								<div class="message_wrapper">
 					           	 <div class="chat_name">
-						           	<!-- 상단 고정 아이콘 -->
+						           	<!-- 상단 고정 아이콘 --> 
 		                            <i class="\${item.chat_users_top === 1 ? 'fas fa-solid fa-thumbtack' : 'fas fa-regular fa-thumbtack'}" 
 		                               onclick="updateChatTop(event, \${item.chat_no});" 
 		                               style="margin-right: 8px; cursor: pointer; color: \${item.chat_users_top === 1 ? '#ff6347' : '#ccc'};">
 		                            </i>
+		                            /* 이스케이프 처리하여 el 태그로 ${} 값을 출력한다. */
 						           	\${item.chat_users_name}`;
 			           	if(item.user_count > 2) {   	
 		           		html += `   <span class="user_count">\${item.user_count}</span>`;
@@ -190,7 +203,7 @@ function startChatSearchInterval(searchValue) {
 						</li>`;
 					}
                 }
-	            $("#chatRoomList").html(html);
+	            $("#chatRoomList").html(html); // 검색 결과를 업데이트
             }
         });
     }, 1000);
@@ -340,7 +353,7 @@ function chatModal(){
 	                      style="border:none; width:85%; height:auto; margin-left:5px;">
 	                      <i class="fas fa-times" id="clearBtn"></i>
                     </div>
-	            </div>
+	            </div> 
 	            <div id="chatSidebar">
 	                <ul id="chatRoomList">`;
             if(data.message) {
@@ -598,9 +611,10 @@ function connectWebSocket(chat_no) {
     // 채팅방 번호에 따라 WebSocket을 생성
     if(!chatWebSockets[chat_no]) {
     	/* 시연용 */
-        //const socket = new WebSocket("ws://192.168.0.175:8080/community/chat"); 
+        //const socket = new WebSocket("ws://192.168.0.175:8080/community/chat");
+    	
         //각자 컴퓨터에서 돌릴용
-        const socket = new WebSocket("ws://localhost:8080/community/chat"); 
+        const socket = new WebSocket("ws://localhost:8080/community/chat"); // WebSocket 연결 생성  
 
         socket.onopen = function () {
             console.log(`WebSocket 연결 성공: 채팅방 \${chat_no}`);
@@ -681,6 +695,7 @@ function connectWebSocket(chat_no) {
         chatWebSockets[chat_no] = socket;
     }
 }
+
 /* 채팅메시지 DB에 저장 */
 function sendMessage(chat_no) {
     const input = document.getElementById("messageInput_" + chat_no);
@@ -1034,6 +1049,8 @@ function showUnreadCount(totalUnread) {
     }
 }
 </script>
+
+<!-- 위치 기반 출퇴근 script -->
 <script>
 function checkIn() {
     if ("geolocation" in navigator) {
