@@ -16,12 +16,12 @@
 			<br>
 			<!-- 근무시간 나타내기  -->
 			 <div class="summaryContainer">
-			    <div>현재 주차 </div>
-			    <div class="mainCalender">
-		            <a href="?startDate=${startOfWeek.minusWeeks(1)}">&lt;</a>
-			        <span id="currentWeekDisplay">${startOfWeek}~${endOfWeek}</span>
-			        <a href="?startDate=${startOfWeek.plusWeeks(1)}"> &gt;</a>
-			    </div>
+		       <div>현재 주차 </div>
+   				<div class="mainCalender">
+				    <a href="?startDate=${prevWeekStart}">&lt;</a>
+				    <span id="currentWeekDisplay">${startOfWeek}~${endOfWeek}</span>
+				    <a href="?startDate=${nextWeekStart}"> &gt;</a>
+				</div>
 			</div>
 			<!-- 월요일부터 일요일까지 근무 시간 나타내기  -->
 		    <div class="diagramContainer">
@@ -29,15 +29,6 @@
 		    </div>
 		    
 
-  
-<%-- var workTimes = [
-    <c:forEach var="workTime" items="${workTimeDetails}" varStatus="status">
-        Math.round(${workTime.workDuration}),  // minutes 단위로 변환하지 않고 그대로 사용
-        <c:if test="${!status.last}">,</c:if>
-    </c:forEach>
-]; --%>
-
- 
 <script>
 
 //차트 데이터 구성
