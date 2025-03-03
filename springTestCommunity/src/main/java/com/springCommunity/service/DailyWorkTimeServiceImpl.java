@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,50 +34,48 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 	}
 
 
-// 전체 근무 시간 및 일간 근무 시간 코드 
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	// 전체 근무 시간 및 일간 근무 시간 코드 
+		private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		private static final Logger logger = LoggerFactory.getLogger(DailyWorkTimeServiceImpl.class);
+		 @Override
+		    public Map<String, Object> getWeeklyWorkTimeDetails(String user_id, String startDate) {
+			 
+		        // 현재 날짜 기준으로 주차 계산
+		        LocalDate currentDate = startDate != null ? LocalDate.parse(startDate) : LocalDate.now();
+		        
+		        // 1. 주의 시작일과 종료일을 계산 (월요일~ 일요일)
+		        LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // 주의 시작일 (월요일)
+		        LocalDate endOfWeek = startOfWeek.plusDays(6); // 월요일부터 6일 추가  // 주의 종료일 (일요일)
 
-	 @Override
-	    public Map<String, Object> getWeeklyWorkTimeDetails(String user_id, String startDate) {
-		 
-	        // 현재 날짜 기준으로 주차 계산
-	        LocalDate currentDate = startDate != null ? LocalDate.parse(startDate) : LocalDate.now();
-	        
-	        // 1. 주의 시작일과 종료일을 계산 (월요일~ 일요일)
-	        LocalDate startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // 주의 시작일 (월요일)
-	        LocalDate endOfWeek = startOfWeek.plusDays(6); // 월요일부터 6일 추가  // 주의 종료일 (일요일)
+		        // 2. DAO를 통해 해당 주차의 근무 시간 목록을 조회
+		        List<DailyWorkTimeVO> dbWorkTimes = dailyWorkTimeDAO.selectDetailedListByWeek(user_id, startOfWeek.toString(), endOfWeek.toString());
+		        
+		        // 디버깅 
+		        if (dbWorkTimes == null) {
+		            logger.info("dbWorkTimes가 null입니다. 빈 리스트로 초기화합니다.");
+		            dbWorkTimes = new ArrayList<>();
+		        }
+		        
+		        //3 [핵심 로직]  jsp화면에서 chart.js를 사용하기 때문에  데이터와 레이블의 동기화가 필요함 
+		        // (데이터베이스에 없는 날짜는 결과에 포함되지 않아 chart.js에 누락될 수 있기 때문에 레이블과 데이터의 동기화가 잘 되지 않을 수 있음) 
+		        // 만약 chart.js를 이용하지 않고 근무 시간만 보여준다면 굳이 작성할 필요가 없음 
+		        // 결국 데이터와 레이블의 동기화를 위해 필요한 로직임 
+		        
+		        // 7일간의 데이터 구조 생성 (월~일)
+		        List<Map<String, Object>> workTimeDetails = new ArrayList<>();
+		        for (int i = 0; i < 7; i++) {
+		            LocalDate currentDay = startOfWeek.plusDays(i);
+		            Map<String, Object> dayData = createDayData(currentDay, dbWorkTimes); // dayData에 createDayData를 메소드를 활용한 값을 집어 넣음 
+		            workTimeDetails.add(dayData);
+		        }
 
-	        // 2. DAO를 통해 해당 주차의 근무 시간 목록을 조회
-	        List<DailyWorkTimeVO> dbWorkTimes = dailyWorkTimeDAO.selectDetailedListByWeek(user_id, startOfWeek.toString(), endOfWeek.toString());
-	
-	        
-	        // 디버깅 
-	        if(dbWorkTimes == null || dbWorkTimes.isEmpty()) {
-	        	System.out.println("workTimes의 값이 비어있음");
-	        }else {
-	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>" + dbWorkTimes.get(0).getCheck_in_time());
-	        	System.out.println("0번째 인덱스의 출근 시간 깂 >>>>>>>>>>>>>>>>>>>>"  + dbWorkTimes.get(0).getCheck_out_time());
-	        }
-	        //3 [핵심 로직]  jsp화면에서 chart.js를 사용하기 때문에  데이터와 레이블의 동기화가 필요함 (데이터베이스에 없는 날짜는 결과에 포함되지 않아 chart.js에 누락될 수 있기 때문에 레이블과 데이터의 동기화가 잘 되지 않을 수 있음) 
-	        // 만약 chart.js를 이용하지 않고 근무 시간만 보여준다면 굳이 작성할 필요가 없음 
-	        // 결국 데이터와 레이블의 동기화를 위해 필요한 로직임 
-	        
-	        // 7일간의 데이터 구조 생성 (월~일)
-	        List<Map<String, Object>> workTimeDetails = new ArrayList<>();
-	        for (int i = 0; i < 7; i++) {
-	            LocalDate currentDay = startOfWeek.plusDays(i);
-	            Map<String, Object> dayData = createDayData(currentDay, dbWorkTimes); // dayData에 createDayData를 메소드를 활용한 값을 집어 넣음 
-	            workTimeDetails.add(dayData);
-	        }
-
-	        // 결과 맵 구성
-	        Map<String, Object> result = new HashMap<>();
-	        result.put("workTimeDetails", workTimeDetails);
-	        result.put("startOfWeek", startOfWeek);
-	        result.put("endOfWeek", endOfWeek);
-	        return result;
-	    }
-	        
+		        // 결과 맵 구성
+		        Map<String, Object> result = new HashMap<>();
+		        result.put("workTimeDetails", workTimeDetails);
+		        result.put("startOfWeek", startOfWeek);
+		        result.put("endOfWeek", endOfWeek);
+		        return result;
+		    }	        
 	        
 	        
 	 private Map<String, Object> createDayData(LocalDate date, List<DailyWorkTimeVO> dbWorkTimes) {

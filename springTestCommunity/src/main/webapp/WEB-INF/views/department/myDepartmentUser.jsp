@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" 
-	pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <%@ include file="../include/header.jsp" %>
@@ -9,7 +8,6 @@
 <script src='<%= request.getContextPath()%>/resources/js/jquery-3.7.1.js'></script>
 <!-- CDN > 해당 링크에서 그대로 가져옴 -->
 <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script><!-- moment.js 추가  -->
-<script src='<%= request.getContextPath()%>/resources/js/index.global.js'></script>
 <script src='<%= request.getContextPath()%>/resources/js/index.global.min.js'></script>
 
 <script>
@@ -122,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
             	        schedule_state: '0',
             	        department_id: parseInt('${vo.department_id}'),
             	        job_position_id: parseInt('${vo.job_position_id}'),
-/* JavaScript에서는 EL 태그를 직접 사용할 수 없으므로, JSP에서 미리 변수로 설정한 후 JavaScript에서 사용 */
             	        user_id: manager, // 위에서  var manager = "${vo.user_id}";로 설정함
             	        schedule_no: null
             };
@@ -154,23 +151,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('일정 수정 권한이 없습니다.');
                 return;
             }
-
             // 사용자에게 수정 또는 삭제 선택을 묻는 팝업
             const action = prompt('수정하려면 "edit"을, 삭제하려면 "delete"를 입력하세요:', 'edit');
-
             if (action === 'edit') {
                 // 수정하는 로직
                 const newTitle = prompt('일정 제목을 수정하세요:', info.event.title);
                 if (!newTitle) return;
-
                 const startTime = prompt('시작 시간을 수정하세요 (HH:MM):', 
                     info.event.start.getHours().toString().padStart(2, '0') + ':' + 
                     info.event.start.getMinutes().toString().padStart(2, '0'));
-
                 const endTime = prompt('종료 시간을 수정하세요 (HH:MM):', 
                     info.event.end.getHours().toString().padStart(2, '0') + ':' + 
                     info.event.end.getMinutes().toString().padStart(2, '0'));
-
                 const updateData = {
                     schedule_no: parseInt(info.event.id),
                     schedule_name: newTitle,
@@ -180,16 +172,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     job_position_id: parseInt('${vo.job_position_id}'),
                     user_id: manager
                 };
-                console.log("-----------------------------------");
-                console.log(info.event);
-
                 $.ajax({
                     url: '<c:url value="/api/scheduleUpdate.do" />',
                     method: 'PUT',
                     data: JSON.stringify(updateData),
                     contentType: 'application/json',
                     success: function(response) {
-                        if (response.status === 'success') {
+                        if (response.status === 'success') {  // 응답 받은 객체 안의 status의 값이 success일 때 
                             info.event.setProp('title', newTitle); // 제목 수정
                             info.event.setStart(formatDateTime(info.event.start, startTime)); // 시작 시간 수정
                             info.event.setEnd(formatDateTime(info.event.end, endTime)); // 종료 시간 수정
@@ -206,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const deleteData = {
                         schedule_no:parseInt(info.event.id)
                     };
-
                     $.ajax({
                         url: '<c:url value="/api/scheduleDelete.do" />',
                         method: 'DELETE',
@@ -233,39 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('FullCalendar initialized successfully!');
 });
 
-<<<<<<< HEAD
-function updateEvent(event, calendar) {
-    const updateData = {
-        schedule_id: parseInt(event.id),
-        schedule_name: event.title,
-        schedule_start_date: formatDateTime(event.start),
-        schedule_end_date: formatDateTime(event.end),
-        department_id: parseInt('${vo.department_id}'),
-        job_position_id: parseInt('${vo.job_position_id}'),
-        user_id: manager
-    };
-    
-    $.ajax({
-        url: '<c:url value="/api/scheduleUpdate.do" />',
-        method: 'PUT',
-        data: JSON.stringify(updateData),
-        contentType: 'application/json',
-        success: function(response) {
-            if (response.status === 'success') {
-                alert('일정이 수정되었습니다.');
-            } else {
-                event.revert();
-                alert(response.message || '일정 수정에 실패했습니다.');
-            }
-        },
-        error: function(xhr) {
-            event.revert(); 
-            handleError(xhr);
-        }
-    });
-}
-=======
->>>>>>> branch 'main' of https://github.com/ParkInJae/springTestCommunity.git
 
 
 function  formatDateTime(date, timeStr = null) {
