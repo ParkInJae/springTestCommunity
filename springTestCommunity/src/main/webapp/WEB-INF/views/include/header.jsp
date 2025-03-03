@@ -174,7 +174,7 @@ function startChatSearchInterval(searchValue) {
 		                               onclick="updateChatTop(event, \${item.chat_no});" 
 		                               style="margin-right: 8px; cursor: pointer; color: \${item.chat_users_top === 1 ? '#ff6347' : '#ccc'};">
 		                            </i>
-		                            /* 이스케이프 처리하여 el 태그로 ${} 값을 출력한다. */
+		                            /* 이스케이프 처리하여 el 태그로 값을 출력한다. */
 						           	\${item.chat_users_name}`;
 			           	if(item.user_count > 2) {   	
 		           		html += `   <span class="user_count">\${item.user_count}</span>`;
