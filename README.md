@@ -1,27 +1,38 @@
  목차 
  <hr>
 📗 1. home.jsp에서 chart.js정리  <br/>
- 	❌ 오류 내용 <br/>
+ 	❌ 에러 내용 <br/>
 	✔️ 해결 방법 <br/>
 
  <br/>
 📗 2. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
-	❌ 오류 내용 <br/>
+	❌ 에러 내용 <br/>
 	✔️ 해결 방법 <br/>
  <br/>
-📗 3. 거리계산 메소드 및 출근, 퇴근 시간 DB에 저장하는 비즈니스 로직 <br/>
- 	❌ 오류 내용 <br/>
+📗 3.  일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
+ 	❌ 에러 내용 <br/>
 	✔️ 해결 방법 <br/>
  <br/>
-📗 4. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
- 	❌ 오류 내용 <br/>
+📗 4. 4. fullCalender 내부의 ajax 의미  <br/>
+ 	❌ 에러 내용 <br/>
 	✔️ 해결 방법 <br/>
  <br/>
-📗 5. fullCalender 내부의 ajax 의미 <br/>
- 	❌ 오류 내용 <br/>
+📗 5.  pom.xml <br/>
+ 	❌ 에러 내용 <br/>
 	✔️ 해결 방법 <br/>
 <br/>
- 📗 6. pom.xml 정리 
+📗 6. 주석 사용 후 el 태그 작성시 에러 메시지 <br/>
+	❌ 에러 내용 <br/>
+	✔️ 해결 방법 <br/>
+<br/>
+
+📗 7. 그 외 새로운 에러 메시지 <br/>
+
+<br/>
+
+
+
+
 
  <hr>
 
@@ -162,7 +173,7 @@ new Chart(ctx, {
 ```
 
 <br/>
-❌ 오류 내용 <br/>
+❌ 에러 내용 <br/>
 
 ```
 <%-- var workTimes = [
@@ -262,7 +273,7 @@ ex) 월요일 데이터 존재, 화요일~목요일 데이터 x , 금요일 데�
 ▶ 내부 소스코드에 오류가 있을 경우     <br/>
 ![image](https://github.com/user-attachments/assets/ea37aa9d-0c50-4a01-aa41-2a711e668456)
 
-▶ 오류 내용 <br/>
+▶ 에러 내용 <br/>
 
 ```
 
@@ -590,13 +601,13 @@ function checkOut() {
 ```
 
 <br/>
-❌ 오류 내용 <br/>
+❌ 에러 내용 <br/>
 처음에 거리 계산 구글 거리 계산 API를 사용하여 테스트 하였을 때 거리계산이 되지 않는 문제점이 있었다. <br/>
 
 <br/>
 
 ✔️ 해결 방법 <br/>
-오류 내용을 읽고, 검색 등 해결 방법을 찾아보았다. <br/>
+에러 내용을 읽고, 검색 등 해결 방법을 찾아보았다. <br/>
 **원인은 API키의 부재였다**. <br/>
 API키가 없기 때문에 다른 해결방법을 찾아 보았고,  API키를 사용하지 않고, 지구 반지름과 사용자의 위도, 경도, 회사의 위도, 경도를 계산하는 메소드를 생성 후 해당 메소드를 이용하여 오차 범위를 정한 후 오차 범위를 활용하여 계산시, 거리계산 오류를 해결할 수 있었다. <br/>
 
@@ -635,6 +646,8 @@ API키가 없기 때문에 다른 해결방법을 찾아 보았고,  API키를 �
  <hr>
  
 <br/>
+
+
  📗 3. 일간 근무 시간, 주간 근무 시간 계산하는 로직 <br/>
  <br/>
  
@@ -836,7 +849,7 @@ public class DailyWorkTimeServiceImpl implements DailyWorkTimeService {
 
 ➡️ startOfWeek과 endOfWeek는 DAO와 Mapper에서는 startDate, EndDate로 사용된다.
 
-❌ 오류 내용 <br/>
+❌ 에러 내용 <br/>
 1. 출근 버튼을 누르고 퇴근 버튼을 누르지 않은 상태에서 다른 페이지로 이동하면 나타나는 오류 <br/>
 
 org.springframework.web.util.NestedServletException: Request processing failed; nested exception is java.lang.NullPointerException: text
@@ -1249,7 +1262,7 @@ function handleError(xhr) {
 ```
 
 <br/>
-❌ 오류 내용 <br/>
+❌ 에러 내용 <br/>
 1. fullCalendar를 처음 사용하기 때문에 script를 선언하는 순서에 따라서 fullCalendar의 화면이 나타나는지 나타나지 않는지에 대해 몰랐어서 화면에 나오지 않는 문제가 있었다. <br/>
 
 2. 일정을 등록할 경우 날짜를 클릭 후 시간 설정 페이지에서 해당일의 오전부터 오후까지 일정을 등록할 때는 정상적으로 등록이 되었는데, 날짜의 백그라운드를 클릭 후 해당일의 오전부터 오후까지 일정을 등록할 때 해당일의 오전부터 다음날의 오후까지 등록되는 문제가 있었다.
@@ -1411,4 +1424,97 @@ const event = {
 위의 코드는 버전을 <org.springframework-version>4.3.3.RELEASE</org.springframework-version> 에서<org.springframework-version>5.2.22.RELEASE</org.springframework-version>로 업그레이드 하였다. <br/>
 <org.springframework-version> 의 버전을 업그레이드 하지 않는 경우에는 spring security가 적용이 되지 않아서, Run on Server를 작동시켜도 웹 페이지가 나오지 않으며, 자바 오류가 발생하기 때문에 spring security를 
 사용하기 위해서라면 반드시 버전을 업그레이드 해야한다. 
+
+ <br/>
  
+📗 6. 주석 사용 후 el 태그 작성시 에러 메시지 <br/>
+
+ 채팅방 관련 코드에 주석을 달며, 이해한 내용을 작성하고 있었다.  <br/>
+ 그러고 며칠 뒤 프로젝트 점검 하기 위해 프로젝트를 실행해보니 아래와 같은 에러가 발생했다. 
+ <br/>
+ 분명 jsp에서 발생한 내용이였는데, 어느 jsp에서 문제가 발생했는지 찾기 너무 어려웠다. 
+ 그래서 home.jsp에 있는 날짜와 관련된 내용인지 찾다가 아닌 것을 확인하고 구글에 검색했다. 
+
+❌ 에러 내용 <br/>
+
+ ```
+ 타입 예외 보고
+
+메시지 org.apache.jasper.JasperException: javax.el.ELException: Failed to parse the expression [${}]
+설명 서버가, 해당 요청을 충족시키지 못하게 하는 예기치 않은 조건을 맞닥뜨렸습니다.
+예외
+org.apache.jasper.JasperException: org.apache.jasper.JasperException: javax.el.ELException: Failed to parse the expression [${}]
+
+근본 원인 (root cause)
+org.apache.jasper.JasperException: javax.el.ELException: Failed to parse the expression [${}]
+
+근본 원인 (root cause)
+
+javax.el.ELException: Failed to parse the expression [${}]
+
+근본 원인 (root cause)
+
+org.apache.el.parser.ParseException: Encountered " "}" "} "" at line 1, column 3.
+Was expecting one of:
+    "{" ...
+    <INTEGER_LITERAL> ...
+    <FLOATING_POINT_LITERAL> ...
+    <STRING_LITERAL> ...
+    "true" ...
+    "false" ...
+    "null" ...
+    "(" ...
+    "[" ...
+    "!" ...
+    "not" ...
+    "empty" ...
+    "-" ...
+    <IDENTIFIER> ...
+    <IDENTIFIER> ...
+    "(" ...
+
+```
+
+```
+java.lang.classnotfoundexception: org.apache.jsp.web_002dinf.views.home_jsp
+```
+
+
+<br/>
+✔️ 해결 방법 <br/>
+<br/>
+ 원인
+ <br/>
+ 채팅방 주석을 작성할 때 el 태그인 ${}앞에 \를 사용하여 이스케이프문을 작성한다고 주석으로 작성했었다. <br/>
+ <br/>
+ 
+ org.apache.el.parser.parseexception: encountered " "}" "} "" at line 1, column 3. 오류는 주석에 el 태그 때문에 발생하는 원인이였기 때문에 el 태그를 작성한 모든 jsp를 찾아가며 주석에 ${}표시가 있는 내용을 지워서 해결하였다. <br/>
+ <br/>
+ 
+<br/>
+
+📗 7. 그 외 새로운 에러 메시지 <br/>
+
+ java.lang.classnotfoundexception: org.apache.jsp.web_002dinf.views.home_jsp <br/>
+
+ 이 오류는 jsp 파일이 java 파일로 변환되고 class 파일로 만들어져서 빌드되는 과정에서 에러가 나기 때문에 발생하는 내용이다.<br/>
+ 그래서 tomcat을 clean, project도 clean , 메이븐도 clean을 시켰지만 계속해서 발생하였고, 톰캣을 새로 설치해도 계속 발생하였다. 
+
+ 그래서 찾아본 결과 
+
+ ![image](https://github.com/user-attachments/assets/7a729455-e352-4cd1-b726-21686147b8a6)
+
+![image](https://github.com/user-attachments/assets/ca60031e-1da9-4cd6-92b5-abdcacc7f2b9)
+
+해당 부분에서 Dcatalina.base에 해당하는 경로에서, \work\Catalina\localhost\ROOT\org\apache\ 경로에 존재하는 jsp를 지우니 해결할 수 있었다. 
+
+톰캣을 삭제하고 새로 설치할 때 발생한 에러 내용 
+```
+javax.servlet.ServletException: 서블릿 [appServlet]을(를) 위한 Servlet.init() 호출이 예외를 발생시켰습니다.
+```
+
+위의 문제는 프로젝트 우클릭 > build path > configure build path > JRE에서 설정을 맞추면 해결된다. 
+ 
+
+
+
