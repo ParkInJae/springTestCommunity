@@ -101,7 +101,7 @@ function startChatInterval() {
 		        	for(item of data.list){
 		        		/*  chatRoomView > 채팅방 번호와 이름을 나타냄*/
 						html += `
-						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');"> // 이스케이프 문을 사용해서 번호 값과 이름 값을 넣음 
+						<li onclick="chatRoomView(\${item.chat_no},'\${item.chat_users_name}');"> <!--이스케이프 문을 사용해서 번호 값과 이름 값을 넣음 -->  
 							<div class="chat_item">
 								<div class="message_wrapper">
 					           	 <div class="chat_name">
@@ -132,7 +132,8 @@ function startChatInterval() {
 			            }
 			            html += `</div>
 			            		<div class="last_message_wrapper">
-					                <div class="last_message">\${item.chat_message_content || ""}</div>  // null과 NaN뿐만 아닌 undefined등일 경우 ""(빈 문자열)로 나타냄 
+					            <!-- null과 NaN뿐만 아닌 undefined등일 경우 ""(빈 문자열)로 나타냄 -->    
+			            		<div class="last_message">\${item.chat_message_content || ""}</div>   
 					                <div class="last_message_time">\${item.chat_message_time || ""}</div>
 					            </div>
 					        </div>
